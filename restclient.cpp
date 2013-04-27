@@ -22,13 +22,22 @@ namespace arg3
             return new_len;
         }
 
-        RESTClient::RESTClient(const string &host, const string &version) : protocol_(http::PROTOCOL), host_(host), version_(version), curl_(curl_easy_init())
+        RESTClient::RESTClient(const string &host, const string &version) : curl_(curl_easy_init()), protocol_(http::PROTOCOL), host_(host), version_(version)
         {
             if (curl_ == NULL)
             {
                 throw RESTException("unable to initialize request");
             }
 
+            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
+        }
+
+        RESTClient::RESTClient() : curl_(curl_easy_init())
+        {
+            if (curl_ == NULL)
+            {
+                throw RESTException("unable to initialize request");
+            }
 
             curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
         }
@@ -43,6 +52,11 @@ namespace arg3
             headers_.erase(key);
         }
 
+        string RESTClient::getHeader(const string &key)
+        {
+            return headers_[key];
+        }
+
         string RESTClient::getVersion() const {
             return version_;
         }
@@ -51,12 +65,25 @@ namespace arg3
             return host_;
         }
 
-        int RESTClient::getResult() const {
-            return result_;
+        int RESTClient::getResponse() const {
+            return responseCode_;
+        }
+
+        void RESTClient::setHost(const string &host) {
+            host_ = host;
+        }
+
+        void RESTClient::setVersion(const string &version) {
+            version_ = version;
         }
 
         void RESTClient::setSecure(bool value) {
             protocol_ = value ? http::SECURE_PROTOCOL : http::PROTOCOL;
+        }
+
+        RESTClient &RESTClient::setPayload(const string &payload) {
+            payload_ = payload;
+            return *this;
         }
 
         string RESTClient::perform_request(const string& path)
@@ -67,13 +94,13 @@ namespace arg3
 
             char buf[http::MAX_URL_LEN+1];
 
-            snprintf(buf, sizeof(buf), "%s://%s/%s/%s", protocol_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
+            snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", protocol_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
 
             curl_easy_setopt(curl_, CURLOPT_URL, buf);
 
             for(auto &h : headers_)
             {
-                sprintf(buf, "%s: %s", h.first.c_str(), h.second.c_str());
+                snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
                 headers = curl_slist_append(headers, buf);
             }
@@ -87,7 +114,7 @@ namespace arg3
             if (res != CURLE_OK)
                 throw RESTException(curl_easy_strerror(res));
 
-            curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &result_);
+            curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
 
             /* always cleanup */
             curl_easy_cleanup(curl_);
@@ -102,20 +129,20 @@ namespace arg3
             return perform_request(path);
         }
 
-        string RESTClient::post(const string &path, const string &payload)
+        string RESTClient::post(const string &path)
         {
             curl_easy_setopt(curl_, CURLOPT_POST, 1L);
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload.c_str());
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload.size());
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
 
             return perform_request(path);
         }
 
-        string RESTClient::put(const string &path, const string &payload)
+        string RESTClient::put(const string &path)
         {
             curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload.c_str());
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload.size());
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
 
             return perform_request(path);
         }

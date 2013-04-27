@@ -14,19 +14,27 @@ namespace arg3
         {
         public:
             RESTClient(const string &host, const string &version);
+            RESTClient();
 
             void addHeader(const string &key, const string &value);
             void removeHeader(const string &key);
+            string getHeader(const string &key);
 
             string getHost() const;
             string getVersion() const;
-            int getResult() const;
+            string getPayload() const;
+            int getResponse() const;
+
+            void setHost(const string &);
+            void setVersion(const string &);
+
+            RESTClient& setPayload(const string &);
 
             string get(const string &path);
 
-            string post(const string &path, const string &payload="");
+            string post(const string &path);
 
-            string put(const string &path, const string &payload="");
+            string put(const string &path);
 
             string de1ete(const string &path);
 
@@ -36,11 +44,13 @@ namespace arg3
             string perform_request(const string &path);
 
         private:
+            CURL *curl_;
             string protocol_;
             string host_;
             string version_;
-            CURL *curl_;
-            int result_;
+            string payload_;
+            int responseCode_;
+            string response_;
             map<string,string> headers_;
         };
     }
