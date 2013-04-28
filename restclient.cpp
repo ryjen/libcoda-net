@@ -69,6 +69,10 @@ namespace arg3
             return responseCode_;
         }
 
+        string RESTClient::getPayload() const {
+            return payload_;
+        }
+
         string RESTClient::getResponse() const {
             return response_;
         }
