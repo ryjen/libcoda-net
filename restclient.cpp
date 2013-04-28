@@ -86,7 +86,7 @@ namespace arg3
             return *this;
         }
 
-        string RESTClient::perform_request(const string& path)
+        string RESTClient::request(http::Method method, const string& path)
         {
             struct curl_slist *headers = NULL;
 
@@ -97,6 +97,25 @@ namespace arg3
             snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", protocol_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
 
             curl_easy_setopt(curl_, CURLOPT_URL, buf);
+
+            switch(method)
+            {
+            case http::Get:
+                curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
+                break;
+            case http::Post:
+                curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+                curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+                curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                break;
+            case http::Put:
+                curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
+                curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+                curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+            case http::Delete:
+                curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::DELETE);
+                break;
+            }
 
             for(auto &h : headers_)
             {
@@ -124,34 +143,24 @@ namespace arg3
 
         string RESTClient::get(const string &path)
         {
-            curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
-
-            return perform_request(path);
+            return request(http::Get, path);
         }
 
         string RESTClient::post(const string &path)
         {
-            curl_easy_setopt(curl_, CURLOPT_POST, 1L);
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
-
-            return perform_request(path);
+            return request(http::Post, path);
         }
 
         string RESTClient::put(const string &path)
         {
-            curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
-
-            return perform_request(path);
+            return request(http::Put, path);
         }
 
         string RESTClient::de1ete(const string &path)
         {
             curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::DELETE);
 
-            return perform_request(path);
+            return request(http::Delete, path);
         }
     }
 }

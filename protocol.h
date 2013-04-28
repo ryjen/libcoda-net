@@ -13,6 +13,11 @@ namespace arg3
             extern const char *const PROTOCOL;
 
             extern const char *const SECURE_PROTOCOL;
+
+            typedef enum
+            {
+                Get, Post, Put, Delete
+            } Method;
         }
     }
 }

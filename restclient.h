@@ -30,6 +30,8 @@ namespace arg3
 
             RESTClient& setPayload(const string &);
 
+            string request(http::Method method, const string &path);
+
             string get(const string &path);
 
             string post(const string &path);
@@ -39,9 +41,6 @@ namespace arg3
             string de1ete(const string &path);
 
             void setSecure(bool value);
-
-        protected:
-            string perform_request(const string &path);
 
         private:
             CURL *curl_;
