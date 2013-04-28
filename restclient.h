@@ -30,15 +30,15 @@ namespace arg3
 
             RESTClient& setPayload(const string &);
 
-            string request(http::Method method, const string &path);
+            virtual string request(http::Method method, const string &path);
 
-            string get(const string &path);
+            virtual string get(const string &path);
 
-            string post(const string &path);
+            virtual string post(const string &path);
 
-            string put(const string &path);
+            virtual string put(const string &path);
 
-            string de1ete(const string &path);
+            virtual string de1ete(const string &path);
 
             void setSecure(bool value);
 
