@@ -65,8 +65,12 @@ namespace arg3
             return host_;
         }
 
-        int RESTClient::getResponse() const {
+        int RESTClient::getResponseCode() const {
             return responseCode_;
+        }
+
+        string RESTClient::getResponse() const {
+            return response_;
         }
 
         void RESTClient::setHost(const string &host) {
@@ -86,11 +90,9 @@ namespace arg3
             return *this;
         }
 
-        string RESTClient::request(http::Method method, const string& path)
+        RESTClient& RESTClient::request(http::Method method, const string& path)
         {
             struct curl_slist *headers = NULL;
-
-            string output;
 
             char buf[http::MAX_URL_LEN+1];
 
@@ -126,7 +128,7 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &output);
+            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_);
 
             CURLcode res = curl_easy_perform(curl_);
 
@@ -138,25 +140,25 @@ namespace arg3
             /* always cleanup */
             curl_easy_cleanup(curl_);
 
-            return output;
+            return *this;
         }
 
-        string RESTClient::get(const string &path)
+        RESTClient& RESTClient::get(const string &path)
         {
             return request(http::Get, path);
         }
 
-        string RESTClient::post(const string &path)
+        RESTClient& RESTClient::post(const string &path)
         {
             return request(http::Post, path);
         }
 
-        string RESTClient::put(const string &path)
+        RESTClient& RESTClient::put(const string &path)
         {
             return request(http::Put, path);
         }
 
-        string RESTClient::de1ete(const string &path)
+        RESTClient& RESTClient::de1ete(const string &path)
         {
             curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::DELETE);
 

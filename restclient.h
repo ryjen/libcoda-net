@@ -23,22 +23,23 @@ namespace arg3
             string getHost() const;
             string getVersion() const;
             string getPayload() const;
-            int getResponse() const;
+            int getResponseCode() const;
+            string getResponse() const;
 
             void setHost(const string &);
             void setVersion(const string &);
 
             RESTClient& setPayload(const string &);
 
-            virtual string request(http::Method method, const string &path);
+            virtual RESTClient& request(http::Method method, const string &path);
 
-            virtual string get(const string &path);
+            virtual RESTClient& get(const string &path);
 
-            virtual string post(const string &path);
+            virtual RESTClient& post(const string &path);
 
-            virtual string put(const string &path);
+            virtual RESTClient& put(const string &path);
 
-            virtual string de1ete(const string &path);
+            virtual RESTClient& de1ete(const string &path);
 
             void setSecure(bool value);
 
