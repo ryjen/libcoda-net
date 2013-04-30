@@ -29,7 +29,7 @@ namespace arg3
             void setHost(const string &);
             void setVersion(const string &);
 
-            RESTClient& setPayload(const string &);
+            RESTClient& setPayload(const string &value);
 
             RESTClient& request(http::Method method, const string &path);
 
