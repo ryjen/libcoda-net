@@ -26,6 +26,8 @@ namespace arg3
             int getResponseCode() const;
             string getResponse() const;
 
+            bool isSecure() const;
+
             void setHost(const string &);
             void setVersion(const string &);
 
@@ -45,7 +47,7 @@ namespace arg3
 
         private:
             CURL *curl_;
-            string protocol_;
+            string scheme_;
             string host_;
             string version_;
             string payload_;

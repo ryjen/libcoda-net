@@ -1,5 +1,6 @@
 #include "restclient.h"
 #include "exception.h"
+#include "../log/log.h"
 
 namespace arg3
 {
@@ -22,7 +23,7 @@ namespace arg3
             return new_len;
         }
 
-        RESTClient::RESTClient(const string &host, const string &version) : curl_(curl_easy_init()), protocol_(http::PROTOCOL), host_(host), version_(version)
+        RESTClient::RESTClient(const string &host, const string &version) : curl_(curl_easy_init()), scheme_(http::PROTOCOL), host_(host), version_(version)
         {
             if (curl_ == NULL)
             {
@@ -77,6 +78,10 @@ namespace arg3
             return response_;
         }
 
+        bool RESTClient::isSecure() const {
+            return scheme_ == http::SECURE_PROTOCOL;
+        }
+
         void RESTClient::setHost(const string &host) {
             host_ = host;
         }
@@ -86,7 +91,7 @@ namespace arg3
         }
 
         void RESTClient::setSecure(bool value) {
-            protocol_ = value ? http::SECURE_PROTOCOL : http::PROTOCOL;
+            scheme_ = value ? http::SECURE_PROTOCOL : http::PROTOCOL;
         }
 
         RESTClient &RESTClient::setPayload(const string &payload) {
@@ -100,7 +105,7 @@ namespace arg3
 
             char buf[http::MAX_URL_LEN+1];
 
-            snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", protocol_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
+            snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", scheme_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
 
             curl_easy_setopt(curl_, CURLOPT_URL, buf);
 
@@ -137,7 +142,9 @@ namespace arg3
             CURLcode res = curl_easy_perform(curl_);
 
             if (res != CURLE_OK)
+            {
                 throw RESTException(curl_easy_strerror(res));
+            }
 
             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
 

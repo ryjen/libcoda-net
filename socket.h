@@ -34,7 +34,16 @@ namespace arg3
         class Socket
         {
         public:
+
+            Socket(SOCKET sock, const sockaddr_in &addr);
+
+            Socket(const std::string &host, const int port);
+            Socket (int port, int queueSize = QUEUE_SIZE);
+            Socket();
+
             Socket(const Socket &);
+            Socket (Socket &&other);
+
             virtual ~Socket();
             Socket &operator=(const Socket &);
 
@@ -47,8 +56,8 @@ namespace arg3
 
             bool is_valid() const;
 
-            const Socket& operator << ( const std::string& );
-            const Socket& operator >> ( std::string& );
+            Socket& operator << ( const std::string& );
+            Socket& operator >> ( std::string& );
 
             SOCKET getSocket() const;
 
@@ -58,25 +67,39 @@ namespace arg3
 
             void setPort(const int port);
             void setIP(const std::string &ip);
-            //void setSocket(SOCKET sock);
+
             void close();
+
+            // Client initialization
+            bool connect ( const std::string &host, const int port );
+
+            SOCKET accept(sockaddr_in &addr) const;
+
+            bool listen();
+
+            void set_non_blocking ( const bool );
 
         protected:
 
             static const int MAXHOSTNAME = 200;
             static const int MAXRECV = 500;
             static const int INVALID = -1;
-
-            Socket(SOCKET sock, const sockaddr_in &addr);
-
-            Socket();
-
-            void set_non_blocking ( const bool );
+            static const int QUEUE_SIZE = 10;
 
             SOCKET sock_;
             sockaddr_in addr_;
+            unsigned *references_;
 
-            friend class ServerSocket;
+            bool create();
+            bool bind ();
+
+            int backlogSize_;
+            int port_;
+
+        private:
+            void update_reference_count();
+
+            friend class SocketServer;
         };
 
     }

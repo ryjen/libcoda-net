@@ -1,11 +1,11 @@
 
 #include <cerrno>
 #include <fstream>
+#include "socket.h"
+#include "exception.h"
 #ifndef _WIN32
 #include <fcntl.h>
 #endif
-#include "socket.h"
-#include "exception.h"
 
 using namespace std;
 
@@ -23,19 +23,39 @@ namespace arg3
 #endif
 
         Socket::Socket() :
-            sock_ ( -1 )
+            sock_ ( INVALID ), references_(NULL)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
-        Socket::Socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr)
+        Socket::Socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr),
+            references_(new unsigned(0)), backlogSize_(QUEUE_SIZE), port_(0)
         {
 
         }
 
-        Socket::Socket(const Socket &sock) : sock_(sock.sock_), addr_(sock.addr_)
+        Socket::Socket(const Socket &sock) : sock_(sock.sock_), addr_(sock.addr_), references_(sock.references_),
+            backlogSize_(sock.backlogSize_), port_(sock.port_)
         {
+            update_reference_count();
+        }
 
+        void Socket::update_reference_count()
+        {
+            if(references_)
+            {
+                (*references_)++;
+            }
+            else if(sock_ != INVALID)
+            {
+                references_ = new unsigned(0);
+                (*references_)++;
+            }
+        }
+
+        Socket::Socket(Socket &&other) : sock_(other.sock_), addr_(other.addr_)
+        {
+            other.sock_ = INVALID;
         }
 
         Socket &Socket::operator=(const Socket &other)
@@ -43,6 +63,10 @@ namespace arg3
             if(this != &other) {
                 sock_ = other.sock_;
                 addr_ = other.addr_;
+                backlogSize_ = other.backlogSize_;
+                port_ = other.port_;
+
+                update_reference_count();
             }
             return *this;
         }
@@ -51,7 +75,10 @@ namespace arg3
         {
             if ( is_valid())
             {
-                close();
+                if(!references_ || !*references_)
+                    close();
+                else
+                    (*references_)--;
             }
         }
 
@@ -125,7 +152,7 @@ namespace arg3
             return status;
         }
 
-        const Socket& Socket::operator << ( const string& s )
+        Socket& Socket::operator << ( const string& s )
         {
             if ( send ( s ) < 0)
             {
@@ -136,7 +163,7 @@ namespace arg3
 
         }
 
-        const Socket& Socket::operator >> ( string& s )
+        Socket& Socket::operator >> ( string& s )
         {
             if ( recv(s) < 0)
             {
@@ -144,6 +171,135 @@ namespace arg3
             }
 
             return *this;
+        }
+
+        Socket::Socket(const std::string &host, const int port) : Socket()
+        {
+            connect(host, port);
+        }
+
+        bool Socket::connect ( const string &host, const int port )
+        {
+            if ( ! is_valid() ) return false;
+
+            struct hostent *hp;
+
+            if ((hp = gethostbyname(host.c_str())) == 0)
+                return false;
+
+            addr_.sin_family = AF_INET;
+            addr_.sin_port = htons ( port );
+            addr_.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
+
+            int status = ::connect ( sock_, ( sockaddr * ) &addr_, sizeof ( addr_ ) );
+
+            if ( status == 0 )
+                return true;
+            else
+                return false;
+        }
+
+
+        Socket::Socket(int port, int queueSize) : sock_(INVALID), references_(NULL), backlogSize_(queueSize), port_(port)
+        {}
+
+        bool Socket::create()
+        {
+#ifdef _WIN32
+            static int started = 0;
+            if (!started)
+            {
+                short wVersionRequested = 0x101;
+                WSADATA wsaData;
+                if (WSAStartup( wVersionRequested, &wsaData ) == -1)
+                {
+                    return false;
+                }
+                if (wsaData.wVersion != 0x101)
+                {
+                    return false;
+                }
+                started = 1;
+            }
+#endif
+
+            sock_ = socket ( AF_INET, SOCK_STREAM, 0 );
+
+            if ( ! is_valid() )
+                return false;
+
+
+            // TIME_WAIT - argh
+            int on = 1;
+            if ( setsockopt ( sock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof ( on ) ) == -1 )
+                return false;
+
+
+            return true;
+
+        }
+
+        bool Socket::bind ( )
+        {
+            if ( ! is_valid() )
+            {
+                return false;
+            }
+
+            addr_.sin_family = AF_INET;
+            addr_.sin_addr.s_addr = INADDR_ANY;
+            addr_.sin_port = htons ( port_ );
+
+            int bind_return = ::bind ( sock_, ( struct sockaddr * ) &addr_, sizeof ( addr_ ) );
+
+
+            if ( bind_return == -1 )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        bool Socket::listen()
+        {
+            if ( ! create() )
+            {
+                throw SocketException ( "Could not create server socket." );
+            }
+
+            if ( ! bind ( ) )
+            {
+                throw SocketException ( "Could not bind to port." );
+            }
+
+            if ( ! is_valid() )
+            {
+                return false;
+            }
+
+            int listen_return = ::listen ( sock_, backlogSize_ );
+
+            if ( listen_return == -1 )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        SOCKET Socket::accept (sockaddr_in &addr) const
+        {
+            int addr_length = sizeof ( addr );
+
+            SOCKET sock = ::accept ( sock_, ( sockaddr * ) &addr, ( socklen_t * ) &addr_length );
+
+            if ( sock <= 0 )
+            {
+                return false;
+            }
+
+            return sock;
         }
 
 
@@ -167,7 +323,6 @@ namespace arg3
             ioctlsocket( sock_, FIONBIO, 0 );
 #endif
         }
-
     }
 
 }
