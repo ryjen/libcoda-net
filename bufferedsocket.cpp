@@ -60,16 +60,20 @@ namespace arg3
 
         string BufferedSocket::readLine()
         {
+            if(inBuffer_.empty()) return inBuffer_;
+
             auto pos = inBuffer_.find_first_of("\n\r");
+
+            if(pos == string::npos) return inBuffer_;
 
             string temp = inBuffer_.substr(0, pos);
 
-            do {
-                inBuffer_.erase(0, pos + 1);
-
-                pos = inBuffer_.find_first_of("\n\r");
+            while(pos < inBuffer_.length() &&
+                    (inBuffer_[pos] == '\n' || inBuffer_[pos] == '\r')) {
+                pos++;
             }
-            while(pos != string::npos);
+
+            inBuffer_.erase(0, pos);
 
             return temp;
         }

@@ -127,6 +127,10 @@ namespace arg3
                     {
                         throw SocketException("stall");
                     }
+
+                    // check still valid after wait
+                    if(!is_valid())
+                        break;
                 }
 
                 gettimeofday(&last_time, NULL);

@@ -4,6 +4,7 @@
 #include "bufferedsocket.h"
 #include "../log/log.h"
 #include "../format/format.h"
+#include "../string/argument.h"
 #include <string>
 #include <thread>
 
@@ -17,6 +18,14 @@ using namespace std;
 
 class TestServerListener : public SocketServerListener
 {
+private:
+    string response_;
+
+public:
+    void setResponse(const string &response) {
+        response_ = response;
+    }
+
     void onConnect(BufferedSocket &sock)
     {
         log::trace(format("{0} connected", sock.getIP()));
@@ -36,7 +45,11 @@ class TestServerListener : public SocketServerListener
     {
         log::trace(format("{0} did read", sock.getIP()));
 
-        sock.write(sock.getInput());
+        argument line = sock.readLine();
+
+        string method = line.next();
+
+        sock.write(method + ": " + response_);
     }
 
     void onWillWrite(BufferedSocket &sock)
@@ -57,19 +70,23 @@ class TestServer : public SocketServer
 public:
     TestServer() : SocketServer(9876)
     {
-        addListener(&listener_);
     }
+
 private:
     TestServerListener listener_;
 };
 
 TestServer testServer;
 
+TestServerListener listener;
+
 Context(arg3restclient)
 {
     static void SetUpContext()
     {
         try {
+            testServer.addListener(&listener);
+
             testServer.start();
 
             log::trace("Mock server started");
@@ -88,12 +105,31 @@ Context(arg3restclient)
     {
         RESTClient client("localhost:9876", "1");
 
+        listener.setResponse("Hello, World!");
+
         try {
             client.get("test");
-            log::trace(client.getResponse());
+            Assert::That(client.getResponse(), Equals("GET: Hello, World!"));
         }
         catch(const exception &e) {
             log::trace(e.what());
+            throw e;
+        }
+    }
+
+    Spec(testPost)
+    {
+        RESTClient client("localhost:9876", "1");
+
+        client.setPayload("Hello, World!");
+
+        try {
+            client.post("test");
+            Assert::That(client.getResponse(), Equals("POST: Hello, World!"));
+        }
+        catch(const exception &e) {
+            log::trace(e.what());
+            throw e;
         }
     }
 };
