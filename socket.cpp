@@ -76,9 +76,15 @@ namespace arg3
             if ( is_valid())
             {
                 if(!references_ || !*references_)
+                {
                     close();
+                    if(references_)
+                        delete references_;
+                }
                 else
+                {
                     (*references_)--;
+                }
             }
         }
 
