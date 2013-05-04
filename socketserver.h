@@ -29,6 +29,11 @@ namespace arg3
         {
         public:
             SocketServer(int port, int queueSize = QUEUE_SIZE);
+            SocketServer(const SocketServer &other);
+            SocketServer(SocketServer &&other);
+            virtual ~SocketServer();
+            SocketServer &operator=(const SocketServer &other);
+            SocketServer &operator=(SocketServer &&other);
 
             void start(bool inBackground = true);
 
@@ -52,8 +57,6 @@ namespace arg3
             void notifyClose(BufferedSocket &sock);
 
             void loop();
-
-            string response_;
 
             unsigned pollFrequency_;
 

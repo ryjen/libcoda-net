@@ -10,6 +10,41 @@ namespace arg3
             : Socket(port, queueSize), pollFrequency_(4)
         {}
 
+         SocketServer::SocketServer(const SocketServer &other)
+            : Socket(other), pollFrequency_(other.pollFrequency_)
+        {}
+
+        SocketServer::SocketServer(SocketServer &&other)
+            : Socket(std::move(other)), pollFrequency_(other.pollFrequency_)
+        {}
+
+        SocketServer::~SocketServer()
+        {}
+        
+        SocketServer &SocketServer::operator=(const SocketServer &other)
+        {
+            if(this != &other)
+            {
+                Socket::operator=(other);
+
+                pollFrequency_ = other.pollFrequency_;
+            }
+
+            return *this;
+        }
+
+        SocketServer &SocketServer::operator=(SocketServer &&other)
+        {
+            if(this != &other)
+            {
+                Socket::operator=(std::move(other));
+
+                pollFrequency_ = other.pollFrequency_;
+            }
+
+            return *this;
+        }
+
         void SocketServer::start(bool inBackground)
         {
             if(inBackground)

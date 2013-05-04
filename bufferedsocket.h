@@ -20,7 +20,8 @@ namespace arg3
             BufferedSocket(const BufferedSocket &);
             BufferedSocket(BufferedSocket &&other);
             virtual ~BufferedSocket();
-            BufferedSocket &operator=(const BufferedSocket &);
+            BufferedSocket &operator=(const BufferedSocket &other);
+            BufferedSocket &operator=(BufferedSocket &&other);
 
             bool readToBuffer();
             string readLine();
@@ -44,8 +45,6 @@ namespace arg3
 
             string inBuffer_;
             string outBuffer_;
-
-            friend class EventServerSocket;
         };
     }
 }

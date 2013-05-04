@@ -10,6 +10,26 @@ namespace arg3
         public:
             SocketException ( const std::string &s ) : message_ ( s ) {};
             virtual ~SocketException() throw() {}
+            SocketException (const SocketException &e) : std::exception(e), message_(e.message_)
+            {}
+            SocketException (SocketException &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
+            {}
+
+            SocketException& operator=(const SocketException &e) {
+                if(this != &e) {
+                    std::exception::operator=(e);
+                    message_ = e.message_;
+                }
+                return *this;
+            }
+
+            SocketException &operator=(SocketException &&e) {
+                if(this != &e) {
+                    std::exception::operator=(std::move(e));
+                    message_ = std::move(e.message_);
+                }
+                return *this;
+            }
 
             virtual const char *what() const throw()
             {
@@ -27,6 +47,26 @@ namespace arg3
         public:
             RESTException ( const std::string &s ) : message_ ( s ) {};
             virtual ~RESTException() throw() {}
+            RESTException (const RESTException &e) : std::exception(e), message_(e.message_)
+            {}
+            RESTException (RESTException &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
+            {}
+
+            RESTException& operator=(const RESTException &e) {
+                if(this != &e) {
+                    std::exception::operator=(e);
+                    message_ = e.message_;
+                }
+                return *this;
+            }
+
+            RESTException &operator=(RESTException &&e) {
+                if(this != &e) {
+                    std::exception::operator=(std::move(e));
+                    message_ = std::move(e.message_);
+                }
+                return *this;
+            }
 
             virtual const char *what() const throw()
             {

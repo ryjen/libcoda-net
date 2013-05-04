@@ -53,7 +53,8 @@ namespace arg3
             }
         }
 
-        Socket::Socket(Socket &&other) : sock_(other.sock_), addr_(other.addr_)
+        Socket::Socket(Socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), backlogSize_(other.backlogSize_),
+            port_(other.port_)
         {
             other.sock_ = INVALID;
         }
@@ -70,6 +71,20 @@ namespace arg3
             }
             return *this;
         }
+
+        Socket &Socket::operator=(Socket &&other)
+        {
+            if(this != &other) {
+                sock_ = other.sock_;
+                addr_ = std::move(other.addr_);
+                backlogSize_ = other.backlogSize_;
+                port_ = other.port_;
+
+                other.sock_ = INVALID;
+            }
+            return *this;
+        }
+
 
         Socket::~Socket()
         {

@@ -15,6 +15,11 @@ namespace arg3
         public:
             RESTClient(const string &host, const string &version);
             RESTClient();
+            virtual ~RESTClient();
+            RESTClient(const RESTClient &other);
+            RESTClient(RESTClient &&other);
+            RESTClient &operator=(const RESTClient &other);
+            RESTClient &operator=(RESTClient &&other);
 
             void addHeader(const string &key, const string &value);
             void removeHeader(const string &key);
@@ -46,7 +51,6 @@ namespace arg3
             void setSecure(bool value);
 
         private:
-            CURL *curl_;
             string scheme_;
             string host_;
             string version_;

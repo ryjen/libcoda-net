@@ -41,6 +41,18 @@ namespace arg3
 
             return *this;
         }
+        BufferedSocket &BufferedSocket::operator=(BufferedSocket &&other)
+        {
+            if(this != &other)
+            {
+                Socket::operator=(std::move(other));
+
+                inBuffer_ = std::move(other.inBuffer_);
+                outBuffer_ = std::move(other.outBuffer_);
+            }
+
+            return *this;
+        }
 
         bool BufferedSocket::readToBuffer()
         {

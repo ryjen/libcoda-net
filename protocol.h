@@ -10,14 +10,15 @@ namespace arg3
 
             extern const unsigned MAX_URL_LEN;
 
-            extern const char *const PROTOCOL;
+            extern const char *const SCHEME;
 
-            extern const char *const SECURE_PROTOCOL;
+            extern const char *const SECURE_SCHEME;
 
             typedef enum
             {
                 Get, Post, Put, Delete
-            } Method;
+            } 
+            Method;
         }
     }
 }

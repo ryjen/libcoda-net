@@ -23,24 +23,58 @@ namespace arg3
             return new_len;
         }
 
-        RESTClient::RESTClient(const string &host, const string &version) : curl_(curl_easy_init()), scheme_(http::PROTOCOL), host_(host), version_(version)
+        RESTClient::RESTClient(const string &host, const string &version) : scheme_(http::SCHEME), host_(host), version_(version)
         {
-            if (curl_ == NULL)
-            {
-                throw RESTException("unable to initialize request");
-            }
-
-            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
         }
 
-        RESTClient::RESTClient() : curl_(curl_easy_init())
+        RESTClient::RESTClient() 
         {
-            if (curl_ == NULL)
-            {
-                throw RESTException("unable to initialize request");
-            }
+        }
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
+        RESTClient::~RESTClient()
+        {
+        }
+
+        RESTClient::RESTClient(const RESTClient &other) : scheme_(other.scheme_), host_(other.host_), 
+                version_(other.version_), payload_(other.payload_), responseCode_(other.responseCode_), 
+                response_(other.response_), headers_(other.headers_)
+        {
+        }
+
+        RESTClient::RESTClient(RESTClient &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)), 
+                version_(std::move(other.version_)), payload_(std::move(other.payload_)), responseCode_(other.responseCode_), 
+                response_(std::move(other.response_)), headers_(std::move(other.headers_))
+        {
+        }
+
+        RESTClient &RESTClient::operator=(const RESTClient &other)
+        {
+            if(this != &other)
+            {
+                scheme_ = other.scheme_;
+                host_ = other.host_;
+                version_ = other.version_;
+                payload_ = other.payload_;
+                responseCode_ = other.responseCode_;
+                response_ = other.response_;
+                headers_ = other.headers_;
+            }
+            return *this;
+        }
+
+        RESTClient &RESTClient::operator=(RESTClient &&other)
+        {
+            if(this != &other)
+            {
+                scheme_ = std::move(other.scheme_);
+                host_ = std::move(other.host_);
+                version_ = std::move(other.version_);
+                payload_ = std::move(other.payload_);
+                responseCode_ = std::move(other.responseCode_);
+                response_ = std::move(other.response_);
+                headers_ = std::move(other.headers_);
+            }
+            return *this;
         }
 
         void RESTClient::addHeader(const string &key, const string &value)
@@ -79,7 +113,7 @@ namespace arg3
         }
 
         bool RESTClient::isSecure() const {
-            return scheme_ == http::SECURE_PROTOCOL;
+            return scheme_ == http::SECURE_SCHEME;
         }
 
         void RESTClient::setHost(const string &host) {
@@ -91,7 +125,7 @@ namespace arg3
         }
 
         void RESTClient::setSecure(bool value) {
-            scheme_ = value ? http::SECURE_PROTOCOL : http::PROTOCOL;
+            scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
         }
 
         RESTClient &RESTClient::setPayload(const string &payload) {
@@ -105,9 +139,18 @@ namespace arg3
 
             char buf[http::MAX_URL_LEN+1];
 
+            CURL *curl_ = curl_easy_init();
+
+            if (curl_ == NULL)
+            {
+                throw RESTException("unable to initialize request");
+            }
+
             snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", scheme_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
 
             curl_easy_setopt(curl_, CURLOPT_URL, buf);
+
+            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
 
             switch(method)
             {
@@ -143,12 +186,13 @@ namespace arg3
 
             if (res != CURLE_OK)
             {
+                curl_easy_cleanup(curl_);
+
                 throw RESTException(curl_easy_strerror(res));
             }
 
             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
 
-            /* always cleanup */
             curl_easy_cleanup(curl_);
 
             return *this;
@@ -171,8 +215,6 @@ namespace arg3
 
         RESTClient& RESTClient::de1ete(const string &path)
         {
-            curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::DELETE);
-
             return request(http::Delete, path);
         }
     }

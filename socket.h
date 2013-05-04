@@ -46,6 +46,7 @@ namespace arg3
 
             virtual ~Socket();
             Socket &operator=(const Socket &);
+            Socket &operator=(Socket &&);
 
             // Data Transimission
             int send ( const std::string&, int flags = 0 );
