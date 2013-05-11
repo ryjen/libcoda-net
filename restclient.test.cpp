@@ -16,7 +16,7 @@ using namespace arg3;
 
 using namespace std;
 
-class TestServerListener : public SocketServerListener
+class TestSocketListener : public BufferedSocketListener
 {
 private:
     string response_;
@@ -26,67 +26,70 @@ public:
         response_ = response;
     }
 
-    void onConnect(BufferedSocket &sock)
+    void onConnect(BufferedSocket *sock)
     {
-        log::trace(format("{0} connected", sock.getIP()));
+        log::trace(format("{0} connected", sock->getIP()));
     }
 
-    void onClose(BufferedSocket &sock)
+    void onClose(BufferedSocket *sock)
     {
-        log::trace(format("{0} closed", sock.getIP()));
+        log::trace(format("{0} closed", sock->getIP()));
     }
 
-    void onWillRead(BufferedSocket &sock)
+    void onWillRead(BufferedSocket *sock)
     {
-        log::trace(format("{0} will read", sock.getIP()));
+        log::trace(format("{0} will read", sock->getIP()));
     }
 
-    void onDidRead(BufferedSocket &sock)
+    void onDidRead(BufferedSocket *sock)
     {
-        log::trace(format("{0} did read", sock.getIP()));
+        log::trace(format("{0} did read", sock->getIP()));
 
-        argument line = sock.readLine();
+        argument line = sock->readLine();
 
         string method = line.next();
 
-        sock.write(method + ": " + response_);
+        sock->write(method + ": " + response_);
     }
 
-    void onWillWrite(BufferedSocket &sock)
+    void onWillWrite(BufferedSocket *sock)
     {
-        log::trace(format("{0} will write", sock.getIP()));
+        log::trace(format("{0} will write", sock->getIP()));
     }
 
-    void onDidWrite(BufferedSocket &sock)
+    void onDidWrite(BufferedSocket *sock)
     {
-        log::trace(format("{0} did write", sock.getIP()));
+        log::trace(format("{0} did write", sock->getIP()));
 
-        sock.close();
+        sock->close();
     }
 };
 
-class TestServer : public SocketServer
+TestSocketListener listener;
+
+class TestSocketFactory : public DefaultSocketFactory
 {
 public:
-    TestServer() : SocketServer(9876)
+    BufferedSocket *createSocket(SOCKET sock, const sockaddr_in &addr)
     {
+        BufferedSocket *socket = DefaultSocketFactory::createSocket(sock, addr);
+
+        socket->addListener(&listener);
+
+        return socket;
     }
 
-private:
-    TestServerListener listener_;
 };
 
-TestServer testServer;
+TestSocketFactory testFactory;
 
-TestServerListener listener;
+SocketServer testServer(9876, &testFactory);
 
 Context(arg3restclient)
 {
     static void SetUpContext()
     {
         try {
-            testServer.addListener(&listener);
-
             testServer.start();
 
             log::trace("Mock server started");

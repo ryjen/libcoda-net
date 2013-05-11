@@ -69,7 +69,7 @@ namespace arg3
             void setPort(const int port);
             void setIP(const std::string &ip);
 
-            void close();
+            virtual void close();
 
             // Client initialization
             bool connect ( const std::string &host, const int port );

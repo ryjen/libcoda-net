@@ -6,21 +6,47 @@ namespace arg3
 {
     namespace net
     {
-        SocketServer::SocketServer(int port, int queueSize)
-            : Socket(port, queueSize), pollFrequency_(4)
+        DefaultSocketFactory defaultSocketFactory;
+
+        BufferedSocket* DefaultSocketFactory::createSocket(SOCKET sock, const sockaddr_in &addr)
+        {
+            BufferedSocket connection(sock, addr);
+
+            connections_.push_back(connection);
+
+            return &connections_[connections_.size()-1];
+        }
+
+        vector<BufferedSocket>& DefaultSocketFactory::getSockets()
+        {
+            return connections_;
+        }
+
+        void SocketFactory::run(std::function<bool(BufferedSocket &)> delegate)
+        {
+            vector<BufferedSocket> &sockets_ = getSockets();
+
+            sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
+        }
+
+        SocketServer::SocketServer(int port, SocketFactory *factory, int queueSize)
+            : Socket(port, queueSize), pollFrequency_(4), factory_(factory)
         {}
 
-         SocketServer::SocketServer(const SocketServer &other)
-            : Socket(other), pollFrequency_(other.pollFrequency_)
+        SocketServer::SocketServer(const SocketServer &other)
+            : Socket(other), pollFrequency_(other.pollFrequency_), factory_(other.factory_)
         {}
 
         SocketServer::SocketServer(SocketServer &&other)
-            : Socket(std::move(other)), pollFrequency_(other.pollFrequency_)
-        {}
+            : Socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(std::move(other.factory_))
+        {
+            other.sock_ = INVALID;
+            other.factory_ = NULL;
+        }
 
         SocketServer::~SocketServer()
         {}
-        
+
         SocketServer &SocketServer::operator=(const SocketServer &other)
         {
             if(this != &other)
@@ -28,6 +54,8 @@ namespace arg3
                 Socket::operator=(other);
 
                 pollFrequency_ = other.pollFrequency_;
+
+                factory_ = other.factory_;
             }
 
             return *this;
@@ -40,6 +68,8 @@ namespace arg3
                 Socket::operator=(std::move(other));
 
                 pollFrequency_ = other.pollFrequency_;
+
+                factory_ = std::move(other.factory_);
             }
 
             return *this;
@@ -58,59 +88,6 @@ namespace arg3
             close();
 
             listenThread_.join();
-        }
-
-        void SocketServer::addListener(SocketServerListener *listener)
-        {
-            listeners_.push_back(listener);
-        }
-
-        void SocketServer::notifyConnect(BufferedSocket &sock)
-        {
-            for(auto &l : listeners_)
-            {
-                l->onConnect(sock);
-            }
-        }
-
-        void SocketServer::notifyWillRead(BufferedSocket &sock)
-        {
-            for(auto &l : listeners_)
-            {
-                l->onWillRead(sock);
-            }
-        }
-
-        void SocketServer::notifyDidRead(BufferedSocket &sock)
-        {
-            for(auto &l : listeners_)
-            {
-                l->onDidRead(sock);
-            }
-        }
-
-        void SocketServer::notifyWillWrite(BufferedSocket &sock)
-        {
-            for(auto &l : listeners_)
-            {
-                l->onWillWrite(sock);
-            }
-        }
-
-        void SocketServer::notifyDidWrite(BufferedSocket &sock)
-        {
-            for(auto &l : listeners_)
-            {
-                l->onDidWrite(sock);
-            }
-        }
-
-        void SocketServer::notifyClose(BufferedSocket &sock)
-        {
-            for(auto &l : listeners_)
-            {
-                l->onClose(sock);
-            }
         }
 
         void SocketServer::loop()
@@ -177,15 +154,14 @@ namespace arg3
 
                 maxdesc = sock_;
 
-                connections_.erase(std::remove_if(connections_.begin(), connections_.end(),
-                [&](BufferedSocket &c) {
+                factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
                     maxdesc = std::max(maxdesc, c.sock_);
                     FD_SET(c.sock_, &in_set);
                     FD_SET(c.sock_, &out_set);
                     FD_SET(c.sock_, &exc_set);
                     return false;
-                }), connections_.end());
+                });
 
                 if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) < 0)
                 {
@@ -199,18 +175,13 @@ namespace arg3
                 {
                     sockaddr_in addr;
 
-                    BufferedSocket sock(accept(addr), addr);
+                    BufferedSocket *sock = factory_->createSocket(accept(addr), addr);
 
-                    sock.set_non_blocking(true);
-
-                    notifyConnect(sock);
-
-                    connections_.push_back(sock);
+                    sock->set_non_blocking(true);
                 }
 
                 /* check for freaky connections */
-                connections_.erase(std::remove_if(connections_.begin(), connections_.end(),
-                [&](BufferedSocket &c) {
+                factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
 
                     if (FD_ISSET(c.sock_, &exc_set))
@@ -218,64 +189,48 @@ namespace arg3
                         FD_CLR(c.sock_, &in_set);
                         FD_CLR(c.sock_, &out_set);
 
-                        notifyClose(c);
-
                         c.close();
                         return true;
                     }
                     return false;
-                }), connections_.end());
+                });
 
                 /* read from all connections, removing failed sockets */
-                connections_.erase(std::remove_if(connections_.begin(), connections_.end(),
-                [&](BufferedSocket &c) {
+                factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
 
                     if (FD_ISSET(c.sock_, &in_set))
                     {
-                        notifyWillRead(c);
-
                         if (!c.readToBuffer())
                         {
                             FD_CLR(c.sock_, &out_set);
 
-                            notifyClose(c);
-
                             c.close();
                             return true;
                         }
-
-                        notifyDidRead(c);
                     }
 
                     return false;
-                }), connections_.end());
+                });
 
                 /* write to all connections, removing failed sockets */
-                connections_.erase(std::remove_if(connections_.begin(), connections_.end(),
-                [&](BufferedSocket &c) {
+                factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
 
                     if (FD_ISSET(c.sock_, &out_set))
                     {
                         if(c.hasOutput())
                         {
-                            notifyWillWrite(c);
-
                             if(!c.writeFromBuffer())
                             {
-                                notifyClose(c);
-
                                 c.close();
 
                                 return true;
                             }
-
-                            notifyDidWrite(c);
                         }
                     }
                     return false;
-                }), connections_.end());
+                });
 
             }
         }

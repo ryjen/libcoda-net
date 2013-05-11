@@ -9,26 +9,32 @@ namespace arg3
 {
     namespace net
     {
-        class SocketServerListener
+        class SocketFactory
         {
         public:
-            virtual void onWillRead(BufferedSocket &sock) = 0;
+            virtual BufferedSocket* createSocket(SOCKET sock, const sockaddr_in &addr)= 0;
 
-            virtual void onDidRead(BufferedSocket &sock) = 0;
+            virtual vector<BufferedSocket>& getSockets() = 0;
 
-            virtual void onWillWrite(BufferedSocket &sock) = 0;
-
-            virtual void onDidWrite(BufferedSocket &sock) = 0;
-
-            virtual void onConnect(BufferedSocket &sock) = 0;
-
-            virtual void onClose(BufferedSocket &sock) = 0;
+            void run(std::function<bool(BufferedSocket &)> delegate);
         };
+
+        class DefaultSocketFactory : public SocketFactory
+        {
+        public:
+            virtual BufferedSocket* createSocket(SOCKET sock, const sockaddr_in &addr);
+
+            vector<BufferedSocket>& getSockets();
+        private:
+            vector<BufferedSocket> connections_;
+        };
+
+        extern DefaultSocketFactory defaultSocketFactory;
 
         class SocketServer : public Socket
         {
         public:
-            SocketServer(int port, int queueSize = QUEUE_SIZE);
+            SocketServer(int port, SocketFactory *factory = &defaultSocketFactory, int queueSize = QUEUE_SIZE);
             SocketServer(const SocketServer &other);
             SocketServer(SocketServer &&other);
             virtual ~SocketServer();
@@ -41,30 +47,14 @@ namespace arg3
 
             void setPollFrequency(unsigned value);
 
-            void addListener(SocketServerListener *listener);
-
         private:
-            void notifyWillRead(BufferedSocket &sock);
-
-            void notifyDidRead(BufferedSocket &sock);
-
-            void notifyWillWrite(BufferedSocket &sock);
-
-            void notifyDidWrite(BufferedSocket &sock);
-
-            void notifyConnect(BufferedSocket &sock);
-
-            void notifyClose(BufferedSocket &sock);
-
             void loop();
 
             unsigned pollFrequency_;
 
             thread listenThread_;
 
-            vector<BufferedSocket> connections_;
-
-            vector<SocketServerListener*> listeners_;
+            SocketFactory *factory_;
         };
     }
 }

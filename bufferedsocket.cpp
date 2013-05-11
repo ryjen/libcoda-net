@@ -9,7 +9,9 @@ namespace arg3
         }
 
         BufferedSocket::BufferedSocket(SOCKET sock, const sockaddr_in &addr) : Socket(sock, addr)
-        {}
+        {
+            notifyConnect();
+        }
 
 
         BufferedSocket::BufferedSocket(const BufferedSocket &sock) : Socket(sock),
@@ -58,6 +60,8 @@ namespace arg3
         {
             string chunk;
 
+            notifyWillRead();
+
             int status = Socket::recv(chunk);
 
             while(status > 0)
@@ -67,7 +71,12 @@ namespace arg3
                 status = Socket::recv(chunk);
             }
 
-            return status == 0 || errno == EWOULDBLOCK;
+            bool success = status == 0 || errno == EWOULDBLOCK;
+
+            if(success)
+                notifyDidRead();
+
+            return success;
         }
 
         string BufferedSocket::readLine()
@@ -134,15 +143,81 @@ namespace arg3
             return *this;
         }
 
+        void BufferedSocket::close()
+        {
+            notifyClose();
+
+            Socket::close();
+        }
+
         bool BufferedSocket::writeFromBuffer()
         {
+            notifyWillWrite();
+
             if(send(outBuffer_) < 0)
             {
                 return false;
             }
 
             outBuffer_.clear();
+
+            notifyDidWrite();
+
             return true;
+        }
+
+
+        void BufferedSocket::addListener(BufferedSocketListener *listener)
+        {
+            listeners_.push_back(listener);
+        }
+
+        void BufferedSocket::notifyConnect()
+        {
+            for(auto &l : listeners_)
+            {
+                l->onConnect(this);
+            }
+        }
+
+        void BufferedSocket::notifyWillRead()
+        {
+            for(auto &l : listeners_)
+            {
+                l->onWillRead(this);
+            }
+        }
+
+        void BufferedSocket::notifyDidRead()
+        {
+            for(auto &l : listeners_)
+            {
+                l->onDidRead(this);
+            }
+        }
+
+        void BufferedSocket::notifyWillWrite()
+        {
+            for(auto &l : listeners_)
+            {
+                l->onWillWrite(this);
+            }
+        }
+
+        void BufferedSocket::notifyDidWrite()
+        {
+            for(auto &l : listeners_)
+            {
+                l->onDidWrite(this);
+            }
+        }
+
+        void BufferedSocket::notifyClose()
+        {
+            for(auto &l : listeners_)
+            {
+                l->onClose(this);
+            }
         }
 
     }
