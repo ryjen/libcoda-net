@@ -26,6 +26,7 @@ namespace arg3
         {
             vector<BufferedSocket> &sockets_ = getSockets();
 
+            // run the delegate, remove connection if delegate returns false
             sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
         }
 
@@ -128,6 +129,7 @@ namespace arg3
                     secDelta += 1;
                 }
 
+                // check if server should stall for a moment based on poll frequency
                 if (secDelta > 0 || (secDelta == 0 && usecDelta > 0))
                 {
                     struct timeval stall_time;
@@ -154,6 +156,7 @@ namespace arg3
 
                 maxdesc = sock_;
 
+                // prepare for sockets for polling
                 factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
                     maxdesc = std::max(maxdesc, c.sock_);
@@ -163,6 +166,7 @@ namespace arg3
                     return false;
                 });
 
+                // poll
                 if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) < 0)
                 {
                     if (errno != EINTR)
@@ -171,6 +175,7 @@ namespace arg3
                     }
                 }
 
+                // check for new connection
                 if (FD_ISSET(sock_, &in_set))
                 {
                     sockaddr_in addr;
@@ -195,7 +200,7 @@ namespace arg3
                     return false;
                 });
 
-                /* read from all connections, removing failed sockets */
+                /* read from all readable connections, removing failed sockets */
                 factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
 
@@ -213,7 +218,7 @@ namespace arg3
                     return false;
                 });
 
-                /* write to all connections, removing failed sockets */
+                /* write to all writable connections, removing failed sockets */
                 factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
 
