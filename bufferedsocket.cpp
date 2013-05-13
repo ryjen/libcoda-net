@@ -125,6 +125,12 @@ namespace arg3
             return *this;
         }
 
+        BufferedSocket& BufferedSocket::writeLine()
+        {
+            outBuffer_.append("\n\r");
+            return *this;
+        }
+
         BufferedSocket& BufferedSocket::write(const string &value)
         {
             outBuffer_.append(value);
@@ -166,6 +172,13 @@ namespace arg3
             return true;
         }
 
+        void BufferedSocket::onConnect() {}
+        void BufferedSocket::onClose() {}
+        void BufferedSocket::onWillRead() {}
+        void BufferedSocket::onDidRead() {}
+        void BufferedSocket::onWillWrite() {}
+        void BufferedSocket::onDidWrite() {}
+
 
         void BufferedSocket::addListener(BufferedSocketListener *listener)
         {
@@ -174,6 +187,8 @@ namespace arg3
 
         void BufferedSocket::notifyConnect()
         {
+            onConnect();
+
             for(auto &l : listeners_)
             {
                 l->onConnect(this);
@@ -182,6 +197,8 @@ namespace arg3
 
         void BufferedSocket::notifyWillRead()
         {
+            onWillRead();
+
             for(auto &l : listeners_)
             {
                 l->onWillRead(this);
@@ -190,6 +207,8 @@ namespace arg3
 
         void BufferedSocket::notifyDidRead()
         {
+            onDidRead();
+
             for(auto &l : listeners_)
             {
                 l->onDidRead(this);
@@ -198,6 +217,8 @@ namespace arg3
 
         void BufferedSocket::notifyWillWrite()
         {
+            onWillWrite();
+
             for(auto &l : listeners_)
             {
                 l->onWillWrite(this);
@@ -206,6 +227,8 @@ namespace arg3
 
         void BufferedSocket::notifyDidWrite()
         {
+            onDidWrite();
+
             for(auto &l : listeners_)
             {
                 l->onDidWrite(this);
@@ -214,6 +237,8 @@ namespace arg3
 
         void BufferedSocket::notifyClose()
         {
+            onClose();
+
             for(auto &l : listeners_)
             {
                 l->onClose(this);

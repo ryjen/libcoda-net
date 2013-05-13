@@ -29,7 +29,7 @@ namespace arg3
         }
 
         Socket::Socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr),
-            references_(new unsigned(0)), backlogSize_(QUEUE_SIZE), port_(0)
+            references_(new unsigned(0)), backlogSize_(BACKLOG_SIZE), port_(0)
         {
 
         }

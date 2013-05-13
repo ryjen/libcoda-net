@@ -1,3 +1,5 @@
+#ifndef THIN
+
 #include "socketserver.h"
 #include "exception.h"
 #include "../log/log.h"
@@ -6,30 +8,6 @@ namespace arg3
 {
     namespace net
     {
-        DefaultSocketFactory defaultSocketFactory;
-
-        BufferedSocket* DefaultSocketFactory::createSocket(SOCKET sock, const sockaddr_in &addr)
-        {
-            BufferedSocket connection(sock, addr);
-
-            connections_.push_back(connection);
-
-            return &connections_[connections_.size()-1];
-        }
-
-        vector<BufferedSocket>& DefaultSocketFactory::getSockets()
-        {
-            return connections_;
-        }
-
-        void SocketFactory::run(std::function<bool(BufferedSocket &)> delegate)
-        {
-            vector<BufferedSocket> &sockets_ = getSockets();
-
-            // run the delegate, remove connection if delegate returns false
-            sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
-        }
-
         SocketServer::SocketServer(int port, SocketFactory *factory, int queueSize)
             : Socket(port, queueSize), pollFrequency_(4), factory_(factory)
         {}
@@ -76,12 +54,24 @@ namespace arg3
             return *this;
         }
 
-        void SocketServer::start(bool inBackground)
+        void SocketServer::addListener(SocketServerListener *listener)
         {
-            if(inBackground)
-                listenThread_ = thread(&SocketServer::loop, this);
-            else
-                loop();
+            listeners_.push_back(listener);
+        }
+
+        void SocketServer::notifyPoll()
+        {
+            onPoll();
+
+            for(auto &listener : listeners_)
+            {
+                listener->onPoll(this);
+            }
+        }
+
+        void SocketServer::start()
+        {
+            listenThread_ = thread(&SocketServer::loop, this);
         }
 
         void SocketServer::stop()
@@ -90,6 +80,9 @@ namespace arg3
 
             listenThread_.join();
         }
+
+        void SocketServer::onPoll()
+        {}
 
         void SocketServer::loop()
         {
@@ -218,6 +211,8 @@ namespace arg3
                     return false;
                 });
 
+                notifyPoll();
+
                 /* write to all writable connections, removing failed sockets */
                 factory_->run([&](BufferedSocket &c) {
                     if(!c.is_valid()) return true;
@@ -242,3 +237,5 @@ namespace arg3
 
     }
 }
+
+#endif

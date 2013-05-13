@@ -1,3 +1,5 @@
+#ifndef THIN
+
 #include <igloo/igloo.h>
 #include "restclient.h"
 #include "socketserver.h"
@@ -136,3 +138,5 @@ Context(arg3restclient)
         }
     }
 };
+
+#endif

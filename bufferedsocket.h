@@ -47,6 +47,7 @@ namespace arg3
             string readLine();
 
             BufferedSocket& writeLine(const string &value);
+            BufferedSocket& writeLine();
             BufferedSocket& write(const string &value);
 
             string getInput() const;
@@ -62,6 +63,15 @@ namespace arg3
             BufferedSocket& operator >> ( std::string& );
 
             void addListener(BufferedSocketListener *listener);
+
+        protected:
+
+            virtual void onWillRead();
+            virtual void onDidRead();
+            virtual void onWillWrite();
+            virtual void onDidWrite();
+            virtual void onConnect();
+            virtual void onClose();
 
         private:
 

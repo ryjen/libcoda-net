@@ -38,7 +38,7 @@ namespace arg3
             Socket(SOCKET sock, const sockaddr_in &addr);
 
             Socket(const std::string &host, const int port);
-            Socket (int port, int queueSize = QUEUE_SIZE);
+            Socket (int port, int queueSize = BACKLOG_SIZE);
             Socket();
 
             Socket(const Socket &);
@@ -85,13 +85,13 @@ namespace arg3
             static const int MAXHOSTNAME = 200;
             static const int MAXRECV = 500;
             static const int INVALID = -1;
-            static const int QUEUE_SIZE = 10;
+            static const int BACKLOG_SIZE = 10;
 
             SOCKET sock_;
             sockaddr_in addr_;
             unsigned *references_;
 
-            bool create();
+            bool create ();
             bool bind ();
 
             int backlogSize_;
