@@ -84,6 +84,12 @@ namespace arg3
         void SocketServer::onPoll()
         {}
 
+        void SocketServer::onStart()
+        {}
+
+        void SocketServer::onStop()
+        {}
+
         void SocketServer::loop()
         {
             fd_set in_set;
@@ -96,6 +102,8 @@ namespace arg3
                 listen();
 
             gettimeofday(&last_time, NULL);
+
+            onStart();
 
             while(is_valid())
             {
@@ -233,8 +241,10 @@ namespace arg3
                 });
 
             }
-        }
 
+            onStop();
+
+        }
     }
 }
 

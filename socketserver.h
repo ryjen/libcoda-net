@@ -42,6 +42,10 @@ namespace arg3
 
             virtual void onPoll();
 
+            virtual void onStart();
+
+            virtual void onStop();
+
         private:
 
             void notifyPoll();
