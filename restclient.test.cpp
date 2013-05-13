@@ -8,6 +8,7 @@
 #include "../string/argument.h"
 #include <string>
 #include <thread>
+#include "../log/log.h"
 
 using namespace igloo;
 

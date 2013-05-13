@@ -16,7 +16,6 @@ namespace arg3
         BufferedSocket::BufferedSocket(const BufferedSocket &sock) : Socket(sock),
             inBuffer_(sock.inBuffer_), outBuffer_(sock.outBuffer_), listeners_(sock.listeners_)
         {
-            log::trace("constructing copy");
 
         }
 
@@ -191,8 +190,6 @@ namespace arg3
 
         void BufferedSocket::notifyConnect()
         {
-            log::trace("notifyConnect");
-
             onConnect();
 
             for(auto &l : listeners_)
