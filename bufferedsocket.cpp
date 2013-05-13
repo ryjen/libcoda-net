@@ -1,30 +1,30 @@
 #include "bufferedsocket.h"
+#include "../log/log.h"
 
 namespace arg3
 {
     namespace net
     {
-        BufferedSocket::BufferedSocket()
+        BufferedSocket::BufferedSocket() : Socket(), listeners_()
         {
         }
 
-        BufferedSocket::BufferedSocket(SOCKET sock, const sockaddr_in &addr) : Socket(sock, addr)
+        BufferedSocket::BufferedSocket(SOCKET sock, const sockaddr_in &addr) : Socket(sock, addr), listeners_()
         {
-            notifyConnect();
         }
 
 
         BufferedSocket::BufferedSocket(const BufferedSocket &sock) : Socket(sock),
-            inBuffer_(sock.inBuffer_), outBuffer_(sock.outBuffer_)
+            inBuffer_(sock.inBuffer_), outBuffer_(sock.outBuffer_), listeners_(sock.listeners_)
         {
+            log::trace("constructing copy");
 
         }
 
-        BufferedSocket::BufferedSocket(BufferedSocket &&other) : Socket(other), inBuffer_(other.inBuffer_),
-            outBuffer_(other.outBuffer_)
+        BufferedSocket::BufferedSocket(BufferedSocket &&other) : Socket(other), inBuffer_(std::move(other.inBuffer_)),
+            outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
         {
-            other.inBuffer_.clear();
-            other.outBuffer_.clear();
+            log::trace("constructing move");
         }
 
         BufferedSocket::~BufferedSocket()
@@ -35,10 +35,14 @@ namespace arg3
         {
             if(this != &other)
             {
+                log::trace("assigning copy");
+
                 Socket::operator=(other);
 
                 inBuffer_ = other.inBuffer_;
                 outBuffer_ = other.outBuffer_;
+
+                listeners_ = other.listeners_;
             }
 
             return *this;
@@ -47,10 +51,18 @@ namespace arg3
         {
             if(this != &other)
             {
+                log::trace("assigning move");
+
                 Socket::operator=(std::move(other));
 
                 inBuffer_ = std::move(other.inBuffer_);
                 outBuffer_ = std::move(other.outBuffer_);
+
+                listeners_ = std::move(other.listeners_);
+
+                /*other.listeners_.clear();
+                other.inBuffer_.clear();
+                other.outBuffer_.clear();*/
             }
 
             return *this;
@@ -182,11 +194,14 @@ namespace arg3
 
         void BufferedSocket::addListener(BufferedSocketListener *listener)
         {
-            listeners_.push_back(listener);
+            if(listener != NULL)
+                listeners_.push_back(listener);
         }
 
         void BufferedSocket::notifyConnect()
         {
+            log::trace("notifyConnect");
+
             onConnect();
 
             for(auto &l : listeners_)

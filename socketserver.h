@@ -1,3 +1,6 @@
+#ifndef ARG3_NET_SOCKETSERVER_H
+#define ARG3_NET_SOCKETSERVER_H
+
 #ifndef THIN
 
 #include "socketfactory.h"
@@ -17,6 +20,10 @@ namespace arg3
         {
         public:
             virtual void onPoll(SocketServer *server) = 0;
+
+            virtual void onStart(SocketServer *server) = 0;
+
+            virtual void onStop(SocketServer *server) = 0;
         };
 
         class SocketServer : public Socket
@@ -48,7 +55,13 @@ namespace arg3
 
         private:
 
+            void foreach(std::function<bool(std::shared_ptr<BufferedSocket> )> delegate);
+
             void notifyPoll();
+
+            void notifyStart();
+
+            void notifyStop();
 
             unsigned pollFrequency_;
 
@@ -57,8 +70,13 @@ namespace arg3
             SocketFactory *factory_;
 
             vector<SocketServerListener*> listeners_;
+
+            vector<std::shared_ptr<BufferedSocket>> sockets_;
         };
     }
 }
 
 #endif
+
+#endif
+

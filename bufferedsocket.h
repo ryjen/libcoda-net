@@ -64,6 +64,8 @@ namespace arg3
 
             void addListener(BufferedSocketListener *listener);
 
+            void notifyConnect();
+
         protected:
 
             virtual void onWillRead();
@@ -83,14 +85,11 @@ namespace arg3
 
             void notifyDidWrite();
 
-            void notifyConnect();
-
             void notifyClose();
-
-            vector<BufferedSocketListener *> listeners_;
 
             string inBuffer_;
             string outBuffer_;
+            vector<BufferedSocketListener *> listeners_;
         };
     }
 }

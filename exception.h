@@ -1,3 +1,6 @@
+#ifndef ARG3_NET_EXCEPTION_H
+#define ARG3_NET_EXCEPTION_H
+
 #include <exception>
 #include <string>
 
@@ -79,3 +82,6 @@ namespace arg3
         };
     }
 }
+
+#endif
+

@@ -23,7 +23,7 @@ namespace arg3
 #endif
 
         Socket::Socket() :
-            sock_ ( INVALID ), references_(NULL)
+            sock_ ( INVALID ), references_(NULL), backlogSize_(BACKLOG_SIZE), port_(0)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
@@ -53,10 +53,11 @@ namespace arg3
             }
         }
 
-        Socket::Socket(Socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), backlogSize_(other.backlogSize_),
-            port_(other.port_)
+        Socket::Socket(Socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), references_(std::move(other.references_)),
+            backlogSize_(other.backlogSize_), port_(other.port_)
         {
             other.sock_ = INVALID;
+            other.references_ = NULL;
         }
 
         Socket &Socket::operator=(const Socket &other)
@@ -77,10 +78,12 @@ namespace arg3
             if(this != &other) {
                 sock_ = other.sock_;
                 addr_ = std::move(other.addr_);
+                references_ = std::move(other.references_);
                 backlogSize_ = other.backlogSize_;
                 port_ = other.port_;
 
                 other.sock_ = INVALID;
+                other.references_ = NULL;
             }
             return *this;
         }
@@ -139,11 +142,11 @@ namespace arg3
 
         int Socket::getPort() const
         {
-            return addr_.sin_port;
+            return port_ == 0 ? addr_.sin_port : port_;
         }
         void Socket::setPort(const int port)
         {
-            addr_.sin_port = port;
+            port_ = port;
         }
         void Socket::setIP(const string &ip)
         {
@@ -214,8 +217,10 @@ namespace arg3
 
             int status = ::connect ( sock_, ( sockaddr * ) &addr_, sizeof ( addr_ ) );
 
-            if ( status == 0 )
+            if ( status == 0 ) {
+                port_ = port;
                 return true;
+            }
             else
                 return false;
         }

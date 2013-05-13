@@ -1,3 +1,7 @@
+#ifndef ARG3_NET_SOCKETFACTORY_H
+#define ARG3_NET_SOCKETFACTORY_H
+#include <memory>
+
 #ifndef THIN
 
 #include "bufferedsocket.h"
@@ -13,34 +17,20 @@ namespace arg3
         {
         public:
             /* creates a buffered socket from a raw socket */
-            virtual BufferedSocket* createSocket(SOCKET sock, const sockaddr_in &addr)= 0;
-
-            /* returns a list of created sockets */
-            virtual vector<BufferedSocket>& getSockets() = 0;
-
-            /*
-             * runs a delegate across all sockets.
-             * return value dictates whether the socket should be removed or not.
-             */
-            void run(std::function<bool(BufferedSocket &)> delegate);
+            virtual std::shared_ptr<BufferedSocket> createSocket(SOCKET sock, const sockaddr_in &addr)= 0;
         };
 
         /* default implementation of a socket factory */
         class DefaultSocketFactory : public SocketFactory
         {
         public:
-            virtual BufferedSocket* createSocket(SOCKET sock, const sockaddr_in &addr);
-
-            vector<BufferedSocket>& getSockets();
-        private:
-            vector<BufferedSocket> connections_;
+            virtual std::shared_ptr<BufferedSocket> createSocket(SOCKET sock, const sockaddr_in &addr);
         };
 
         /* default factory instance */
         extern DefaultSocketFactory defaultSocketFactory;
-
-
     }
 }
 
+#endif
 #endif

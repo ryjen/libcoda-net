@@ -18,12 +18,23 @@ using namespace arg3;
 
 using namespace std;
 
-class TestSocketListener : public BufferedSocketListener
+class TestSocketFactory : public DefaultSocketFactory, public BufferedSocketListener
 {
+
 private:
     string response_;
 
 public:
+    std::shared_ptr<BufferedSocket> createSocket(SOCKET sock, const sockaddr_in &addr)
+    {
+        log::trace("Creating new connection");
+        BufferedSocket *socket = new BufferedSocket(sock, addr);
+
+        socket->addListener(this);
+
+        return std::shared_ptr<BufferedSocket>(socket);
+    }
+
     void setResponse(const string &response) {
         response_ = response;
     }
@@ -67,22 +78,6 @@ public:
     }
 };
 
-TestSocketListener listener;
-
-class TestSocketFactory : public DefaultSocketFactory
-{
-public:
-    BufferedSocket *createSocket(SOCKET sock, const sockaddr_in &addr)
-    {
-        BufferedSocket *socket = DefaultSocketFactory::createSocket(sock, addr);
-
-        socket->addListener(&listener);
-
-        return socket;
-    }
-
-};
-
 TestSocketFactory testFactory;
 
 SocketServer testServer(9876, &testFactory);
@@ -110,7 +105,7 @@ Context(arg3restclient)
     {
         RESTClient client("localhost:9876", "1");
 
-        listener.setResponse("Hello, World!");
+        testFactory.setResponse("Hello, World!");
 
         try {
             client.get("test");

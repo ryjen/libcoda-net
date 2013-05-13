@@ -1,3 +1,5 @@
+#ifndef ARG3_NET_PROTOCOL_H
+#define ARG3_NET_PROTOCOL_H
 
 namespace arg3
 {
@@ -17,8 +19,10 @@ namespace arg3
             typedef enum
             {
                 Get, Post, Put, Delete
-            } 
+            }
             Method;
         }
     }
 }
+
+#endif

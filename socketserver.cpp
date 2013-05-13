@@ -2,7 +2,6 @@
 
 #include "socketserver.h"
 #include "exception.h"
-#include "../log/log.h"
 
 namespace arg3
 {
@@ -69,6 +68,26 @@ namespace arg3
             }
         }
 
+        void SocketServer::notifyStart()
+        {
+            onStart();
+
+            for(auto &listener : listeners_)
+            {
+                listener->onStart(this);
+            }
+        }
+
+        void SocketServer::notifyStop()
+        {
+            onStop();
+
+            for(auto &listener : listeners_)
+            {
+                listener->onStop(this);
+            }
+        }
+
         void SocketServer::start()
         {
             listenThread_ = thread(&SocketServer::loop, this);
@@ -89,6 +108,11 @@ namespace arg3
 
         void SocketServer::onStop()
         {}
+
+        void SocketServer::foreach(std::function<bool(std::shared_ptr<BufferedSocket>)> delegate)
+        {
+            sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
+        }
 
         void SocketServer::loop()
         {
@@ -158,12 +182,12 @@ namespace arg3
                 maxdesc = sock_;
 
                 // prepare for sockets for polling
-                factory_->run([&](BufferedSocket &c) {
-                    if(!c.is_valid()) return true;
-                    maxdesc = std::max(maxdesc, c.sock_);
-                    FD_SET(c.sock_, &in_set);
-                    FD_SET(c.sock_, &out_set);
-                    FD_SET(c.sock_, &exc_set);
+                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                    if(!c->is_valid()) return true;
+                    maxdesc = std::max(maxdesc, c->sock_);
+                    FD_SET(c->sock_, &in_set);
+                    FD_SET(c->sock_, &out_set);
+                    FD_SET(c->sock_, &exc_set);
                     return false;
                 });
 
@@ -181,37 +205,41 @@ namespace arg3
                 {
                     sockaddr_in addr;
 
-                    BufferedSocket *sock = factory_->createSocket(accept(addr), addr);
+                    auto sock = factory_->createSocket(accept(addr), addr);
 
                     sock->set_non_blocking(true);
+
+                    sock->notifyConnect();
+
+                    sockets_.push_back(sock);
                 }
 
                 /* check for freaky connections */
-                factory_->run([&](BufferedSocket &c) {
-                    if(!c.is_valid()) return true;
+                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                    if(!c->is_valid()) return true;
 
-                    if (FD_ISSET(c.sock_, &exc_set))
+                    if (FD_ISSET(c->sock_, &exc_set))
                     {
-                        FD_CLR(c.sock_, &in_set);
-                        FD_CLR(c.sock_, &out_set);
+                        FD_CLR(c->sock_, &in_set);
+                        FD_CLR(c->sock_, &out_set);
 
-                        c.close();
+                        c->close();
                         return true;
                     }
                     return false;
                 });
 
                 /* read from all readable connections, removing failed sockets */
-                factory_->run([&](BufferedSocket &c) {
-                    if(!c.is_valid()) return true;
+                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                    if(!c->is_valid()) return true;
 
-                    if (FD_ISSET(c.sock_, &in_set))
+                    if (FD_ISSET(c->sock_, &in_set))
                     {
-                        if (!c.readToBuffer())
+                        if (!c->readToBuffer())
                         {
-                            FD_CLR(c.sock_, &out_set);
+                            FD_CLR(c->sock_, &out_set);
 
-                            c.close();
+                            c->close();
                             return true;
                         }
                     }
@@ -222,16 +250,16 @@ namespace arg3
                 notifyPoll();
 
                 /* write to all writable connections, removing failed sockets */
-                factory_->run([&](BufferedSocket &c) {
-                    if(!c.is_valid()) return true;
+                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                    if(!c->is_valid()) return true;
 
-                    if (FD_ISSET(c.sock_, &out_set))
+                    if (FD_ISSET(c->sock_, &out_set))
                     {
-                        if(c.hasOutput())
+                        if(c->hasOutput())
                         {
-                            if(!c.writeFromBuffer())
+                            if(!c->writeFromBuffer())
                             {
-                                c.close();
+                                c->close();
 
                                 return true;
                             }
