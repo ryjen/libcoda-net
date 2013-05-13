@@ -4,7 +4,6 @@
 #include "restclient.h"
 #include "socketserver.h"
 #include "bufferedsocket.h"
-#include "../log/log.h"
 #include "../format/format.h"
 #include "../string/argument.h"
 #include <string>
@@ -27,7 +26,6 @@ private:
 public:
     std::shared_ptr<BufferedSocket> createSocket(SOCKET sock, const sockaddr_in &addr)
     {
-        log::trace("Creating new connection");
         BufferedSocket *socket = new BufferedSocket(sock, addr);
 
         socket->addListener(this);

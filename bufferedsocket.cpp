@@ -1,5 +1,4 @@
 #include "bufferedsocket.h"
-#include "../log/log.h"
 
 namespace arg3
 {
@@ -24,7 +23,6 @@ namespace arg3
         BufferedSocket::BufferedSocket(BufferedSocket &&other) : Socket(other), inBuffer_(std::move(other.inBuffer_)),
             outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
         {
-            log::trace("constructing move");
         }
 
         BufferedSocket::~BufferedSocket()
@@ -35,8 +33,6 @@ namespace arg3
         {
             if(this != &other)
             {
-                log::trace("assigning copy");
-
                 Socket::operator=(other);
 
                 inBuffer_ = other.inBuffer_;
@@ -51,7 +47,6 @@ namespace arg3
         {
             if(this != &other)
             {
-                log::trace("assigning move");
 
                 Socket::operator=(std::move(other));
 
@@ -59,10 +54,6 @@ namespace arg3
                 outBuffer_ = std::move(other.outBuffer_);
 
                 listeners_ = std::move(other.listeners_);
-
-                /*other.listeners_.clear();
-                other.inBuffer_.clear();
-                other.outBuffer_.clear();*/
             }
 
             return *this;

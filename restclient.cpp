@@ -1,6 +1,5 @@
 #include "restclient.h"
 #include "exception.h"
-#include "../log/log.h"
 
 namespace arg3
 {
@@ -27,7 +26,7 @@ namespace arg3
         {
         }
 
-        RESTClient::RESTClient() 
+        RESTClient::RESTClient()
         {
         }
 
@@ -35,15 +34,15 @@ namespace arg3
         {
         }
 
-        RESTClient::RESTClient(const RESTClient &other) : scheme_(other.scheme_), host_(other.host_), 
-                version_(other.version_), payload_(other.payload_), responseCode_(other.responseCode_), 
-                response_(other.response_), headers_(other.headers_)
+        RESTClient::RESTClient(const RESTClient &other) : scheme_(other.scheme_), host_(other.host_),
+            version_(other.version_), payload_(other.payload_), responseCode_(other.responseCode_),
+            response_(other.response_), headers_(other.headers_)
         {
         }
 
-        RESTClient::RESTClient(RESTClient &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)), 
-                version_(std::move(other.version_)), payload_(std::move(other.payload_)), responseCode_(other.responseCode_), 
-                response_(std::move(other.response_)), headers_(std::move(other.headers_))
+        RESTClient::RESTClient(RESTClient &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
+            version_(std::move(other.version_)), payload_(std::move(other.payload_)), responseCode_(other.responseCode_),
+            response_(std::move(other.response_)), headers_(std::move(other.headers_))
         {
         }
 
