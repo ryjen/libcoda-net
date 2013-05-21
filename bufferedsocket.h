@@ -49,6 +49,7 @@ namespace arg3
             BufferedSocket& writeLine(const string &value);
             BufferedSocket& writeLine();
             BufferedSocket& write(const string &value);
+            BufferedSocket& write(void *pbuf, size_t sz);
 
             string getInput() const;
             bool hasInput() const;
@@ -57,7 +58,6 @@ namespace arg3
             bool hasOutput() const;
 
             bool writeFromBuffer();
-
 
             BufferedSocket& operator << ( const std::string& );
             BufferedSocket& operator >> ( std::string& );
@@ -76,6 +76,8 @@ namespace arg3
             virtual void onClose();
 
         private:
+
+            void flush();
 
             void notifyWillRead();
 

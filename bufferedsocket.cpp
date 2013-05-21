@@ -133,6 +133,12 @@ namespace arg3
             return *this;
         }
 
+        BufferedSocket& BufferedSocket::write(void *pbuf, size_t sz)
+        {
+            Socket::send(pbuf, sz);
+            return *this;
+        }
+
         BufferedSocket& BufferedSocket::write(const string &value)
         {
             outBuffer_.append(value);
@@ -151,9 +157,18 @@ namespace arg3
             return *this;
         }
 
+        void BufferedSocket::flush()
+        {
+            send(outBuffer_);
+
+            outBuffer_.clear();
+        }
+
         void BufferedSocket::close()
         {
             notifyClose();
+
+            flush();
 
             Socket::close();
         }

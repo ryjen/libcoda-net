@@ -97,7 +97,10 @@ namespace arg3
                 {
                     close();
                     if(references_)
+                    {
                         delete references_;
+                        references_ = NULL;
+                    }
                 }
                 else
                 {
@@ -117,7 +120,7 @@ namespace arg3
             return ::send ( sock_, s.c_str(), s.size(), flags );
         }
 
-        int Socket::send( unsigned const char *s, size_t len, int flags)
+        int Socket::send( void *s, size_t len, int flags)
         {
 #ifdef _WIN32
             return ::send(sock_, reinterpret_cast<const char *>(s), len, flags);

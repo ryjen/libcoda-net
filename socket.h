@@ -50,7 +50,7 @@ namespace arg3
 
             // Data Transimission
             int send ( const std::string&, int flags = 0 );
-            int send ( unsigned const char *, size_t, int flags = 0);
+            int send ( void *, size_t, int flags = 0);
 
             // Recieves a block of input
             int recv(std::string &);
