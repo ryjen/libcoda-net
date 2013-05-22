@@ -45,6 +45,10 @@ namespace arg3
             void setPollFrequency(unsigned value);
 
             void addListener(SocketServerListener *listener);
+
+            bool operator==(const SocketServer &other);
+            bool operator!=(const SocketServer &other);
+
         protected:
 
             virtual void onPoll();

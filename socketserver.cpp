@@ -53,6 +53,16 @@ namespace arg3
             return *this;
         }
 
+        bool SocketServer::operator==(const SocketServer &other)
+        {
+            return port_ == other.port_;
+        }
+
+        bool SocketServer::operator!=(const SocketServer &other)
+        {
+            return !operator==(other);
+        }
+
         void SocketServer::addListener(SocketServerListener *listener)
         {
             listeners_.push_back(listener);
