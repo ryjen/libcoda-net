@@ -25,7 +25,7 @@ private:
     string response_;
 
 public:
-    std::shared_ptr<BufferedSocket> createSocket(SOCKET sock, const sockaddr_in &addr)
+    std::shared_ptr<BufferedSocket> createSocket(SocketServer *server, SOCKET sock, const sockaddr_in &addr)
     {
         BufferedSocket *socket = new BufferedSocket(sock, addr);
 

@@ -215,7 +215,7 @@ namespace arg3
                 {
                     sockaddr_in addr;
 
-                    auto sock = factory_->createSocket(accept(addr), addr);
+                    auto sock = factory_->createSocket(this, accept(addr), addr);
 
                     sock->set_non_blocking(true);
 

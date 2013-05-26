@@ -8,7 +8,7 @@ namespace arg3
     {
         DefaultSocketFactory defaultSocketFactory;
 
-        std::shared_ptr<BufferedSocket> DefaultSocketFactory::createSocket(SOCKET sock, const sockaddr_in &addr)
+        std::shared_ptr<BufferedSocket> DefaultSocketFactory::createSocket(SocketServer *server, SOCKET sock, const sockaddr_in &addr)
         {
             return std::shared_ptr<BufferedSocket>(new BufferedSocket(sock, addr));
         }
