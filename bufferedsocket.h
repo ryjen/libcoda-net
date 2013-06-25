@@ -75,6 +75,8 @@ namespace arg3
             virtual void onConnect();
             virtual void onClose();
 
+            constexpr static const char *const NEWLINE = "\r\n";
+
         private:
 
             void flush();

@@ -123,13 +123,13 @@ namespace arg3
 
         BufferedSocket& BufferedSocket::writeLine(const string &value)
         {
-            outBuffer_.append(value).append("\n\r");
+            outBuffer_.append(value).append(NEWLINE);
             return *this;
         }
 
         BufferedSocket& BufferedSocket::writeLine()
         {
-            outBuffer_.append("\n\r");
+            outBuffer_.append(NEWLINE);
             return *this;
         }
 
