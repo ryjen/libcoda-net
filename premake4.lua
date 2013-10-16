@@ -114,6 +114,8 @@ solution "arg3"
 
         links { "arg3net", "curl" }
 
+	includedirs { "vendor" }
+
         configuration "Debug"
         postbuildcommands {
           "bin/debug/arg3test"
