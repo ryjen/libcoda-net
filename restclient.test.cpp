@@ -4,11 +4,8 @@
 #include "restclient.h"
 #include "socketserver.h"
 #include "bufferedsocket.h"
-#include "../format/format.h"
-#include "../string/argument.h"
 #include <string>
 #include <thread>
-#include "../log/log.h"
 
 using namespace igloo;
 
@@ -41,38 +38,38 @@ public:
 
     void onConnect(BufferedSocket *sock)
     {
-        log::trace(format("{0} connected", sock->getIP()));
+        //log::trace(format("{0} connected", sock->getIP()));
     }
 
     void onClose(BufferedSocket *sock)
     {
-        log::trace(format("{0} closed", sock->getIP()));
+        //log::trace(format("{0} closed", sock->getIP()));
     }
 
     void onWillRead(BufferedSocket *sock)
     {
-        log::trace(format("{0} will read", sock->getIP()));
+        //log::trace(format("{0} will read", sock->getIP()));
     }
 
     void onDidRead(BufferedSocket *sock)
     {
-        log::trace(format("{0} did read", sock->getIP()));
+        //log::trace(format("{0} did read", sock->getIP()));
 
-        argument line = sock->readLine();
+        string line = sock->readLine();
 
-        string method = line.next();
+        string method = line.substr(0, line.find(' '));
 
         sock->write(method + ": " + response_);
     }
 
     void onWillWrite(BufferedSocket *sock)
     {
-        log::trace(format("{0} will write", sock->getIP()));
+        //log::trace(format("{0} will write", sock->getIP()));
     }
 
     void onDidWrite(BufferedSocket *sock)
     {
-        log::trace(format("{0} did write", sock->getIP()));
+        //log::trace(format("{0} did write", sock->getIP()));
 
         sock->close();
     }
@@ -90,11 +87,11 @@ Context(arg3restclient)
         {
             testServer.start();
 
-            log::trace("Mock server started");
+            //log::trace("Mock server started");
         }
-        catch(const exception &e)
+        catch (const exception &e)
         {
-            log::trace(e.what());
+            std::cerr << e.what() << std::endl;
         }
     }
 
@@ -114,9 +111,9 @@ Context(arg3restclient)
             client.get("test");
             Assert::That(client.getResponse(), Equals("GET: Hello, World!"));
         }
-        catch(const exception &e)
+        catch (const exception &e)
         {
-            log::trace(e.what());
+            std::cerr << e.what() << std::endl;
             throw e;
         }
     }
@@ -132,9 +129,9 @@ Context(arg3restclient)
             client.post("test");
             Assert::That(client.getResponse(), Equals("POST: Hello, World!"));
         }
-        catch(const exception &e)
+        catch (const exception &e)
         {
-            log::trace(e.what());
+            std::cerr << e.what() << std::endl;
             throw e;
         }
     }
