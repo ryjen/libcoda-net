@@ -1,6 +1,8 @@
 #ifndef ARG3_NET_REST_CLIENT_H
 #define ARG3_NET_REST_CLIENT_H
 
+#ifndef ARG3_NO_CURL
+
 #include <curl/curl.h>
 #include "protocol.h"
 #include <string>
@@ -63,5 +65,7 @@ namespace arg3
         };
     }
 }
+
+#endif
 
 #endif

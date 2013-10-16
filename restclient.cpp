@@ -1,3 +1,5 @@
+#ifndef ARG3_NO_CURL
+
 #include "restclient.h"
 #include "exception.h"
 
@@ -91,43 +93,53 @@ namespace arg3
             return headers_[key];
         }
 
-        string RESTClient::getVersion() const {
+        string RESTClient::getVersion() const
+        {
             return version_;
         }
 
-        string RESTClient::getHost() const {
+        string RESTClient::getHost() const
+        {
             return host_;
         }
 
-        int RESTClient::getResponseCode() const {
+        int RESTClient::getResponseCode() const
+        {
             return responseCode_;
         }
 
-        string RESTClient::getPayload() const {
+        string RESTClient::getPayload() const
+        {
             return payload_;
         }
 
-        string RESTClient::getResponse() const {
+        string RESTClient::getResponse() const
+        {
             return response_;
         }
 
-        bool RESTClient::isSecure() const {
+        bool RESTClient::isSecure() const
+        {
             return scheme_ == http::SECURE_SCHEME;
         }
 
-        void RESTClient::setHost(const string &host) {
+        void RESTClient::setHost(const string &host)
+        {
             host_ = host;
         }
 
-        void RESTClient::setVersion(const string &version) {
+        void RESTClient::setVersion(const string &version)
+        {
             version_ = version;
         }
 
-        void RESTClient::setSecure(bool value) {
+        void RESTClient::setSecure(bool value)
+        {
             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
         }
 
-        RESTClient &RESTClient::setPayload(const string &payload) {
+        RESTClient &RESTClient::setPayload(const string &payload)
+        {
             payload_ = payload;
             return *this;
         }
@@ -218,3 +230,5 @@ namespace arg3
         }
     }
 }
+
+#endif

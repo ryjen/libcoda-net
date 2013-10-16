@@ -92,7 +92,8 @@ namespace arg3
             string temp = inBuffer_.substr(0, pos);
 
             while(pos < inBuffer_.length() &&
-                    (inBuffer_[pos] == '\n' || inBuffer_[pos] == '\r')) {
+                    (inBuffer_[pos] == '\n' || inBuffer_[pos] == '\r'))
+            {
                 pos++;
             }
 

@@ -12,7 +12,8 @@ using namespace std;
 namespace arg3
 {
 
-    namespace net {
+    namespace net
+    {
 
 #ifndef _WIN32
 
@@ -62,7 +63,8 @@ namespace arg3
 
         Socket &Socket::operator=(const Socket &other)
         {
-            if(this != &other) {
+            if(this != &other)
+            {
                 sock_ = other.sock_;
                 addr_ = other.addr_;
                 backlogSize_ = other.backlogSize_;
@@ -75,7 +77,8 @@ namespace arg3
 
         Socket &Socket::operator=(Socket &&other)
         {
-            if(this != &other) {
+            if(this != &other)
+            {
                 sock_ = other.sock_;
                 addr_ = std::move(other.addr_);
                 references_ = std::move(other.references_);
@@ -134,7 +137,8 @@ namespace arg3
             return sock_ != INVALID;
         }
 
-        SOCKET Socket::getSocket() const {
+        SOCKET Socket::getSocket() const
+        {
             return sock_;
         }
 
@@ -220,7 +224,8 @@ namespace arg3
 
             int status = ::connect ( sock_, ( sockaddr * ) &addr_, sizeof ( addr_ ) );
 
-            if ( status == 0 ) {
+            if ( status == 0 )
+            {
                 port_ = port;
                 return true;
             }

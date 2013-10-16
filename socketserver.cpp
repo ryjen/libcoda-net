@@ -192,7 +192,8 @@ namespace arg3
                 maxdesc = sock_;
 
                 // prepare for sockets for polling
-                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                foreach([&](std::shared_ptr<BufferedSocket> c)
+                {
                     if(!c->is_valid()) return true;
                     maxdesc = std::max(maxdesc, c->sock_);
                     FD_SET(c->sock_, &in_set);
@@ -225,7 +226,8 @@ namespace arg3
                 }
 
                 /* check for freaky connections */
-                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                foreach([&](std::shared_ptr<BufferedSocket> c)
+                {
                     if(!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &exc_set))
@@ -240,7 +242,8 @@ namespace arg3
                 });
 
                 /* read from all readable connections, removing failed sockets */
-                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                foreach([&](std::shared_ptr<BufferedSocket> c)
+                {
                     if(!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &in_set))
@@ -260,7 +263,8 @@ namespace arg3
                 notifyPoll();
 
                 /* write to all writable connections, removing failed sockets */
-                foreach([&](std::shared_ptr<BufferedSocket> c) {
+                foreach([&](std::shared_ptr<BufferedSocket> c)
+                {
                     if(!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &out_set))

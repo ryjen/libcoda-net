@@ -1,4 +1,4 @@
-#ifndef THIN
+#ifndef ARG3_NO_CURL
 
 #include <igloo/igloo.h>
 #include "restclient.h"
@@ -34,7 +34,8 @@ public:
         return std::shared_ptr<BufferedSocket>(socket);
     }
 
-    void setResponse(const string &response) {
+    void setResponse(const string &response)
+    {
         response_ = response;
     }
 
@@ -85,12 +86,14 @@ Context(arg3restclient)
 {
     static void SetUpContext()
     {
-        try {
+        try
+        {
             testServer.start();
 
             log::trace("Mock server started");
         }
-        catch(const exception &e) {
+        catch(const exception &e)
+        {
             log::trace(e.what());
         }
     }
@@ -106,11 +109,13 @@ Context(arg3restclient)
 
         testFactory.setResponse("Hello, World!");
 
-        try {
+        try
+        {
             client.get("test");
             Assert::That(client.getResponse(), Equals("GET: Hello, World!"));
         }
-        catch(const exception &e) {
+        catch(const exception &e)
+        {
             log::trace(e.what());
             throw e;
         }
@@ -122,11 +127,13 @@ Context(arg3restclient)
 
         client.setPayload("Hello, World!");
 
-        try {
+        try
+        {
             client.post("test");
             Assert::That(client.getResponse(), Equals("POST: Hello, World!"));
         }
-        catch(const exception &e) {
+        catch(const exception &e)
+        {
             log::trace(e.what());
             throw e;
         }
