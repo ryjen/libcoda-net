@@ -47,7 +47,7 @@ namespace arg3
             {
                 (*references_)++;
             }
-            else if(sock_ != INVALID)
+            else if (sock_ != INVALID)
             {
                 references_ = new unsigned(0);
                 (*references_)++;
@@ -63,7 +63,7 @@ namespace arg3
 
         Socket &Socket::operator=(const Socket &other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 sock_ = other.sock_;
                 addr_ = other.addr_;
@@ -75,9 +75,9 @@ namespace arg3
             return *this;
         }
 
-        Socket &Socket::operator=(Socket &&other)
+        Socket &Socket::operator=(Socket && other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 sock_ = other.sock_;
                 addr_ = std::move(other.addr_);
@@ -96,10 +96,10 @@ namespace arg3
         {
             if ( is_valid())
             {
-                if(!references_ || !*references_)
+                if (!references_ || !*references_)
                 {
                     close();
-                    if(references_)
+                    if (references_)
                     {
                         delete references_;
                         references_ = NULL;
@@ -183,7 +183,7 @@ namespace arg3
             return status;
         }
 
-        Socket& Socket::operator << ( const string& s )
+        Socket &Socket::operator << ( const string &s )
         {
             if ( send ( s ) < 0)
             {
@@ -194,7 +194,7 @@ namespace arg3
 
         }
 
-        Socket& Socket::operator >> ( string& s )
+        Socket &Socket::operator >> ( string &s )
         {
             if ( recv(s) < 0)
             {
@@ -352,7 +352,7 @@ namespace arg3
             else
                 opts = ( opts & ~O_NONBLOCK );
 
-            fcntl ( sock_, F_SETFL,opts );
+            fcntl ( sock_, F_SETFL, opts );
 #else
             ioctlsocket( sock_, FIONBIO, 0 );
 #endif

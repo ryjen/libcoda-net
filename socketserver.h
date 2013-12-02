@@ -34,7 +34,7 @@ namespace arg3
             SocketServer(SocketServer &&other);
             virtual ~SocketServer();
             SocketServer &operator=(const SocketServer &other);
-            SocketServer &operator=(SocketServer &&other);
+            SocketServer &operator=(SocketServer && other);
 
             void start();
 
@@ -73,7 +73,7 @@ namespace arg3
 
             SocketFactory *factory_;
 
-            vector<SocketServerListener*> listeners_;
+            vector<SocketServerListener *> listeners_;
 
             vector<std::shared_ptr<BufferedSocket>> sockets_;
         };

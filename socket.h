@@ -46,10 +46,10 @@ namespace arg3
 
             virtual ~Socket();
             Socket &operator=(const Socket &);
-            Socket &operator=(Socket &&);
+            Socket &operator=(Socket && );
 
             // Data Transimission
-            int send ( const std::string&, int flags = 0 );
+            int send ( const std::string &, int flags = 0 );
             int send ( void *, size_t, int flags = 0);
 
             // Recieves a block of input
@@ -57,8 +57,8 @@ namespace arg3
 
             bool is_valid() const;
 
-            Socket& operator << ( const std::string& );
-            Socket& operator >> ( std::string& );
+            Socket &operator << ( const std::string & );
+            Socket &operator >> ( std::string & );
 
             SOCKET getSocket() const;
 

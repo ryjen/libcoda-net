@@ -18,9 +18,9 @@ namespace arg3
             SocketException (SocketException &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
             {}
 
-            SocketException& operator=(const SocketException &e)
+            SocketException &operator=(const SocketException &e)
             {
-                if(this != &e)
+                if (this != &e)
                 {
                     std::exception::operator=(e);
                     message_ = e.message_;
@@ -28,9 +28,9 @@ namespace arg3
                 return *this;
             }
 
-            SocketException &operator=(SocketException &&e)
+            SocketException &operator=(SocketException && e)
             {
-                if(this != &e)
+                if (this != &e)
                 {
                     std::exception::operator=(std::move(e));
                     message_ = std::move(e.message_);
@@ -59,9 +59,9 @@ namespace arg3
             RESTException (RESTException &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
             {}
 
-            RESTException& operator=(const RESTException &e)
+            RESTException &operator=(const RESTException &e)
             {
-                if(this != &e)
+                if (this != &e)
                 {
                     std::exception::operator=(e);
                     message_ = e.message_;
@@ -69,9 +69,9 @@ namespace arg3
                 return *this;
             }
 
-            RESTException &operator=(RESTException &&e)
+            RESTException &operator=(RESTException && e)
             {
-                if(this != &e)
+                if (this != &e)
                 {
                     std::exception::operator=(std::move(e));
                     message_ = std::move(e.message_);

@@ -27,7 +27,7 @@ namespace arg3
 
         SocketServer &SocketServer::operator=(const SocketServer &other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 Socket::operator=(other);
 
@@ -39,9 +39,9 @@ namespace arg3
             return *this;
         }
 
-        SocketServer &SocketServer::operator=(SocketServer &&other)
+        SocketServer &SocketServer::operator=(SocketServer && other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 Socket::operator=(std::move(other));
 
@@ -72,7 +72,7 @@ namespace arg3
         {
             onPoll();
 
-            for(auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->onPoll(this);
             }
@@ -82,7 +82,7 @@ namespace arg3
         {
             onStart();
 
-            for(auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->onStart(this);
             }
@@ -92,7 +92,7 @@ namespace arg3
         {
             onStop();
 
-            for(auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->onStop(this);
             }
@@ -132,14 +132,14 @@ namespace arg3
 
             struct timeval last_time;
 
-            if(!is_valid())
+            if (!is_valid())
                 listen();
 
             gettimeofday(&last_time, NULL);
 
             onStart();
 
-            while(is_valid())
+            while (is_valid())
             {
                 static struct timeval null_time;
                 struct timeval now_time;
@@ -178,7 +178,7 @@ namespace arg3
                     }
 
                     // check still valid after wait
-                    if(!is_valid())
+                    if (!is_valid())
                         break;
                 }
 
@@ -194,7 +194,7 @@ namespace arg3
                 // prepare for sockets for polling
                 foreach([&](std::shared_ptr<BufferedSocket> c)
                 {
-                    if(!c->is_valid()) return true;
+                    if (!c->is_valid()) return true;
                     maxdesc = std::max(maxdesc, c->sock_);
                     FD_SET(c->sock_, &in_set);
                     FD_SET(c->sock_, &out_set);
@@ -228,7 +228,7 @@ namespace arg3
                 /* check for freaky connections */
                 foreach([&](std::shared_ptr<BufferedSocket> c)
                 {
-                    if(!c->is_valid()) return true;
+                    if (!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &exc_set))
                     {
@@ -244,7 +244,7 @@ namespace arg3
                 /* read from all readable connections, removing failed sockets */
                 foreach([&](std::shared_ptr<BufferedSocket> c)
                 {
-                    if(!c->is_valid()) return true;
+                    if (!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &in_set))
                     {
@@ -265,13 +265,13 @@ namespace arg3
                 /* write to all writable connections, removing failed sockets */
                 foreach([&](std::shared_ptr<BufferedSocket> c)
                 {
-                    if(!c->is_valid()) return true;
+                    if (!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &out_set))
                     {
-                        if(c->hasOutput())
+                        if (c->hasOutput())
                         {
-                            if(!c->writeFromBuffer())
+                            if (!c->writeFromBuffer())
                             {
                                 c->close();
 

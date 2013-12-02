@@ -30,7 +30,7 @@ namespace arg3
         }
         BufferedSocket &BufferedSocket::operator=(const BufferedSocket &other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 Socket::operator=(other);
 
@@ -42,9 +42,9 @@ namespace arg3
 
             return *this;
         }
-        BufferedSocket &BufferedSocket::operator=(BufferedSocket &&other)
+        BufferedSocket &BufferedSocket::operator=(BufferedSocket && other)
         {
-            if(this != &other)
+            if (this != &other)
             {
 
                 Socket::operator=(std::move(other));
@@ -66,7 +66,7 @@ namespace arg3
 
             int status = Socket::recv(chunk);
 
-            while(status > 0)
+            while (status > 0)
             {
                 inBuffer_.append(chunk);
 
@@ -75,7 +75,7 @@ namespace arg3
 
             bool success = status == 0 || errno == EWOULDBLOCK;
 
-            if(success)
+            if (success)
                 notifyDidRead();
 
             return success;
@@ -83,15 +83,15 @@ namespace arg3
 
         string BufferedSocket::readLine()
         {
-            if(inBuffer_.empty()) return inBuffer_;
+            if (inBuffer_.empty()) return inBuffer_;
 
             auto pos = inBuffer_.find_first_of("\n\r");
 
-            if(pos == string::npos) return inBuffer_;
+            if (pos == string::npos) return inBuffer_;
 
             string temp = inBuffer_.substr(0, pos);
 
-            while(pos < inBuffer_.length() &&
+            while (pos < inBuffer_.length() &&
                     (inBuffer_[pos] == '\n' || inBuffer_[pos] == '\r'))
             {
                 pos++;
@@ -122,36 +122,36 @@ namespace arg3
             return outBuffer_;
         }
 
-        BufferedSocket& BufferedSocket::writeLine(const string &value)
+        BufferedSocket &BufferedSocket::writeLine(const string &value)
         {
             outBuffer_.append(value).append(NEWLINE);
             return *this;
         }
 
-        BufferedSocket& BufferedSocket::writeLine()
+        BufferedSocket &BufferedSocket::writeLine()
         {
             outBuffer_.append(NEWLINE);
             return *this;
         }
 
-        BufferedSocket& BufferedSocket::write(void *pbuf, size_t sz)
+        BufferedSocket &BufferedSocket::write(void *pbuf, size_t sz)
         {
             Socket::send(pbuf, sz);
             return *this;
         }
 
-        BufferedSocket& BufferedSocket::write(const string &value)
+        BufferedSocket &BufferedSocket::write(const string &value)
         {
             outBuffer_.append(value);
             return *this;
         }
 
-        BufferedSocket& BufferedSocket::operator << ( const string& s )
+        BufferedSocket &BufferedSocket::operator << ( const string &s )
         {
             return write(s);
         }
 
-        BufferedSocket& BufferedSocket::operator >> ( string& s )
+        BufferedSocket &BufferedSocket::operator >> ( string &s )
         {
             s.append(inBuffer_);
 
@@ -178,7 +178,7 @@ namespace arg3
         {
             notifyWillWrite();
 
-            if(send(outBuffer_) < 0)
+            if (send(outBuffer_) < 0)
             {
                 return false;
             }
@@ -200,7 +200,7 @@ namespace arg3
 
         void BufferedSocket::addListener(BufferedSocketListener *listener)
         {
-            if(listener != NULL)
+            if (listener != NULL)
                 listeners_.push_back(listener);
         }
 
@@ -208,7 +208,7 @@ namespace arg3
         {
             onConnect();
 
-            for(auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->onConnect(this);
             }
@@ -218,7 +218,7 @@ namespace arg3
         {
             onWillRead();
 
-            for(auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->onWillRead(this);
             }
@@ -228,7 +228,7 @@ namespace arg3
         {
             onDidRead();
 
-            for(auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->onDidRead(this);
             }
@@ -238,7 +238,7 @@ namespace arg3
         {
             onWillWrite();
 
-            for(auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->onWillWrite(this);
             }
@@ -248,7 +248,7 @@ namespace arg3
         {
             onDidWrite();
 
-            for(auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->onDidWrite(this);
             }
@@ -258,7 +258,7 @@ namespace arg3
         {
             onClose();
 
-            for(auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->onClose(this);
             }

@@ -39,17 +39,17 @@ namespace arg3
             BufferedSocket(BufferedSocket &&other);
             virtual ~BufferedSocket();
             BufferedSocket &operator=(const BufferedSocket &other);
-            BufferedSocket &operator=(BufferedSocket &&other);
+            BufferedSocket &operator=(BufferedSocket && other);
 
             void close();
 
             bool readToBuffer();
             string readLine();
 
-            BufferedSocket& writeLine(const string &value);
-            BufferedSocket& writeLine();
-            BufferedSocket& write(const string &value);
-            BufferedSocket& write(void *pbuf, size_t sz);
+            BufferedSocket &writeLine(const string &value);
+            BufferedSocket &writeLine();
+            BufferedSocket &write(const string &value);
+            BufferedSocket &write(void *pbuf, size_t sz);
 
             string getInput() const;
             bool hasInput() const;
@@ -59,8 +59,8 @@ namespace arg3
 
             bool writeFromBuffer();
 
-            BufferedSocket& operator << ( const std::string& );
-            BufferedSocket& operator >> ( std::string& );
+            BufferedSocket &operator << ( const std::string & );
+            BufferedSocket &operator >> ( std::string & );
 
             void addListener(BufferedSocketListener *listener);
 

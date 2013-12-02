@@ -23,7 +23,7 @@ namespace arg3
             RESTClient(const RESTClient &other);
             RESTClient(RESTClient &&other);
             RESTClient &operator=(const RESTClient &other);
-            RESTClient &operator=(RESTClient &&other);
+            RESTClient &operator=(RESTClient && other);
 
             void addHeader(const string &key, const string &value);
             void removeHeader(const string &key);
@@ -40,17 +40,17 @@ namespace arg3
             void setHost(const string &);
             void setVersion(const string &);
 
-            RESTClient& setPayload(const string &value);
+            RESTClient &setPayload(const string &value);
 
-            RESTClient& request(http::Method method, const string &path);
+            RESTClient &request(http::Method method, const string &path);
 
-            RESTClient& get(const string &path);
+            RESTClient &get(const string &path);
 
-            RESTClient& post(const string &path);
+            RESTClient &post(const string &path);
 
-            RESTClient& put(const string &path);
+            RESTClient &put(const string &path);
 
-            RESTClient& de1ete(const string &path);
+            RESTClient &de1ete(const string &path);
 
             void setSecure(bool value);
 
@@ -61,7 +61,7 @@ namespace arg3
             string payload_;
             int responseCode_;
             string response_;
-            map<string,string> headers_;
+            map<string, string> headers_;
         };
     }
 }

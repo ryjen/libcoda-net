@@ -9,7 +9,7 @@ namespace arg3
     {
         size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
         {
-            if(s == NULL) return 0;
+            if (s == NULL) return 0;
 
             const size_t new_len = size * nmemb;
 
@@ -50,7 +50,7 @@ namespace arg3
 
         RESTClient &RESTClient::operator=(const RESTClient &other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 scheme_ = other.scheme_;
                 host_ = other.host_;
@@ -63,9 +63,9 @@ namespace arg3
             return *this;
         }
 
-        RESTClient &RESTClient::operator=(RESTClient &&other)
+        RESTClient &RESTClient::operator=(RESTClient && other)
         {
-            if(this != &other)
+            if (this != &other)
             {
                 scheme_ = std::move(other.scheme_);
                 host_ = std::move(other.host_);
@@ -144,11 +144,11 @@ namespace arg3
             return *this;
         }
 
-        RESTClient& RESTClient::request(http::Method method, const string& path)
+        RESTClient &RESTClient::request(http::Method method, const string &path)
         {
             struct curl_slist *headers = NULL;
 
-            char buf[http::MAX_URL_LEN+1];
+            char buf[http::MAX_URL_LEN + 1];
 
             CURL *curl_ = curl_easy_init();
 
@@ -163,7 +163,7 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
 
-            switch(method)
+            switch (method)
             {
             case http::Get:
                 curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
@@ -182,7 +182,7 @@ namespace arg3
                 break;
             }
 
-            for(auto &h : headers_)
+            for (auto & h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -209,22 +209,22 @@ namespace arg3
             return *this;
         }
 
-        RESTClient& RESTClient::get(const string &path)
+        RESTClient &RESTClient::get(const string &path)
         {
             return request(http::Get, path);
         }
 
-        RESTClient& RESTClient::post(const string &path)
+        RESTClient &RESTClient::post(const string &path)
         {
             return request(http::Post, path);
         }
 
-        RESTClient& RESTClient::put(const string &path)
+        RESTClient &RESTClient::put(const string &path)
         {
             return request(http::Put, path);
         }
 
-        RESTClient& RESTClient::de1ete(const string &path)
+        RESTClient &RESTClient::de1ete(const string &path)
         {
             return request(http::Delete, path);
         }
