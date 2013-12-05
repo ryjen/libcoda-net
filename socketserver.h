@@ -14,27 +14,27 @@ namespace arg3
 {
     namespace net
     {
-        class SocketServer;
+        class socket_server;
 
-        class SocketServerListener
+        class socket_server_listener
         {
         public:
-            virtual void onPoll(SocketServer *server) = 0;
+            virtual void on_poll(socket_server *server) = 0;
 
-            virtual void onStart(SocketServer *server) = 0;
+            virtual void on_start(socket_server *server) = 0;
 
-            virtual void onStop(SocketServer *server) = 0;
+            virtual void on_stop(socket_server *server) = 0;
         };
 
-        class SocketServer : public Socket
+        class socket_server : public socket
         {
         public:
-            SocketServer(int port, SocketFactory *factory = &defaultSocketFactory, int backlogSize = BACKLOG_SIZE);
-            SocketServer(const SocketServer &other);
-            SocketServer(SocketServer &&other);
-            virtual ~SocketServer();
-            SocketServer &operator=(const SocketServer &other);
-            SocketServer &operator=(SocketServer && other);
+            socket_server(int port, socket_factory *factory = &default_socket_factory, int backlogSize = BACKLOG_SIZE);
+            socket_server(const socket_server &other);
+            socket_server(socket_server &&other);
+            virtual ~socket_server();
+            socket_server &operator=(const socket_server &other);
+            socket_server &operator=(socket_server && other);
 
             void start();
 
@@ -42,40 +42,40 @@ namespace arg3
 
             void stop();
 
-            void setPollFrequency(unsigned value);
+            void set_poll_frequency(unsigned value);
 
-            void addListener(SocketServerListener *listener);
+            void add_listener(socket_server_listener *listener);
 
-            bool operator==(const SocketServer &other);
-            bool operator!=(const SocketServer &other);
+            bool operator==(const socket_server &other);
+            bool operator!=(const socket_server &other);
 
         protected:
 
-            virtual void onPoll();
+            virtual void on_poll();
 
-            virtual void onStart();
+            virtual void on_start();
 
-            virtual void onStop();
+            virtual void on_stop();
 
         private:
 
-            void foreach(std::function<bool(std::shared_ptr<BufferedSocket> )> delegate);
+            void foreach(std::function<bool(std::shared_ptr<buffered_socket> )> delegate);
 
-            void notifyPoll();
+            void notify_poll();
 
-            void notifyStart();
+            void notify_start();
 
-            void notifyStop();
+            void notify_stop();
 
             unsigned pollFrequency_;
 
             thread listenThread_;
 
-            SocketFactory *factory_;
+            socket_factory *factory_;
 
-            vector<SocketServerListener *> listeners_;
+            vector<socket_server_listener *> listeners_;
 
-            vector<std::shared_ptr<BufferedSocket>> sockets_;
+            vector<std::shared_ptr<buffered_socket>> sockets_;
         };
     }
 }

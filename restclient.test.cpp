@@ -15,59 +15,59 @@ using namespace arg3;
 
 using namespace std;
 
-class TestSocketFactory : public DefaultSocketFactory, public BufferedSocketListener
+class test_socket_factory : public socket_factory, public buffered_socket_listener
 {
 
 private:
     string response_;
 
 public:
-    std::shared_ptr<BufferedSocket> createSocket(SocketServer *server, SOCKET sock, const sockaddr_in &addr)
+    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr)
     {
-        BufferedSocket *socket = new BufferedSocket(sock, addr);
+        auto socket = make_shared<buffered_socket>(sock, addr);
 
-        socket->addListener(this);
+        socket->add_listener(this);
 
-        return std::shared_ptr<BufferedSocket>(socket);
+        return socket;
     }
 
-    void setResponse(const string &response)
+    void set_response(const string &response)
     {
         response_ = response;
     }
 
-    void onConnect(BufferedSocket *sock)
+    void on_connect(buffered_socket *sock)
     {
         //log::trace(format("{0} connected", sock->getIP()));
     }
 
-    void onClose(BufferedSocket *sock)
+    void on_close(buffered_socket *sock)
     {
         //log::trace(format("{0} closed", sock->getIP()));
     }
 
-    void onWillRead(BufferedSocket *sock)
+    void on_will_read(buffered_socket *sock)
     {
         //log::trace(format("{0} will read", sock->getIP()));
     }
 
-    void onDidRead(BufferedSocket *sock)
+    void on_did_read(buffered_socket *sock)
     {
         //log::trace(format("{0} did read", sock->getIP()));
 
-        string line = sock->readLine();
+        string line = sock->readln();
 
         string method = line.substr(0, line.find(' '));
 
         sock->write(method + ": " + response_);
     }
 
-    void onWillWrite(BufferedSocket *sock)
+    void on_will_write(buffered_socket *sock)
     {
         //log::trace(format("{0} will write", sock->getIP()));
     }
 
-    void onDidWrite(BufferedSocket *sock)
+    void on_did_write(buffered_socket *sock)
     {
         //log::trace(format("{0} did write", sock->getIP()));
 
@@ -75,11 +75,11 @@ public:
     }
 };
 
-TestSocketFactory testFactory;
+test_socket_factory testFactory;
 
-SocketServer testServer(9876, &testFactory);
+socket_server testServer(9876, &testFactory);
 
-Context(arg3restclient)
+Context(rest_client_test)
 {
     static void SetUpContext()
     {
@@ -102,14 +102,14 @@ Context(arg3restclient)
 
     Spec(testGet)
     {
-        RESTClient client("localhost:9876", "1");
+        rest_client client("localhost:9876", "1");
 
-        testFactory.setResponse("Hello, World!");
+        testFactory.set_response("Hello, World!");
 
         try
         {
             client.get("test");
-            Assert::That(client.getResponse(), Equals("GET: Hello, World!"));
+            Assert::That(client.response(), Equals("GET: Hello, World!"));
         }
         catch (const exception &e)
         {
@@ -120,14 +120,14 @@ Context(arg3restclient)
 
     Spec(testPost)
     {
-        RESTClient client("localhost:9876", "1");
+        rest_client client("localhost:9876", "1");
 
-        client.setPayload("Hello, World!");
+        client.set_payload("Hello, World!");
 
         try
         {
             client.post("test");
-            Assert::That(client.getResponse(), Equals("POST: Hello, World!"));
+            Assert::That(client.response(), Equals("POST: Hello, World!"));
         }
         catch (const exception &e)
         {

@@ -14,45 +14,45 @@ namespace arg3
 {
     namespace net
     {
-        class RESTClient
+        class rest_client
         {
         public:
-            RESTClient(const string &host, const string &version);
-            RESTClient();
-            virtual ~RESTClient();
-            RESTClient(const RESTClient &other);
-            RESTClient(RESTClient &&other);
-            RESTClient &operator=(const RESTClient &other);
-            RESTClient &operator=(RESTClient && other);
+            rest_client(const string &host, const string &version);
+            rest_client();
+            virtual ~rest_client();
+            rest_client(const rest_client &other);
+            rest_client(rest_client &&other);
+            rest_client &operator=(const rest_client &other);
+            rest_client &operator=(rest_client && other);
 
-            void addHeader(const string &key, const string &value);
-            void removeHeader(const string &key);
-            string getHeader(const string &key);
+            void add_header(const string &key, const string &value);
+            void remove_header(const string &key);
+            string header(const string &key);
 
-            string getHost() const;
-            string getVersion() const;
-            string getPayload() const;
-            int getResponseCode() const;
-            string getResponse() const;
+            string host() const;
+            string version() const;
+            string payload() const;
+            int response_code() const;
+            string response() const;
 
-            bool isSecure() const;
+            bool is_secure() const;
 
-            void setHost(const string &);
-            void setVersion(const string &);
+            void set_host(const string &);
+            void set_version(const string &);
 
-            RESTClient &setPayload(const string &value);
+            rest_client &set_payload(const string &value);
 
-            RESTClient &request(http::Method method, const string &path);
+            rest_client &request(http::method method, const string &path);
 
-            RESTClient &get(const string &path);
+            rest_client &get(const string &path);
 
-            RESTClient &post(const string &path);
+            rest_client &post(const string &path);
 
-            RESTClient &put(const string &path);
+            rest_client &put(const string &path);
 
-            RESTClient &de1ete(const string &path);
+            rest_client &de1ete(const string &path);
 
-            void setSecure(bool value);
+            void set_secure(bool value);
 
         private:
             string scheme_;

@@ -8,7 +8,7 @@ namespace arg3
         namespace http
         {
 
-            extern const char *const DELETE;
+            extern const char *const DELETE_METHOD;
 
             extern const unsigned MAX_URL_LEN;
 
@@ -18,9 +18,9 @@ namespace arg3
 
             typedef enum
             {
-                Get, Post, Put, Delete
+                GET, POST, PUT, DELETE
             }
-            Method;
+            method;
         }
     }
 }

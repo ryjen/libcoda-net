@@ -1,5 +1,5 @@
 
-// Definition of the Socket class
+// Definition of the socket class
 
 #ifndef _ARG3_SOCKET_H_
 #define _ARG3_SOCKET_H_
@@ -31,22 +31,22 @@ namespace arg3
         int closesocket(SOCKET socket);
 #endif
 
-        class Socket
+        class socket
         {
         public:
 
-            Socket(SOCKET sock, const sockaddr_in &addr);
+            socket(SOCKET sock, const sockaddr_in &addr);
 
-            Socket(const std::string &host, const int port);
-            Socket (int port, int queueSize = BACKLOG_SIZE);
-            Socket();
+            socket(const std::string &host, const int port);
+            socket (int port, int queueSize = BACKLOG_SIZE);
+            socket();
 
-            Socket(const Socket &);
-            Socket (Socket &&other);
+            socket(const socket &);
+            socket (socket &&other);
 
-            virtual ~Socket();
-            Socket &operator=(const Socket &);
-            Socket &operator=(Socket && );
+            virtual ~socket();
+            socket &operator=(const socket &);
+            socket &operator=(socket && );
 
             // Data Transimission
             int send ( const std::string &, int flags = 0 );
@@ -57,17 +57,17 @@ namespace arg3
 
             bool is_valid() const;
 
-            Socket &operator << ( const std::string & );
-            Socket &operator >> ( std::string & );
+            socket &operator << ( const std::string & );
+            socket &operator >> ( std::string & );
 
-            SOCKET getSocket() const;
+            SOCKET raw_socket() const;
 
-            const char *getIP() const;
+            const char *ip() const;
 
-            int getPort() const;
+            int port() const;
 
-            void setPort(const int port);
-            void setIP(const std::string &ip);
+            void set_port(const int port);
+            void set_ip(const std::string &ip);
 
             virtual void close();
 
@@ -100,7 +100,7 @@ namespace arg3
         private:
             void update_reference_count();
 
-            friend class SocketServer;
+            friend class socket_server;
         };
 
     }

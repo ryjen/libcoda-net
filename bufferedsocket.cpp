@@ -4,35 +4,35 @@ namespace arg3
 {
     namespace net
     {
-        BufferedSocket::BufferedSocket() : Socket(), listeners_()
+        buffered_socket::buffered_socket() : socket(), listeners_()
         {
         }
 
-        BufferedSocket::BufferedSocket(SOCKET sock, const sockaddr_in &addr) : Socket(sock, addr), listeners_()
+        buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr), listeners_()
         {
         }
 
 
-        BufferedSocket::BufferedSocket(const BufferedSocket &sock) : Socket(sock),
+        buffered_socket::buffered_socket(const buffered_socket &sock) : socket(sock),
             inBuffer_(sock.inBuffer_), outBuffer_(sock.outBuffer_), listeners_(sock.listeners_)
         {
 
         }
 
-        BufferedSocket::BufferedSocket(BufferedSocket &&other) : Socket(other), inBuffer_(std::move(other.inBuffer_)),
+        buffered_socket::buffered_socket(buffered_socket &&other) : socket(other), inBuffer_(std::move(other.inBuffer_)),
             outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
         {
         }
 
-        BufferedSocket::~BufferedSocket()
+        buffered_socket::~buffered_socket()
         {
 
         }
-        BufferedSocket &BufferedSocket::operator=(const BufferedSocket &other)
+        buffered_socket &buffered_socket::operator=(const buffered_socket &other)
         {
             if (this != &other)
             {
-                Socket::operator=(other);
+                socket::operator=(other);
 
                 inBuffer_ = other.inBuffer_;
                 outBuffer_ = other.outBuffer_;
@@ -42,12 +42,12 @@ namespace arg3
 
             return *this;
         }
-        BufferedSocket &BufferedSocket::operator=(BufferedSocket && other)
+        buffered_socket &buffered_socket::operator=(buffered_socket && other)
         {
             if (this != &other)
             {
 
-                Socket::operator=(std::move(other));
+                socket::operator=(std::move(other));
 
                 inBuffer_ = std::move(other.inBuffer_);
                 outBuffer_ = std::move(other.outBuffer_);
@@ -58,30 +58,30 @@ namespace arg3
             return *this;
         }
 
-        bool BufferedSocket::readToBuffer()
+        bool buffered_socket::read_to_buffer()
         {
             string chunk;
 
-            notifyWillRead();
+            notify_will_read();
 
-            int status = Socket::recv(chunk);
+            int status = socket::recv(chunk);
 
             while (status > 0)
             {
                 inBuffer_.append(chunk);
 
-                status = Socket::recv(chunk);
+                status = socket::recv(chunk);
             }
 
             bool success = status == 0 || errno == EWOULDBLOCK;
 
             if (success)
-                notifyDidRead();
+                notify_did_read();
 
             return success;
         }
 
-        string BufferedSocket::readLine()
+        string buffered_socket::readln()
         {
             if (inBuffer_.empty()) return inBuffer_;
 
@@ -102,81 +102,81 @@ namespace arg3
             return temp;
         }
 
-        bool BufferedSocket::hasInput() const
+        bool buffered_socket::has_input() const
         {
             return !inBuffer_.empty();
         }
 
-        string BufferedSocket::getInput() const
+        string buffered_socket::input() const
         {
             return inBuffer_;
         }
 
-        bool BufferedSocket::hasOutput() const
+        bool buffered_socket::has_output() const
         {
             return !outBuffer_.empty();
         }
 
-        string BufferedSocket::getOutput() const
+        string buffered_socket::output() const
         {
             return outBuffer_;
         }
 
-        BufferedSocket &BufferedSocket::writeLine(const string &value)
+        buffered_socket &buffered_socket::writeln(const string &value)
         {
             outBuffer_.append(value).append(NEWLINE);
             return *this;
         }
 
-        BufferedSocket &BufferedSocket::writeLine()
+        buffered_socket &buffered_socket::writeln()
         {
             outBuffer_.append(NEWLINE);
             return *this;
         }
 
-        BufferedSocket &BufferedSocket::write(void *pbuf, size_t sz)
+        buffered_socket &buffered_socket::write(void *pbuf, size_t sz)
         {
-            Socket::send(pbuf, sz);
+            socket::send(pbuf, sz);
             return *this;
         }
 
-        BufferedSocket &BufferedSocket::write(const string &value)
+        buffered_socket &buffered_socket::write(const string &value)
         {
             outBuffer_.append(value);
             return *this;
         }
 
-        BufferedSocket &BufferedSocket::operator << ( const string &s )
+        buffered_socket &buffered_socket::operator << ( const string &s )
         {
             return write(s);
         }
 
-        BufferedSocket &BufferedSocket::operator >> ( string &s )
+        buffered_socket &buffered_socket::operator >> ( string &s )
         {
             s.append(inBuffer_);
 
             return *this;
         }
 
-        void BufferedSocket::flush()
+        void buffered_socket::flush()
         {
             send(outBuffer_);
 
             outBuffer_.clear();
         }
 
-        void BufferedSocket::close()
+        void buffered_socket::close()
         {
-            notifyClose();
+            notify_close();
 
             flush();
 
-            Socket::close();
+            socket::close();
         }
 
-        bool BufferedSocket::writeFromBuffer()
+        bool buffered_socket::write_from_buffer()
         {
-            notifyWillWrite();
+            notify_will_write();
 
             if (send(outBuffer_) < 0)
             {
@@ -185,82 +185,82 @@ namespace arg3
 
             outBuffer_.clear();
 
-            notifyDidWrite();
+            notify_did_write();
 
             return true;
         }
 
-        void BufferedSocket::onConnect() {}
-        void BufferedSocket::onClose() {}
-        void BufferedSocket::onWillRead() {}
-        void BufferedSocket::onDidRead() {}
-        void BufferedSocket::onWillWrite() {}
-        void BufferedSocket::onDidWrite() {}
+        void buffered_socket::on_connect() {}
+        void buffered_socket::on_close() {}
+        void buffered_socket::on_will_read() {}
+        void buffered_socket::on_did_read() {}
+        void buffered_socket::on_will_write() {}
+        void buffered_socket::on_did_write() {}
 
 
-        void BufferedSocket::addListener(BufferedSocketListener *listener)
+        void buffered_socket::add_listener(buffered_socket_listener *listener)
         {
             if (listener != NULL)
                 listeners_.push_back(listener);
         }
 
-        void BufferedSocket::notifyConnect()
+        void buffered_socket::notify_connect()
         {
-            onConnect();
+            on_connect();
 
             for (auto & l : listeners_)
             {
-                l->onConnect(this);
+                l->on_connect(this);
             }
         }
 
-        void BufferedSocket::notifyWillRead()
+        void buffered_socket::notify_will_read()
         {
-            onWillRead();
+            on_will_read();
 
             for (auto & l : listeners_)
             {
-                l->onWillRead(this);
+                l->on_will_read(this);
             }
         }
 
-        void BufferedSocket::notifyDidRead()
+        void buffered_socket::notify_did_read()
         {
-            onDidRead();
+            on_did_read();
 
             for (auto & l : listeners_)
             {
-                l->onDidRead(this);
+                l->on_did_read(this);
             }
         }
 
-        void BufferedSocket::notifyWillWrite()
+        void buffered_socket::notify_will_write()
         {
-            onWillWrite();
+            on_will_write();
 
             for (auto & l : listeners_)
             {
-                l->onWillWrite(this);
+                l->on_will_write(this);
             }
         }
 
-        void BufferedSocket::notifyDidWrite()
+        void buffered_socket::notify_did_write()
         {
-            onDidWrite();
+            on_did_write();
 
             for (auto & l : listeners_)
             {
-                l->onDidWrite(this);
+                l->on_did_write(this);
             }
         }
 
-        void BufferedSocket::notifyClose()
+        void buffered_socket::notify_close()
         {
-            onClose();
+            on_close();
 
             for (auto & l : listeners_)
             {
-                l->onClose(this);
+                l->on_close(this);
             }
         }
 

@@ -8,17 +8,17 @@ namespace arg3
 {
     namespace net
     {
-        class SocketException : public std::exception
+        class socket_exception : public std::exception
         {
         public:
-            SocketException ( const std::string &s ) : message_ ( s ) {};
-            virtual ~SocketException() throw() {}
-            SocketException (const SocketException &e) : std::exception(e), message_(e.message_)
+            socket_exception ( const std::string &s ) : message_ ( s ) {};
+            virtual ~socket_exception() throw() {}
+            socket_exception (const socket_exception &e) : std::exception(e), message_(e.message_)
             {}
-            SocketException (SocketException &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
+            socket_exception (socket_exception &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
             {}
 
-            SocketException &operator=(const SocketException &e)
+            socket_exception &operator=(const socket_exception &e)
             {
                 if (this != &e)
                 {
@@ -28,7 +28,7 @@ namespace arg3
                 return *this;
             }
 
-            SocketException &operator=(SocketException && e)
+            socket_exception &operator=(socket_exception && e)
             {
                 if (this != &e)
                 {
@@ -49,17 +49,17 @@ namespace arg3
         };
 
 
-        class RESTException : public std::exception
+        class rest_exception : public std::exception
         {
         public:
-            RESTException ( const std::string &s ) : message_ ( s ) {};
-            virtual ~RESTException() throw() {}
-            RESTException (const RESTException &e) : std::exception(e), message_(e.message_)
+            rest_exception ( const std::string &s ) : message_ ( s ) {};
+            virtual ~rest_exception() throw() {}
+            rest_exception (const rest_exception &e) : std::exception(e), message_(e.message_)
             {}
-            RESTException (RESTException &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
+            rest_exception (rest_exception &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
             {}
 
-            RESTException &operator=(const RESTException &e)
+            rest_exception &operator=(const rest_exception &e)
             {
                 if (this != &e)
                 {
@@ -69,7 +69,7 @@ namespace arg3
                 return *this;
             }
 
-            RESTException &operator=(RESTException && e)
+            rest_exception &operator=(rest_exception && e)
             {
                 if (this != &e)
                 {

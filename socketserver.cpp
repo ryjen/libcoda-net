@@ -7,29 +7,29 @@ namespace arg3
 {
     namespace net
     {
-        SocketServer::SocketServer(int port, SocketFactory *factory, int queueSize)
-            : Socket(port, queueSize), pollFrequency_(4), factory_(factory)
+        socket_server::socket_server(int port, socket_factory *factory, int queueSize)
+            : socket(port, queueSize), pollFrequency_(4), factory_(factory)
         {}
 
-        SocketServer::SocketServer(const SocketServer &other)
-            : Socket(other), pollFrequency_(other.pollFrequency_), factory_(other.factory_)
+        socket_server::socket_server(const socket_server &other)
+            : socket(other), pollFrequency_(other.pollFrequency_), factory_(other.factory_)
         {}
 
-        SocketServer::SocketServer(SocketServer &&other)
-            : Socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(std::move(other.factory_))
+        socket_server::socket_server(socket_server &&other)
+            : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(std::move(other.factory_))
         {
             other.sock_ = INVALID;
             other.factory_ = NULL;
         }
 
-        SocketServer::~SocketServer()
+        socket_server::~socket_server()
         {}
 
-        SocketServer &SocketServer::operator=(const SocketServer &other)
+        socket_server &socket_server::operator=(const socket_server &other)
         {
             if (this != &other)
             {
-                Socket::operator=(other);
+                socket::operator=(other);
 
                 pollFrequency_ = other.pollFrequency_;
 
@@ -39,11 +39,11 @@ namespace arg3
             return *this;
         }
 
-        SocketServer &SocketServer::operator=(SocketServer && other)
+        socket_server &socket_server::operator=(socket_server && other)
         {
             if (this != &other)
             {
-                Socket::operator=(std::move(other));
+                socket::operator=(std::move(other));
 
                 pollFrequency_ = other.pollFrequency_;
 
@@ -53,78 +53,78 @@ namespace arg3
             return *this;
         }
 
-        bool SocketServer::operator==(const SocketServer &other)
+        bool socket_server::operator==(const socket_server &other)
         {
             return port_ == other.port_;
         }
 
-        bool SocketServer::operator!=(const SocketServer &other)
+        bool socket_server::operator!=(const socket_server &other)
         {
             return !operator==(other);
         }
 
-        void SocketServer::addListener(SocketServerListener *listener)
+        void socket_server::add_listener(socket_server_listener *listener)
         {
             listeners_.push_back(listener);
         }
 
-        void SocketServer::notifyPoll()
+        void socket_server::notify_poll()
         {
-            onPoll();
+            on_poll();
 
             for (auto & listener : listeners_)
             {
-                listener->onPoll(this);
+                listener->on_poll(this);
             }
         }
 
-        void SocketServer::notifyStart()
+        void socket_server::notify_start()
         {
-            onStart();
+            on_start();
 
             for (auto & listener : listeners_)
             {
-                listener->onStart(this);
+                listener->on_start(this);
             }
         }
 
-        void SocketServer::notifyStop()
+        void socket_server::notify_stop()
         {
-            onStop();
+            on_stop();
 
             for (auto & listener : listeners_)
             {
-                listener->onStop(this);
+                listener->on_stop(this);
             }
         }
 
-        void SocketServer::start()
+        void socket_server::start()
         {
-            listenThread_ = thread(&SocketServer::loop, this);
+            listenThread_ = thread(&socket_server::loop, this);
         }
 
-        void SocketServer::stop()
+        void socket_server::stop()
         {
             close();
 
             listenThread_.join();
         }
 
-        void SocketServer::onPoll()
+        void socket_server::on_poll()
         {}
 
-        void SocketServer::onStart()
+        void socket_server::on_start()
         {}
 
-        void SocketServer::onStop()
+        void socket_server::on_stop()
         {}
 
-        void SocketServer::foreach(std::function<bool(std::shared_ptr<BufferedSocket>)> delegate)
+        void socket_server::foreach(std::function<bool(std::shared_ptr<buffered_socket>)> delegate)
         {
             sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
         }
 
-        void SocketServer::loop()
+        void socket_server::loop()
         {
             fd_set in_set;
             fd_set out_set;
@@ -137,7 +137,7 @@ namespace arg3
 
             gettimeofday(&last_time, NULL);
 
-            onStart();
+            on_start();
 
             while (is_valid())
             {
@@ -174,7 +174,7 @@ namespace arg3
 
                     if (select(0, NULL, NULL, NULL, &stall_time) == -1)
                     {
-                        throw SocketException("stall");
+                        throw socket_exception("stall");
                     }
 
                     // check still valid after wait
@@ -192,7 +192,7 @@ namespace arg3
                 maxdesc = sock_;
 
                 // prepare for sockets for polling
-                foreach([&](std::shared_ptr<BufferedSocket> c)
+                foreach([&](std::shared_ptr<buffered_socket> c)
                 {
                     if (!c->is_valid()) return true;
                     maxdesc = std::max(maxdesc, c->sock_);
@@ -207,7 +207,7 @@ namespace arg3
                 {
                     if (errno != EINTR)
                     {
-                        throw SocketException(strerror(errno));
+                        throw socket_exception(strerror(errno));
                     }
                 }
 
@@ -216,17 +216,17 @@ namespace arg3
                 {
                     sockaddr_in addr;
 
-                    auto sock = factory_->createSocket(this, accept(addr), addr);
+                    auto sock = factory_->create_socket(this, accept(addr), addr);
 
                     sock->set_non_blocking(true);
 
-                    sock->notifyConnect();
+                    sock->notify_connect();
 
                     sockets_.push_back(sock);
                 }
 
                 /* check for freaky connections */
-                foreach([&](std::shared_ptr<BufferedSocket> c)
+                foreach([&](std::shared_ptr<buffered_socket> c)
                 {
                     if (!c->is_valid()) return true;
 
@@ -242,13 +242,13 @@ namespace arg3
                 });
 
                 /* read from all readable connections, removing failed sockets */
-                foreach([&](std::shared_ptr<BufferedSocket> c)
+                foreach([&](std::shared_ptr<buffered_socket> c)
                 {
                     if (!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &in_set))
                     {
-                        if (!c->readToBuffer())
+                        if (!c->read_to_buffer())
                         {
                             FD_CLR(c->sock_, &out_set);
 
@@ -260,18 +260,18 @@ namespace arg3
                     return false;
                 });
 
-                notifyPoll();
+                notify_poll();
 
                 /* write to all writable connections, removing failed sockets */
-                foreach([&](std::shared_ptr<BufferedSocket> c)
+                foreach([&](std::shared_ptr<buffered_socket> c)
                 {
                     if (!c->is_valid()) return true;
 
                     if (FD_ISSET(c->sock_, &out_set))
                     {
-                        if (c->hasOutput())
+                        if (c->has_output())
                         {
-                            if (!c->writeFromBuffer())
+                            if (!c->write_from_buffer())
                             {
                                 c->close();
 
@@ -284,7 +284,7 @@ namespace arg3
 
             }
 
-            onStop();
+            on_stop();
 
         }
     }

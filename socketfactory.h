@@ -11,26 +11,29 @@ namespace arg3
 {
     namespace net
     {
-        class BufferedSocket;
-        class SocketServer;
+        class buffered_socket;
+        class socket_server;
 
         /* factory class to control sockets in a server */
-        class SocketFactory
+        class socket_factory
         {
         public:
             /* creates a buffered socket from a raw socket */
-            virtual std::shared_ptr<BufferedSocket> createSocket(SocketServer *server, SOCKET sock, const sockaddr_in &addr) = 0;
+            virtual std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr) = 0;
         };
 
-        /* default implementation of a socket factory */
-        class DefaultSocketFactory : public SocketFactory
+        namespace detail
         {
-        public:
-            virtual std::shared_ptr<BufferedSocket> createSocket(SocketServer *server, SOCKET sock, const sockaddr_in &addr);
-        };
 
+            /* default implementation of a socket factory */
+            class default_socket_factory : public socket_factory
+            {
+            public:
+                virtual std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr);
+            };
+        }
         /* default factory instance */
-        extern DefaultSocketFactory defaultSocketFactory;
+        extern detail::default_socket_factory default_socket_factory;
     }
 }
 

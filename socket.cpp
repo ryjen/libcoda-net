@@ -23,27 +23,27 @@ namespace arg3
         }
 #endif
 
-        Socket::Socket() :
+        socket::socket() :
             sock_ ( INVALID ), references_(NULL), backlogSize_(BACKLOG_SIZE), port_(0)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
-        Socket::Socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr),
+        socket::socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr),
             references_(new unsigned(0)), backlogSize_(BACKLOG_SIZE), port_(0)
         {
 
         }
 
-        Socket::Socket(const Socket &sock) : sock_(sock.sock_), addr_(sock.addr_), references_(sock.references_),
+        socket::socket(const socket &sock) : sock_(sock.sock_), addr_(sock.addr_), references_(sock.references_),
             backlogSize_(sock.backlogSize_), port_(sock.port_)
         {
             update_reference_count();
         }
 
-        void Socket::update_reference_count()
+        void socket::update_reference_count()
         {
-            if(references_)
+            if (references_)
             {
                 (*references_)++;
             }
@@ -54,14 +54,14 @@ namespace arg3
             }
         }
 
-        Socket::Socket(Socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), references_(std::move(other.references_)),
+        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), references_(std::move(other.references_)),
             backlogSize_(other.backlogSize_), port_(other.port_)
         {
             other.sock_ = INVALID;
             other.references_ = NULL;
         }
 
-        Socket &Socket::operator=(const Socket &other)
+        socket &socket::operator=(const socket &other)
         {
             if (this != &other)
             {
@@ -75,7 +75,7 @@ namespace arg3
             return *this;
         }
 
-        Socket &Socket::operator=(Socket && other)
+        socket &socket::operator=(socket && other)
         {
             if (this != &other)
             {
@@ -92,7 +92,7 @@ namespace arg3
         }
 
 
-        Socket::~Socket()
+        socket::~socket()
         {
             if ( is_valid())
             {
@@ -112,18 +112,18 @@ namespace arg3
             }
         }
 
-        void Socket::close()
+        void socket::close()
         {
             closesocket(sock_);
             sock_ = INVALID;
         }
 
-        int Socket::send ( const string &s, int flags )
+        int socket::send ( const string &s, int flags )
         {
             return ::send ( sock_, s.c_str(), s.size(), flags );
         }
 
-        int Socket::send( void *s, size_t len, int flags)
+        int socket::send( void *s, size_t len, int flags)
         {
 #ifdef _WIN32
             return ::send(sock_, reinterpret_cast<const char *>(s), len, flags);
@@ -132,30 +132,30 @@ namespace arg3
 #endif
         }
 
-        bool Socket::is_valid() const
+        bool socket::is_valid() const
         {
             return sock_ != INVALID;
         }
 
-        SOCKET Socket::getSocket() const
+        SOCKET socket::raw_socket() const
         {
             return sock_;
         }
 
-        const char *Socket::getIP() const
+        const char *socket::ip() const
         {
             return is_valid() ? inet_ntoa(addr_.sin_addr) : "invalid";
         }
 
-        int Socket::getPort() const
+        int socket::port() const
         {
             return port_ == 0 ? addr_.sin_port : port_;
         }
-        void Socket::setPort(const int port)
+        void socket::set_port(const int port)
         {
             port_ = port;
         }
-        void Socket::setIP(const string &ip)
+        void socket::set_ip(const string &ip)
         {
 #ifdef WIN32
             addr_.sin_addr.s_addr = inet_addr(ip);
@@ -164,7 +164,7 @@ namespace arg3
 #endif
         }
 
-        int Socket::recv(string &s)
+        int socket::recv(string &s)
         {
 
             char buf [ MAXRECV + 1 ];
@@ -183,33 +183,33 @@ namespace arg3
             return status;
         }
 
-        Socket &Socket::operator << ( const string &s )
+        socket &socket::operator << ( const string &s )
         {
             if ( send ( s ) < 0)
             {
-                throw SocketException ( "Could not write to socket." );
+                throw socket_exception ( "Could not write to socket." );
             }
 
             return *this;
 
         }
 
-        Socket &Socket::operator >> ( string &s )
+        socket &socket::operator >> ( string &s )
         {
             if ( recv(s) < 0)
             {
-                throw new SocketException("Could not read from socket");
+                throw new socket_exception("Could not read from socket");
             }
 
             return *this;
         }
 
-        Socket::Socket(const std::string &host, const int port) : Socket()
+        socket::socket(const std::string &host, const int port) : socket()
         {
             connect(host, port);
         }
 
-        bool Socket::connect ( const string &host, const int port )
+        bool socket::connect ( const string &host, const int port )
         {
             if ( ! is_valid() ) return false;
 
@@ -234,10 +234,10 @@ namespace arg3
         }
 
 
-        Socket::Socket(int port, int queueSize) : sock_(INVALID), references_(NULL), backlogSize_(queueSize), port_(port)
+        socket::socket(int port, int queueSize) : sock_(INVALID), references_(NULL), backlogSize_(queueSize), port_(port)
         {}
 
-        bool Socket::create()
+        bool socket::create()
         {
 #ifdef _WIN32
             static int started = 0;
@@ -257,7 +257,7 @@ namespace arg3
             }
 #endif
 
-            sock_ = socket ( AF_INET, SOCK_STREAM, 0 );
+            sock_ = ::socket ( AF_INET, SOCK_STREAM, 0 );
 
             if ( ! is_valid() )
                 return false;
@@ -273,7 +273,7 @@ namespace arg3
 
         }
 
-        bool Socket::bind ( )
+        bool socket::bind ( )
         {
             if ( ! is_valid() )
             {
@@ -295,16 +295,16 @@ namespace arg3
             return true;
         }
 
-        bool Socket::listen()
+        bool socket::listen()
         {
             if ( ! create() )
             {
-                throw SocketException ( "Could not create server socket." );
+                throw socket_exception ( "Could not create server socket." );
             }
 
             if ( ! bind ( ) )
             {
-                throw SocketException ( "Could not bind to port." );
+                throw socket_exception ( "Could not bind to port." );
             }
 
             if ( ! is_valid() )
@@ -322,7 +322,7 @@ namespace arg3
             return true;
         }
 
-        SOCKET Socket::accept (sockaddr_in &addr) const
+        SOCKET socket::accept (sockaddr_in &addr) const
         {
             int addr_length = sizeof ( addr );
 
@@ -337,7 +337,7 @@ namespace arg3
         }
 
 
-        void Socket::set_non_blocking ( const bool b )
+        void socket::set_non_blocking ( const bool b )
         {
 #ifndef _WIN32
             int opts = fcntl ( sock_, F_GETFL );

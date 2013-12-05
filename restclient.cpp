@@ -24,31 +24,31 @@ namespace arg3
             return new_len;
         }
 
-        RESTClient::RESTClient(const string &host, const string &version) : scheme_(http::SCHEME), host_(host), version_(version)
+        rest_client::rest_client(const string &host, const string &version) : scheme_(http::SCHEME), host_(host), version_(version)
         {
         }
 
-        RESTClient::RESTClient()
+        rest_client::rest_client()
         {
         }
 
-        RESTClient::~RESTClient()
+        rest_client::~rest_client()
         {
         }
 
-        RESTClient::RESTClient(const RESTClient &other) : scheme_(other.scheme_), host_(other.host_),
+        rest_client::rest_client(const rest_client &other) : scheme_(other.scheme_), host_(other.host_),
             version_(other.version_), payload_(other.payload_), responseCode_(other.responseCode_),
             response_(other.response_), headers_(other.headers_)
         {
         }
 
-        RESTClient::RESTClient(RESTClient &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
+        rest_client::rest_client(rest_client &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
             version_(std::move(other.version_)), payload_(std::move(other.payload_)), responseCode_(other.responseCode_),
             response_(std::move(other.response_)), headers_(std::move(other.headers_))
         {
         }
 
-        RESTClient &RESTClient::operator=(const RESTClient &other)
+        rest_client &rest_client::operator=(const rest_client &other)
         {
             if (this != &other)
             {
@@ -63,7 +63,7 @@ namespace arg3
             return *this;
         }
 
-        RESTClient &RESTClient::operator=(RESTClient && other)
+        rest_client &rest_client::operator=(rest_client && other)
         {
             if (this != &other)
             {
@@ -78,73 +78,73 @@ namespace arg3
             return *this;
         }
 
-        void RESTClient::addHeader(const string &key, const string &value)
+        void rest_client::add_header(const string &key, const string &value)
         {
             headers_[key] = value;
         }
 
-        void RESTClient::removeHeader(const string &key)
+        void rest_client::remove_header(const string &key)
         {
             headers_.erase(key);
         }
 
-        string RESTClient::getHeader(const string &key)
+        string rest_client::header(const string &key)
         {
             return headers_[key];
         }
 
-        string RESTClient::getVersion() const
+        string rest_client::version() const
         {
             return version_;
         }
 
-        string RESTClient::getHost() const
+        string rest_client::host() const
         {
             return host_;
         }
 
-        int RESTClient::getResponseCode() const
+        int rest_client::response_code() const
         {
             return responseCode_;
         }
 
-        string RESTClient::getPayload() const
+        string rest_client::payload() const
         {
             return payload_;
         }
 
-        string RESTClient::getResponse() const
+        string rest_client::response() const
         {
             return response_;
         }
 
-        bool RESTClient::isSecure() const
+        bool rest_client::is_secure() const
         {
             return scheme_ == http::SECURE_SCHEME;
         }
 
-        void RESTClient::setHost(const string &host)
+        void rest_client::set_host(const string &host)
         {
             host_ = host;
         }
 
-        void RESTClient::setVersion(const string &version)
+        void rest_client::set_version(const string &version)
         {
             version_ = version;
         }
 
-        void RESTClient::setSecure(bool value)
+        void rest_client::set_secure(bool value)
         {
             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
         }
 
-        RESTClient &RESTClient::setPayload(const string &payload)
+        rest_client &rest_client::set_payload(const string &payload)
         {
             payload_ = payload;
             return *this;
         }
 
-        RESTClient &RESTClient::request(http::Method method, const string &path)
+        rest_client &rest_client::request(http::method method, const string &path)
         {
             struct curl_slist *headers = NULL;
 
@@ -154,7 +154,7 @@ namespace arg3
 
             if (curl_ == NULL)
             {
-                throw RESTException("unable to initialize request");
+                throw rest_exception("unable to initialize request");
             }
 
             snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", scheme_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
@@ -165,19 +165,19 @@ namespace arg3
 
             switch (method)
             {
-            case http::Get:
+            case http::GET:
                 curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
                 break;
-            case http::Post:
+            case http::POST:
                 curl_easy_setopt(curl_, CURLOPT_POST, 1L);
                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
                 break;
-            case http::Put:
+            case http::PUT:
                 curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
-            case http::Delete:
+            case http::DELETE:
                 curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::DELETE);
                 break;
             }
@@ -199,7 +199,7 @@ namespace arg3
             {
                 curl_easy_cleanup(curl_);
 
-                throw RESTException(curl_easy_strerror(res));
+                throw rest_exception(curl_easy_strerror(res));
             }
 
             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
@@ -209,24 +209,24 @@ namespace arg3
             return *this;
         }
 
-        RESTClient &RESTClient::get(const string &path)
+        rest_client &rest_client::get(const string &path)
         {
-            return request(http::Get, path);
+            return request(http::GET, path);
         }
 
-        RESTClient &RESTClient::post(const string &path)
+        rest_client &rest_client::post(const string &path)
         {
-            return request(http::Post, path);
+            return request(http::POST, path);
         }
 
-        RESTClient &RESTClient::put(const string &path)
+        rest_client &rest_client::put(const string &path)
         {
-            return request(http::Put, path);
+            return request(http::PUT, path);
         }
 
-        RESTClient &RESTClient::de1ete(const string &path)
+        rest_client &rest_client::de1ete(const string &path)
         {
-            return request(http::Delete, path);
+            return request(http::DELETE, path);
         }
     }
 }

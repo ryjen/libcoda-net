@@ -12,68 +12,68 @@ namespace arg3
 
     namespace net
     {
-        class BufferedSocket;
+        class buffered_socket;
 
-        class BufferedSocketListener
+        class buffered_socket_listener
         {
         public:
-            virtual void onWillRead(BufferedSocket *sock) = 0;
+            virtual void on_will_read(buffered_socket *sock) = 0;
 
-            virtual void onDidRead(BufferedSocket *sock) = 0;
+            virtual void on_did_read(buffered_socket *sock) = 0;
 
-            virtual void onWillWrite(BufferedSocket *sock) = 0;
+            virtual void on_will_write(buffered_socket *sock) = 0;
 
-            virtual void onDidWrite(BufferedSocket *sock) = 0;
+            virtual void on_did_write(buffered_socket *sock) = 0;
 
-            virtual void onConnect(BufferedSocket *sock) = 0;
+            virtual void on_connect(buffered_socket *sock) = 0;
 
-            virtual void onClose(BufferedSocket *sock) = 0;
+            virtual void on_close(buffered_socket *sock) = 0;
         };
 
-        class BufferedSocket : public Socket
+        class buffered_socket : public socket
         {
         public:
-            BufferedSocket();
-            BufferedSocket(SOCKET sock, const sockaddr_in &addr);
-            BufferedSocket(const BufferedSocket &);
-            BufferedSocket(BufferedSocket &&other);
-            virtual ~BufferedSocket();
-            BufferedSocket &operator=(const BufferedSocket &other);
-            BufferedSocket &operator=(BufferedSocket && other);
+            buffered_socket();
+            buffered_socket(SOCKET sock, const sockaddr_in &addr);
+            buffered_socket(const buffered_socket &);
+            buffered_socket(buffered_socket &&other);
+            virtual ~buffered_socket();
+            buffered_socket &operator=(const buffered_socket &other);
+            buffered_socket &operator=(buffered_socket && other);
 
             void close();
 
-            bool readToBuffer();
-            string readLine();
+            bool read_to_buffer();
+            string readln();
 
-            BufferedSocket &writeLine(const string &value);
-            BufferedSocket &writeLine();
-            BufferedSocket &write(const string &value);
-            BufferedSocket &write(void *pbuf, size_t sz);
+            buffered_socket &writeln(const string &value);
+            buffered_socket &writeln();
+            buffered_socket &write(const string &value);
+            buffered_socket &write(void *pbuf, size_t sz);
 
-            string getInput() const;
-            bool hasInput() const;
+            string input() const;
+            bool has_input() const;
 
-            string getOutput() const;
-            bool hasOutput() const;
+            string output() const;
+            bool has_output() const;
 
-            bool writeFromBuffer();
+            bool write_from_buffer();
 
-            BufferedSocket &operator << ( const std::string & );
-            BufferedSocket &operator >> ( std::string & );
+            buffered_socket &operator << ( const std::string & );
+            buffered_socket &operator >> ( std::string & );
 
-            void addListener(BufferedSocketListener *listener);
+            void add_listener(buffered_socket_listener *listener);
 
-            void notifyConnect();
+            void notify_connect();
 
         protected:
 
-            virtual void onWillRead();
-            virtual void onDidRead();
-            virtual void onWillWrite();
-            virtual void onDidWrite();
-            virtual void onConnect();
-            virtual void onClose();
+            virtual void on_will_read();
+            virtual void on_did_read();
+            virtual void on_will_write();
+            virtual void on_did_write();
+            virtual void on_connect();
+            virtual void on_close();
 
             constexpr static const char *const NEWLINE = "\r\n";
 
@@ -81,19 +81,19 @@ namespace arg3
 
             void flush();
 
-            void notifyWillRead();
+            void notify_will_read();
 
-            void notifyDidRead();
+            void notify_did_read();
 
-            void notifyWillWrite();
+            void notify_will_write();
 
-            void notifyDidWrite();
+            void notify_did_write();
 
-            void notifyClose();
+            void notify_close();
 
             string inBuffer_;
             string outBuffer_;
-            vector<BufferedSocketListener *> listeners_;
+            vector<buffered_socket_listener *> listeners_;
         };
     }
 }
