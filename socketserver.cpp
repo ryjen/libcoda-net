@@ -124,11 +124,121 @@ namespace arg3
             sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
         }
 
-        void socket_server::loop()
+        void socket_server::update()
         {
+
+            static struct timeval null_time;
+
             fd_set in_set;
             fd_set out_set;
             fd_set exc_set;
+            int maxdesc = 0;
+
+            if (!is_valid())
+                return;
+
+            FD_ZERO(&in_set);
+            FD_ZERO(&out_set);
+            FD_ZERO(&exc_set);
+            FD_SET(sock_, &in_set);
+
+            maxdesc = sock_;
+
+            // prepare for sockets for polling
+            foreach([&](std::shared_ptr<buffered_socket> c)
+            {
+                if (!c->is_valid()) return true;
+                maxdesc = std::max(maxdesc, c->sock_);
+                FD_SET(c->sock_, &in_set);
+                FD_SET(c->sock_, &out_set);
+                FD_SET(c->sock_, &exc_set);
+                return false;
+            });
+
+            // poll
+            if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) < 0)
+            {
+                if (errno != EINTR)
+                {
+                    throw socket_exception(strerror(errno));
+                }
+            }
+
+            // check for new connection
+            if (FD_ISSET(sock_, &in_set))
+            {
+                sockaddr_in addr;
+
+                auto sock = factory_->create_socket(this, accept(addr), addr);
+
+                sock->set_non_blocking(true);
+
+                sock->notify_connect();
+
+                sockets_.push_back(sock);
+            }
+
+            /* check for freaky connections */
+            foreach([&](std::shared_ptr<buffered_socket> c)
+            {
+                if (!c->is_valid()) return true;
+
+                if (FD_ISSET(c->sock_, &exc_set))
+                {
+                    FD_CLR(c->sock_, &in_set);
+                    FD_CLR(c->sock_, &out_set);
+
+                    c->close();
+                    return true;
+                }
+                return false;
+            });
+
+            /* read from all readable connections, removing failed sockets */
+            foreach([&](std::shared_ptr<buffered_socket> c)
+            {
+                if (!c->is_valid()) return true;
+
+                if (FD_ISSET(c->sock_, &in_set))
+                {
+                    if (!c->read_to_buffer())
+                    {
+                        FD_CLR(c->sock_, &out_set);
+
+                        c->close();
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            notify_poll();
+
+            /* write to all writable connections, removing failed sockets */
+            foreach([&](std::shared_ptr<buffered_socket> c)
+            {
+                if (!c->is_valid()) return true;
+
+                if (FD_ISSET(c->sock_, &out_set))
+                {
+                    if (c->has_output())
+                    {
+                        if (!c->write_from_buffer())
+                        {
+                            c->close();
+
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+
+        }
+
+        void socket_server::loop()
+        {
 
             struct timeval last_time;
 
@@ -141,11 +251,9 @@ namespace arg3
 
             while (is_valid())
             {
-                static struct timeval null_time;
                 struct timeval now_time;
                 long secDelta;
                 long usecDelta;
-                int maxdesc = 0;
 
                 gettimeofday(&now_time, NULL);
 
@@ -184,108 +292,10 @@ namespace arg3
 
                 gettimeofday(&last_time, NULL);
 
-                FD_ZERO(&in_set);
-                FD_ZERO(&out_set);
-                FD_ZERO(&exc_set);
-                FD_SET(sock_, &in_set);
-
-                maxdesc = sock_;
-
-                // prepare for sockets for polling
-                foreach([&](std::shared_ptr<buffered_socket> c)
-                {
-                    if (!c->is_valid()) return true;
-                    maxdesc = std::max(maxdesc, c->sock_);
-                    FD_SET(c->sock_, &in_set);
-                    FD_SET(c->sock_, &out_set);
-                    FD_SET(c->sock_, &exc_set);
-                    return false;
-                });
-
-                // poll
-                if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) < 0)
-                {
-                    if (errno != EINTR)
-                    {
-                        throw socket_exception(strerror(errno));
-                    }
-                }
-
-                // check for new connection
-                if (FD_ISSET(sock_, &in_set))
-                {
-                    sockaddr_in addr;
-
-                    auto sock = factory_->create_socket(this, accept(addr), addr);
-
-                    sock->set_non_blocking(true);
-
-                    sock->notify_connect();
-
-                    sockets_.push_back(sock);
-                }
-
-                /* check for freaky connections */
-                foreach([&](std::shared_ptr<buffered_socket> c)
-                {
-                    if (!c->is_valid()) return true;
-
-                    if (FD_ISSET(c->sock_, &exc_set))
-                    {
-                        FD_CLR(c->sock_, &in_set);
-                        FD_CLR(c->sock_, &out_set);
-
-                        c->close();
-                        return true;
-                    }
-                    return false;
-                });
-
-                /* read from all readable connections, removing failed sockets */
-                foreach([&](std::shared_ptr<buffered_socket> c)
-                {
-                    if (!c->is_valid()) return true;
-
-                    if (FD_ISSET(c->sock_, &in_set))
-                    {
-                        if (!c->read_to_buffer())
-                        {
-                            FD_CLR(c->sock_, &out_set);
-
-                            c->close();
-                            return true;
-                        }
-                    }
-
-                    return false;
-                });
-
-                notify_poll();
-
-                /* write to all writable connections, removing failed sockets */
-                foreach([&](std::shared_ptr<buffered_socket> c)
-                {
-                    if (!c->is_valid()) return true;
-
-                    if (FD_ISSET(c->sock_, &out_set))
-                    {
-                        if (c->has_output())
-                        {
-                            if (!c->write_from_buffer())
-                            {
-                                c->close();
-
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                });
-
+                update();
             }
 
             on_stop();
-
         }
     }
 }

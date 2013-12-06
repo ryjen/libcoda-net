@@ -38,6 +38,8 @@ namespace arg3
 
             void start();
 
+            void update();
+
             void loop();
 
             void stop();
