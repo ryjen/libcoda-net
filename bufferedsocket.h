@@ -33,7 +33,7 @@ namespace arg3
         class buffered_socket : public socket
         {
         public:
-            buffered_socket();
+            //buffered_socket();
             buffered_socket(SOCKET sock, const sockaddr_in &addr);
             buffered_socket(const buffered_socket &);
             buffered_socket(buffered_socket &&other);
@@ -51,10 +51,10 @@ namespace arg3
             buffered_socket &write(const string &value);
             buffered_socket &write(void *pbuf, size_t sz);
 
-            string input() const;
+            const data_buffer &input() const;
             bool has_input() const;
 
-            string output() const;
+            const data_buffer &output() const;
             bool has_output() const;
 
             bool write_from_buffer();
@@ -75,8 +75,8 @@ namespace arg3
             virtual void on_connect();
             virtual void on_close();
 
-            constexpr static const char *const NEWLINE = "\r\n";
-
+            data_buffer inBuffer_;
+            data_buffer outBuffer_;
         private:
 
             void flush();
@@ -91,8 +91,6 @@ namespace arg3
 
             void notify_close();
 
-            string inBuffer_;
-            string outBuffer_;
             vector<buffered_socket_listener *> listeners_;
         };
     }

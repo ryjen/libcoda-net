@@ -118,9 +118,9 @@ namespace arg3
             sock_ = INVALID;
         }
 
-        int socket::send ( const string &s, int flags )
+        int socket::send ( const data_buffer &s, int flags )
         {
-            return ::send ( sock_, s.c_str(), s.size(), flags );
+            return ::send ( sock_, &s[0], s.size(), flags );
         }
 
         int socket::send( void *s, size_t len, int flags)
@@ -164,26 +164,26 @@ namespace arg3
 #endif
         }
 
-        int socket::recv(string &s)
+        int socket::recv(data_buffer &s)
         {
 
-            char buf [ MAXRECV + 1 ];
+            unsigned char buf [ MAXRECV + 1 ];
 
             memset ( buf, 0, sizeof(buf) );
 
-            s = "";
+            s.clear();
 
             int status = ::recv ( sock_, buf, MAXRECV, 0 );
 
             if (status > 0)
             {
-                s = buf;
+                s.insert(s.end(), &buf[0], &buf[status]);
             }
 
             return status;
         }
 
-        socket &socket::operator << ( const string &s )
+        socket &socket::operator << ( const data_buffer &s )
         {
             if ( send ( s ) < 0)
             {
@@ -194,7 +194,7 @@ namespace arg3
 
         }
 
-        socket &socket::operator >> ( string &s )
+        socket &socket::operator >> ( data_buffer &s )
         {
             if ( recv(s) < 0)
             {

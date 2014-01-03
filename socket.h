@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <exception>
+#include <vector>
 
 namespace arg3
 {
@@ -34,6 +35,8 @@ namespace arg3
         class socket
         {
         public:
+            typedef char data_type;
+            typedef std::vector<data_type> data_buffer;
 
             socket(SOCKET sock, const sockaddr_in &addr);
 
@@ -49,16 +52,16 @@ namespace arg3
             socket &operator=(socket && );
 
             // Data Transimission
-            int send ( const std::string &, int flags = 0 );
+            int send ( const data_buffer &, int flags = 0 );
             int send ( void *, size_t, int flags = 0);
 
             // Recieves a block of input
-            int recv(std::string &);
+            int recv(data_buffer &);
 
             bool is_valid() const;
 
-            socket &operator << ( const std::string & );
-            socket &operator >> ( std::string & );
+            socket &operator << ( const data_buffer & );
+            socket &operator >> ( data_buffer & );
 
             SOCKET raw_socket() const;
 

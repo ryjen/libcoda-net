@@ -4,9 +4,12 @@ namespace arg3
 {
     namespace net
     {
-        buffered_socket::buffered_socket() : socket(), listeners_()
-        {
-        }
+
+        static const socket::data_type NEWLINE[] = { '\r', '\n' };
+
+        // buffered_socket::buffered_socket() : socket(), listeners_()
+        // {
+        // }
 
         buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr), listeners_()
         {
@@ -60,7 +63,7 @@ namespace arg3
 
         bool buffered_socket::read_to_buffer()
         {
-            string chunk;
+            data_buffer chunk;
 
             notify_will_read();
 
@@ -68,7 +71,7 @@ namespace arg3
 
             while (status > 0)
             {
-                inBuffer_.append(chunk);
+                inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
 
                 status = socket::recv(chunk);
             }
@@ -83,21 +86,25 @@ namespace arg3
 
         string buffered_socket::readln()
         {
-            if (inBuffer_.empty()) return inBuffer_;
+            if (inBuffer_.empty()) return string(inBuffer_.begin(), inBuffer_.end());
 
-            auto pos = inBuffer_.find_first_of("\n\r");
+            data_type needle[] = { '\n', '\r' };
 
-            if (pos == string::npos) return inBuffer_;
+            auto pos = find_first_of(inBuffer_.begin(), inBuffer_.end(), needle, needle + 2);
 
-            string temp = inBuffer_.substr(0, pos);
+            if (pos == inBuffer_.end())
+                return string(inBuffer_.begin(), inBuffer_.end());
 
-            while (pos < inBuffer_.length() &&
-                    (inBuffer_[pos] == '\n' || inBuffer_[pos] == '\r'))
+
+            while (pos != inBuffer_.end() &&
+                    (*pos == '\n' || *pos == '\r'))
             {
                 pos++;
             }
 
-            inBuffer_.erase(0, pos);
+            string temp(inBuffer_.begin(), pos);
+
+            inBuffer_.erase(inBuffer_.begin(), pos);
 
             return temp;
         }
@@ -107,7 +114,7 @@ namespace arg3
             return !inBuffer_.empty();
         }
 
-        string buffered_socket::input() const
+        const socket::data_buffer &buffered_socket::input() const
         {
             return inBuffer_;
         }
@@ -117,20 +124,21 @@ namespace arg3
             return !outBuffer_.empty();
         }
 
-        string buffered_socket::output() const
+        const socket::data_buffer &buffered_socket::output() const
         {
             return outBuffer_;
         }
 
         buffered_socket &buffered_socket::writeln(const string &value)
         {
-            outBuffer_.append(value).append(NEWLINE);
+            outBuffer_.insert(outBuffer_.end(), value.begin(), value.end());
+            outBuffer_.insert(outBuffer_.end(), NEWLINE, NEWLINE + 2);
             return *this;
         }
 
         buffered_socket &buffered_socket::writeln()
         {
-            outBuffer_.append(NEWLINE);
+            outBuffer_.insert(outBuffer_.end(), NEWLINE, NEWLINE + 2);
             return *this;
         }
 
@@ -142,7 +150,7 @@ namespace arg3
 
         buffered_socket &buffered_socket::write(const string &value)
         {
-            outBuffer_.append(value);
+            outBuffer_.insert(outBuffer_.end(), value.begin(), value.end());
             return *this;
         }
 
@@ -153,7 +161,7 @@ namespace arg3
 
         buffered_socket &buffered_socket::operator >> ( string &s )
         {
-            s.append(inBuffer_);
+            s.append(inBuffer_.begin(), inBuffer_.end());
 
             return *this;
         }
