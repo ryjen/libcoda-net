@@ -1,6 +1,6 @@
-#ifndef THIN
 
-#include "socketfactory.h"
+
+#include "socket_factory.h"
 
 namespace arg3
 {
@@ -19,4 +19,3 @@ namespace arg3
     }
 }
 
-#endif

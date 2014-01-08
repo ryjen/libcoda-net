@@ -1,9 +1,9 @@
 #ifndef ARG3_NO_CURL
 
 #include <igloo/igloo.h>
-#include "restclient.h"
-#include "socketserver.h"
-#include "bufferedsocket.h"
+#include "rest_client.h"
+#include "socket_server.h"
+#include "buffered_socket.h"
 #include <string>
 #include <thread>
 

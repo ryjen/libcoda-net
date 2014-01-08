@@ -1,6 +1,5 @@
-#ifndef THIN
 
-#include "socketserver.h"
+#include "socket_server.h"
 #include "exception.h"
 
 namespace arg3
@@ -300,4 +299,3 @@ namespace arg3
     }
 }
 
-#endif

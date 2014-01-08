@@ -1,9 +1,7 @@
 #ifndef ARG3_NET_SOCKETFACTORY_H
 #define ARG3_NET_SOCKETFACTORY_H
 
-#ifndef THIN
-
-#include "bufferedsocket.h"
+#include "buffered_socket.h"
 
 #include <memory>
 
@@ -37,5 +35,4 @@ namespace arg3
     }
 }
 
-#endif
 #endif

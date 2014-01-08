@@ -1,9 +1,7 @@
 #ifndef ARG3_NET_SOCKETSERVER_H
 #define ARG3_NET_SOCKETSERVER_H
 
-#ifndef THIN
-
-#include "socketfactory.h"
+#include "socket_factory.h"
 #include <vector>
 #include <thread>
 #include <sys/time.h>
@@ -81,8 +79,6 @@ namespace arg3
         };
     }
 }
-
-#endif
 
 #endif
 

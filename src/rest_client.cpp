@@ -1,6 +1,8 @@
-#ifndef ARG3_NO_CURL
+#include "config.h"
 
-#include "restclient.h"
+#ifdef HAVE_LIBCURL
+
+#include "rest_client.h"
 #include "exception.h"
 
 namespace arg3
