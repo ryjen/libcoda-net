@@ -1,7 +1,7 @@
 #ifndef ARG3_NET_TELNET_FACTORY_H_
 #define ARG3_NET_TELNET_FACTORY_H_
 
-#include "../socketfactory.h"
+#include "../socket_factory.h"
 
 namespace arg3
 {

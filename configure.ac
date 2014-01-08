@@ -26,5 +26,5 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostbyname gettimeofday inet_ntoa memset select socket strerror])
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/telnet/Makefile tests/Makefile])
 AC_OUTPUT

@@ -1,7 +1,7 @@
 #ifndef ARG3_NET_TELNETSERVER_H_
 #define ARG3_NET_TELNETSERVER_H_
 
-#include "../socketserver.h"
+#include "../socket_server.h"
 
 namespace arg3
 {

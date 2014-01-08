@@ -6,3 +6,6 @@ libarg3net_0_2_la_SOURCES = buffered_socket.cpp protocol.cpp rest_client.cpp soc
 
 AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Wall -Werror
 
+pkginclude_HEADERS = buffered_socket.h exception.h protocol.h rest_client.h socket.h socket_factory.h socket_server.h
+
+SUBDIRS = telnet

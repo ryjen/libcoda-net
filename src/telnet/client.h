@@ -1,7 +1,7 @@
 #ifndef ARG3_NET_TELNET_CLIENT_H_
 #define ARG3_NET_TELNET_CLIENT_H_
 
-#include "../bufferedsocket.h"
+#include "../buffered_socket.h"
 
 namespace arg3
 {
