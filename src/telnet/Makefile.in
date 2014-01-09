@@ -119,7 +119,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libarg3telnet_0_2_la_DEPENDENCIES = ../libarg3net-0.2.la
+libarg3telnet_0_2_la_LIBADD =
 am_libarg3telnet_0_2_la_OBJECTS = client.lo factory.lo
 libarg3telnet_0_2_la_OBJECTS = $(am_libarg3telnet_0_2_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -309,7 +309,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libarg3telnet-0.2.la
 libarg3telnet_0_2_la_SOURCES = client.cpp factory.cpp
-libarg3telnet_0_2_la_LIBADD = ../libarg3net-0.2.la
 AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Wall -Werror
 pkginclude_HEADERS = client.h factory.h protocol.h server.h
 all: all-am
