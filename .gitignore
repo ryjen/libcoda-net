@@ -16,3 +16,9 @@ Makefile
 *.lai
 *.la
 *.a
+*.cache
+*.log
+libtool
+.deps
+stamp-h1
+.libs
