@@ -7,24 +7,13 @@ useful code for network related activities
 Building
 ========
 
-*OSX:*
-
-[Download](http://brew.sh) and install homebrew.
+Requires [autotools](http://en.wikipedia.org/wiki/GNU_build_system).
 
 ```bash
-brew install premake
-
-premake4 gmake
+./configure --prefix=/usr/local
 
 make
 ```
-
-*Windows:*
-
-- [Download](http://industriousone.com/premake/download) premake.
-- run <code>premake4 vs2010</code>.
-- Open the generated project file in Visual Studio.
-
 
 Coding Style
 ============
