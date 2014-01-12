@@ -16,13 +16,13 @@ namespace arg3
         }
 
 
-        buffered_socket::buffered_socket(const buffered_socket &sock) : socket(sock),
+        /*buffered_socket::buffered_socket(const buffered_socket &sock) : socket(sock),
             inBuffer_(sock.inBuffer_), outBuffer_(sock.outBuffer_), listeners_(sock.listeners_)
         {
 
-        }
+        }*/
 
-        buffered_socket::buffered_socket(buffered_socket &&other) : socket(other), inBuffer_(std::move(other.inBuffer_)),
+        buffered_socket::buffered_socket(buffered_socket &&other) : socket(std::move(other)), inBuffer_(std::move(other.inBuffer_)),
             outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
         {
         }
@@ -31,7 +31,8 @@ namespace arg3
         {
 
         }
-        buffered_socket &buffered_socket::operator=(const buffered_socket &other)
+
+        /*buffered_socket &buffered_socket::operator=(const buffered_socket &other)
         {
             if (this != &other)
             {
@@ -44,7 +45,8 @@ namespace arg3
             }
 
             return *this;
-        }
+        }*/
+
         buffered_socket &buffered_socket::operator=(buffered_socket && other)
         {
             if (this != &other)

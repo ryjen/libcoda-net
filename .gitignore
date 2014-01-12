@@ -22,3 +22,6 @@ libtool
 .deps
 stamp-h1
 .libs
+*.status
+config.h
+arg3net_test

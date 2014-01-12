@@ -24,18 +24,18 @@ namespace arg3
 #endif
 
         socket::socket() :
-            sock_ ( INVALID ), references_(NULL), backlogSize_(BACKLOG_SIZE), port_(0)
+            sock_ ( INVALID ), /*references_(NULL),*/ backlogSize_(BACKLOG_SIZE), port_(0)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
         socket::socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr),
-            references_(new unsigned(0)), backlogSize_(BACKLOG_SIZE), port_(0)
+    /*references_(new unsigned(0)),*/ backlogSize_(BACKLOG_SIZE), port_(0)
         {
 
         }
 
-        socket::socket(const socket &sock) : sock_(sock.sock_), addr_(sock.addr_), references_(sock.references_),
+        /*socket::socket(const socket &sock) : sock_(sock.sock_), addr_(sock.addr_), references_(sock.references_),
             backlogSize_(sock.backlogSize_), port_(sock.port_)
         {
             update_reference_count();
@@ -52,16 +52,16 @@ namespace arg3
                 references_ = new unsigned(0);
                 (*references_)++;
             }
-        }
+        }*/
 
-        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), references_(std::move(other.references_)),
+        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), /*references_(std::move(other.references_)),*/
             backlogSize_(other.backlogSize_), port_(other.port_)
         {
             other.sock_ = INVALID;
-            other.references_ = NULL;
+            //other.references_ = NULL;
         }
 
-        socket &socket::operator=(const socket &other)
+        /*socket &socket::operator=(const socket &other)
         {
             if (this != &other)
             {
@@ -73,7 +73,7 @@ namespace arg3
                 update_reference_count();
             }
             return *this;
-        }
+        }*/
 
         socket &socket::operator=(socket && other)
         {
@@ -81,12 +81,12 @@ namespace arg3
             {
                 sock_ = other.sock_;
                 addr_ = std::move(other.addr_);
-                references_ = std::move(other.references_);
+                //references_ = std::move(other.references_);
                 backlogSize_ = other.backlogSize_;
                 port_ = other.port_;
 
                 other.sock_ = INVALID;
-                other.references_ = NULL;
+                //other.references_ = NULL;
             }
             return *this;
         }
@@ -96,19 +96,19 @@ namespace arg3
         {
             if ( is_valid())
             {
-                if (!references_ || !*references_)
-                {
-                    close();
-                    if (references_)
-                    {
-                        delete references_;
-                        references_ = NULL;
-                    }
-                }
-                else
-                {
-                    (*references_)--;
-                }
+                //if (!references_ || !*references_)
+                //{
+                close();
+                //     if (references_)
+                //     {
+                //         delete references_;
+                //         references_ = NULL;
+                //     }
+                // }
+                // else
+                // {
+                //     (*references_)--;
+                // }
             }
         }
 
@@ -234,7 +234,7 @@ namespace arg3
         }
 
 
-        socket::socket(int port, int queueSize) : sock_(INVALID), references_(NULL), backlogSize_(queueSize), port_(port)
+        socket::socket(int port, int queueSize) : sock_(INVALID), /*references_(NULL),*/ backlogSize_(queueSize), port_(port)
         {}
 
         bool socket::create()

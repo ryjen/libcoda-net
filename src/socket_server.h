@@ -28,10 +28,10 @@ namespace arg3
         {
         public:
             socket_server(int port, socket_factory *factory = &default_socket_factory, int backlogSize = BACKLOG_SIZE);
-            socket_server(const socket_server &other);
+            socket_server(const socket_server &other) = delete;
             socket_server(socket_server &&other);
             virtual ~socket_server();
-            socket_server &operator=(const socket_server &other);
+            socket_server &operator=(const socket_server &other) = delete;
             socket_server &operator=(socket_server && other);
 
             void start();

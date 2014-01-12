@@ -35,10 +35,10 @@ namespace arg3
         public:
             //buffered_socket();
             buffered_socket(SOCKET sock, const sockaddr_in &addr);
-            buffered_socket(const buffered_socket &);
+            buffered_socket(const buffered_socket &) = delete;
             buffered_socket(buffered_socket &&other);
             virtual ~buffered_socket();
-            buffered_socket &operator=(const buffered_socket &other);
+            buffered_socket &operator=(const buffered_socket &other) = delete;
             buffered_socket &operator=(buffered_socket && other);
 
             void close();

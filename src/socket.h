@@ -44,11 +44,11 @@ namespace arg3
             socket (int port, int queueSize = BACKLOG_SIZE);
             socket();
 
-            socket(const socket &);
+            socket(const socket &) = delete;
             socket (socket &&other);
 
             virtual ~socket();
-            socket &operator=(const socket &);
+            socket &operator=(const socket &) = delete;
             socket &operator=(socket && );
 
             // Data Transimission
@@ -92,7 +92,7 @@ namespace arg3
 
             SOCKET sock_;
             sockaddr_in addr_;
-            unsigned *references_;
+            //unsigned *references_;
 
             bool create ();
             bool bind ();

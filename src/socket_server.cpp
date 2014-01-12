@@ -10,9 +10,9 @@ namespace arg3
             : socket(port, queueSize), pollFrequency_(4), factory_(factory)
         {}
 
-        socket_server::socket_server(const socket_server &other)
+        /*socket_server::socket_server(const socket_server &other)
             : socket(other), pollFrequency_(other.pollFrequency_), factory_(other.factory_)
-        {}
+        {}*/
 
         socket_server::socket_server(socket_server &&other)
             : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(std::move(other.factory_))
@@ -24,7 +24,7 @@ namespace arg3
         socket_server::~socket_server()
         {}
 
-        socket_server &socket_server::operator=(const socket_server &other)
+        /*socket_server &socket_server::operator=(const socket_server &other)
         {
             if (this != &other)
             {
@@ -36,7 +36,7 @@ namespace arg3
             }
 
             return *this;
-        }
+        }*/
 
         socket_server &socket_server::operator=(socket_server && other)
         {
