@@ -7,20 +7,9 @@ namespace arg3
 
         static const socket::data_type NEWLINE[] = { '\r', '\n' };
 
-        // buffered_socket::buffered_socket() : socket(), listeners_()
-        // {
-        // }
-
         buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr), listeners_()
         {
         }
-
-
-        /*buffered_socket::buffered_socket(const buffered_socket &sock) : socket(sock),
-            inBuffer_(sock.inBuffer_), outBuffer_(sock.outBuffer_), listeners_(sock.listeners_)
-        {
-
-        }*/
 
         buffered_socket::buffered_socket(buffered_socket &&other) : socket(std::move(other)), inBuffer_(std::move(other.inBuffer_)),
             outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
@@ -29,36 +18,16 @@ namespace arg3
 
         buffered_socket::~buffered_socket()
         {
-
         }
-
-        /*buffered_socket &buffered_socket::operator=(const buffered_socket &other)
-        {
-            if (this != &other)
-            {
-                socket::operator=(other);
-
-                inBuffer_ = other.inBuffer_;
-                outBuffer_ = other.outBuffer_;
-
-                listeners_ = other.listeners_;
-            }
-
-            return *this;
-        }*/
 
         buffered_socket &buffered_socket::operator=(buffered_socket && other)
         {
-            if (this != &other)
-            {
+            socket::operator=(std::move(other));
 
-                socket::operator=(std::move(other));
+            inBuffer_ = std::move(other.inBuffer_);
+            outBuffer_ = std::move(other.outBuffer_);
 
-                inBuffer_ = std::move(other.inBuffer_);
-                outBuffer_ = std::move(other.outBuffer_);
-
-                listeners_ = std::move(other.listeners_);
-            }
+            listeners_ = std::move(other.listeners_);
 
             return *this;
         }
@@ -92,12 +61,14 @@ namespace arg3
 
             data_type needle[] = { '\n', '\r' };
 
+            /* find a new line character */
             auto pos = find_first_of(inBuffer_.begin(), inBuffer_.end(), needle, needle + 2);
 
             if (pos == inBuffer_.end())
                 return string(inBuffer_.begin(), inBuffer_.end());
 
 
+            /* Skip all new line characters */
             while (pos != inBuffer_.end() &&
                     (*pos == '\n' || *pos == '\r'))
             {
@@ -200,6 +171,9 @@ namespace arg3
             return true;
         }
 
+        /*!
+         * default implementations do nothing
+         */
         void buffered_socket::on_connect() {}
         void buffered_socket::on_close() {}
         void buffered_socket::on_will_read() {}

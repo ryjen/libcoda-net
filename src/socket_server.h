@@ -14,52 +14,122 @@ namespace arg3
     {
         class socket_server;
 
+        /*!
+         * Defines an interface to listen to a socket server
+         */
         class socket_server_listener
         {
         public:
+
+            /*!
+             * called when the server has polled its connections
+             */
             virtual void on_poll(socket_server *server) = 0;
 
+            /*!
+             * called when the server starts
+             */
             virtual void on_start(socket_server *server) = 0;
 
+            /*!
+             * called when the server stops
+             */
             virtual void on_stop(socket_server *server) = 0;
         };
 
+
+        /*!
+         * Defines a network server that accepts incomming connections, processes their input and writes their output.
+         */
         class socket_server : public socket
         {
         public:
+            /*!
+             * default constructor takes a port
+             * @port the port to listen on
+             * @factory the factory to create sockets with
+             * @blacklogSize the max number of simultaneous new connections (not the same as the number of current connections)
+             */
             socket_server(int port, socket_factory *factory = &default_socket_factory, int backlogSize = BACKLOG_SIZE);
+
+            /*!
+             * non-copyable constructor
+             */
             socket_server(const socket_server &other) = delete;
+
+            /*!
+             * move constructor
+             */
             socket_server(socket_server &&other);
+
+            /*!
+             * destuctor will stop the server
+             */
             virtual ~socket_server();
+
+            /*!
+             * Non-copyable assignment operator
+             */
             socket_server &operator=(const socket_server &other) = delete;
+
+            /*!
+             * move assignment operator
+             */
             socket_server &operator=(socket_server && other);
 
-            void start();
+            /*!
+             * starts the server
+             */
+            void listen();
 
-            void update();
+            thread listenThread();
 
-            void loop();
+            /*!
+             * Sets the frequency of connection updates (used when looping)
+             * @param value the number of cycles per secon
+             */
+            void set_poll_frequency(unsigned cyclesPerSecond);
 
-            void stop();
-
-            void set_poll_frequency(unsigned value);
-
+            /*!
+             * Adds a l istener to the server
+             */
             void add_listener(socket_server_listener *listener);
 
+            /*!
+             * equality operator compares the port
+             */
             bool operator==(const socket_server &other);
+
+            /*!
+             * inequality operator compares the port
+             */
             bool operator!=(const socket_server &other);
 
         protected:
 
+            /*!
+             * updates the servers connections (performs read/writes)
+             */
+            void update();
+
+            /*!
+             * starts a syncronous loop of updating connections
+             */
+            void loop();
+
+            /*!
+             * can override these without adding a listener
+             */
             virtual void on_poll();
-
             virtual void on_start();
-
             virtual void on_stop();
 
         private:
 
-            void foreach(std::function<bool(std::shared_ptr<buffered_socket> )> delegate);
+            /*!
+             * Will loop each connection and if the delegate returns false, will remove the connection
+             */
+            void check_connections(std::function<bool(std::shared_ptr<buffered_socket> )> delegate);
 
             void notify_poll();
 
@@ -68,8 +138,6 @@ namespace arg3
             void notify_stop();
 
             unsigned pollFrequency_;
-
-            thread listenThread_;
 
             socket_factory *factory_;
 

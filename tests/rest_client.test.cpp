@@ -85,7 +85,7 @@ Context(rest_client_test)
     {
         try
         {
-            testServer.start();
+            testServer.listenThread();
 
             //log::trace("Mock server started");
         }
@@ -97,7 +97,7 @@ Context(rest_client_test)
 
     static void TearDownContext()
     {
-        testServer.stop();
+        testServer.close();
     }
 
     Spec(testGet)

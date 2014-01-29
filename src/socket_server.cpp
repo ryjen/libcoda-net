@@ -10,10 +10,6 @@ namespace arg3
             : socket(port, queueSize), pollFrequency_(4), factory_(factory)
         {}
 
-        /*socket_server::socket_server(const socket_server &other)
-            : socket(other), pollFrequency_(other.pollFrequency_), factory_(other.factory_)
-        {}*/
-
         socket_server::socket_server(socket_server &&other)
             : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(std::move(other.factory_))
         {
@@ -23,20 +19,6 @@ namespace arg3
 
         socket_server::~socket_server()
         {}
-
-        /*socket_server &socket_server::operator=(const socket_server &other)
-        {
-            if (this != &other)
-            {
-                socket::operator=(other);
-
-                pollFrequency_ = other.pollFrequency_;
-
-                factory_ = other.factory_;
-            }
-
-            return *this;
-        }*/
 
         socket_server &socket_server::operator=(socket_server && other)
         {
@@ -97,16 +79,14 @@ namespace arg3
             }
         }
 
-        void socket_server::start()
+        thread socket_server::listenThread()
         {
-            listenThread_ = thread(&socket_server::loop, this);
+            return thread(&socket_server::loop, this);
         }
 
-        void socket_server::stop()
+        void socket_server::listen()
         {
-            close();
-
-            listenThread_.join();
+            loop();
         }
 
         void socket_server::on_poll()
@@ -118,19 +98,18 @@ namespace arg3
         void socket_server::on_stop()
         {}
 
-        void socket_server::foreach(std::function<bool(std::shared_ptr<buffered_socket>)> delegate)
+        void socket_server::check_connections(std::function<bool(std::shared_ptr<buffered_socket>)> delegate)
         {
             sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
         }
 
         void socket_server::update()
         {
-
-            static struct timeval null_time;
+            static struct timeval null_time = {0};
 
             fd_set in_set;
             fd_set out_set;
-            fd_set exc_set;
+            fd_set err_set;
             int maxdesc = 0;
 
             if (!is_valid())
@@ -138,24 +117,25 @@ namespace arg3
 
             FD_ZERO(&in_set);
             FD_ZERO(&out_set);
-            FD_ZERO(&exc_set);
+            FD_ZERO(&err_set);
             FD_SET(sock_, &in_set);
 
             maxdesc = sock_;
 
             // prepare for sockets for polling
-            foreach([&](std::shared_ptr<buffered_socket> c)
+            check_connections([&](std::shared_ptr<buffered_socket> c)
             {
                 if (!c->is_valid()) return true;
+
                 maxdesc = std::max(maxdesc, c->sock_);
                 FD_SET(c->sock_, &in_set);
                 FD_SET(c->sock_, &out_set);
-                FD_SET(c->sock_, &exc_set);
+                FD_SET(c->sock_, &err_set);
                 return false;
             });
 
             // poll
-            if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) < 0)
+            if (select(maxdesc + 1, &in_set, &out_set, &err_set, &null_time) < 0)
             {
                 if (errno != EINTR)
                 {
@@ -178,11 +158,11 @@ namespace arg3
             }
 
             /* check for freaky connections */
-            foreach([&](std::shared_ptr<buffered_socket> c)
+            check_connections([&](std::shared_ptr<buffered_socket> c)
             {
                 if (!c->is_valid()) return true;
 
-                if (FD_ISSET(c->sock_, &exc_set))
+                if (FD_ISSET(c->sock_, &err_set))
                 {
                     FD_CLR(c->sock_, &in_set);
                     FD_CLR(c->sock_, &out_set);
@@ -194,7 +174,7 @@ namespace arg3
             });
 
             /* read from all readable connections, removing failed sockets */
-            foreach([&](std::shared_ptr<buffered_socket> c)
+            check_connections([&](std::shared_ptr<buffered_socket> c)
             {
                 if (!c->is_valid()) return true;
 
@@ -215,7 +195,7 @@ namespace arg3
             notify_poll();
 
             /* write to all writable connections, removing failed sockets */
-            foreach([&](std::shared_ptr<buffered_socket> c)
+            check_connections([&](std::shared_ptr<buffered_socket> c)
             {
                 if (!c->is_valid()) return true;
 
@@ -238,7 +218,6 @@ namespace arg3
 
         void socket_server::loop()
         {
-
             struct timeval last_time;
 
             if (!is_valid())
@@ -281,7 +260,7 @@ namespace arg3
 
                     if (select(0, NULL, NULL, NULL, &stall_time) == -1)
                     {
-                        throw socket_exception("stall");
+                        throw socket_exception(strerror(errno));
                     }
 
                     // check still valid after wait
