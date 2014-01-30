@@ -150,9 +150,6 @@ namespace arg3
             vector<socket_server_listener *> listeners_;
 
             vector<std::shared_ptr<buffered_socket>> sockets_;
-
-            std::mutex mutex_;
-
         };
     }
 }

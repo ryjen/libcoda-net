@@ -46,9 +46,7 @@ namespace arg3
 
         void socket_server::close()
         {
-            mutex_.lock();
             socket::close();
-            mutex_.unlock();
         }
 
         void socket_server::stop()
@@ -57,9 +55,7 @@ namespace arg3
         }
         void socket_server::add_listener(socket_server_listener *listener)
         {
-            mutex_.lock();
             listeners_.push_back(listener);
-            mutex_.unlock();
         }
 
         void socket_server::notify_poll()
@@ -118,8 +114,6 @@ namespace arg3
 
         void socket_server::update()
         {
-            mutex_.lock();
-
             static struct timeval null_time = {0};
 
             fd_set in_set;
@@ -228,8 +222,6 @@ namespace arg3
                 }
                 return false;
             });
-
-            mutex_.unlock();
         }
 
         void socket_server::loop()

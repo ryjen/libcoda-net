@@ -450,7 +450,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -555,9 +555,9 @@ uninstall-am:
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstPROGRAMS cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
+.PHONY: CTAGS GTAGS TAGS all all-am all-local check check-am clean \
+	clean-generic clean-libtool clean-noinstPROGRAMS cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
@@ -569,6 +569,9 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am
 
+
+all-local: arg3net_test$(EXEEXT)
+	./arg3net_test
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
