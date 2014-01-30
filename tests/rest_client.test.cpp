@@ -79,13 +79,15 @@ test_socket_factory testFactory;
 
 socket_server testServer(9876, &testFactory);
 
+thread serverThread;
+
 Context(rest_client_test)
 {
     static void SetUpContext()
     {
         try
         {
-            testServer.listenThread();
+            serverThread = testServer.startThread();
 
             //log::trace("Mock server started");
         }
@@ -98,6 +100,8 @@ Context(rest_client_test)
     static void TearDownContext()
     {
         testServer.close();
+
+        serverThread.join();
     }
 
     Spec(testGet)

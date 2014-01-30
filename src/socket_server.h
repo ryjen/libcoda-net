@@ -80,9 +80,9 @@ namespace arg3
             /*!
              * starts the server
              */
-            void listen();
+            void start();
 
-            thread listenThread();
+            thread startThread();
 
             /*!
              * Sets the frequency of connection updates (used when looping)
@@ -105,12 +105,17 @@ namespace arg3
              */
             bool operator!=(const socket_server &other);
 
-        protected:
-
             /*!
              * updates the servers connections (performs read/writes)
+             * will do nothing if the server is not alive
              */
             void update();
+
+            void close();
+
+            void stop();
+
+        protected:
 
             /*!
              * starts a syncronous loop of updating connections
@@ -144,6 +149,9 @@ namespace arg3
             vector<socket_server_listener *> listeners_;
 
             vector<std::shared_ptr<buffered_socket>> sockets_;
+
+            std::mutex mutex_;
+
         };
     }
 }
