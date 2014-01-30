@@ -20,6 +20,12 @@
 #include <exception>
 #include <vector>
 
+#ifdef HAVE_LIBSSL
+#include <openssl/rand.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#endif
+
 namespace arg3
 {
     namespace net
@@ -101,19 +107,19 @@ namespace arg3
              * Will write a block of data to the socket
              * @return the number of bytes written
              */
-            int send ( const data_buffer &, int flags = 0 );
+            virtual int send ( const data_buffer &, int flags = 0 );
 
             /*!
              * Will write a block of data to the socket
              * @return the number of bytes written
              */
-            int send ( void *, size_t, int flags = 0);
+            virtual int send ( void *, size_t, int flags = 0);
 
             /*!
              * Recieves a block of input
              * @returns the number of bytes read
              */
-            int recv(data_buffer &);
+            virtual int recv(data_buffer &);
 
             /*!
              * @returns true if the socket is alive and connected
@@ -164,7 +170,7 @@ namespace arg3
             /*!
              * Client initialization, connects to a host and port
              */
-            bool connect ( const std::string &host, const int port );
+            virtual bool connect ( const std::string &host, const int port );
 
             /*!
              * Accepts a socket
@@ -182,6 +188,8 @@ namespace arg3
              * sets the socket in blocking or non blocking mode
              */
             void set_non_blocking ( const bool );
+
+            void set_secure(const bool);
 
         protected:
 
@@ -207,6 +215,11 @@ namespace arg3
 
             int backlogSize_;
             int port_;
+
+#ifdef HAVE_LIBSSL
+            SSL *sslHandle_;
+            SSL_CTX *sslContext_;
+#endif
 
             friend class socket_server;
         };

@@ -65,17 +65,37 @@ namespace arg3
         {
             closesocket(sock_);
             sock_ = INVALID;
+#ifdef HAVE_LIBSSL
+            if (sslHandle_)
+            {
+                SSL_shutdown (sslHandle_);
+                SSL_free (sslHandle_);
+                sslHandle_ = NULL;
+            }
+            if (sslContext_)
+            {
+                SSL_CTX_free (sslContext_);
+                sslContext_ = NULL;
+            }
+#endif
         }
 
         int socket::send ( const data_buffer &s, int flags )
         {
-            if (s.size() == 0) return 0;
-
+            if (s.empty()) return 0;
+#ifdef HAVE_LIBSSL
+            if (sslHandle_)
+                return SSL_write(sock_, &s[0], s.size() );
+#endif
             return ::send ( sock_, &s[0], s.size(), flags );
         }
 
         int socket::send( void *s, size_t len, int flags)
         {
+#ifdef HAVE_LIBSSL
+            if (sslHandle_)
+                return SSL_write(sock_, s, len );
+#endif
 #ifdef _WIN32
             return ::send(sock_, reinterpret_cast<const char *>(s), len, flags);
 #else
@@ -119,11 +139,18 @@ namespace arg3
         {
             unsigned char buf [ MAXRECV + 1 ];
 
+            int status;
+
             memset ( buf, 0, sizeof(buf) );
 
             s.clear();
 
-            int status = ::recv ( sock_, buf, MAXRECV, 0 );
+#ifdef HAVE_LIBSSL
+            if (sslHandle_)
+                status = SSL_read( sslHandle_, buf, MAXRECV );
+            else
+#endif
+                status = ::recv ( sock_, buf, MAXRECV, 0 );
 
             if (status > 0)
             {
@@ -304,6 +331,60 @@ namespace arg3
             fcntl ( sock_, F_SETFL, opts );
 #else
             ioctlsocket( sock_, FIONBIO, 0 );
+#endif
+        }
+
+        void socket::set_secure(const bool b)
+        {
+#ifndef HAVE_LIBSSL
+
+            throw socket_exception("SSL not supported");
+#else
+            if (!b)
+            {
+                // check if we need to free
+                if (sslHandle_)
+                {
+                    SSL_shutdown (sslHandle_);
+                    SSL_free (sslHandle_);
+                    sslHandle_ = NULL;
+                }
+                if (sslContext_)
+                {
+                    SSL_CTX_free (sslContext_);
+                    sslContext_ = NULL;
+                }
+
+                return;
+
+            }
+
+            // check we're already initialized
+            if (sslHandle_)
+                return;
+
+            // Register the error strings for libcrypto & libssl
+            SSL_load_error_strings ();
+            // Register the available ciphers and digests
+            SSL_library_init ();
+
+            // New context saying we are a client, and using SSL 2 or 3
+            sslContext_ = SSL_CTX_new (SSLv23_client_method ());
+            if (sslContext_ == NULL)
+                ERR_print_errors_fp (stderr);
+
+            // Create an SSL struct for the connection
+            sslHandle_ = SSL_new (sslContext_);
+            if (sslHandle_ == NULL)
+                ERR_print_errors_fp (stderr);
+
+            // Connect the SSL struct to our connection
+            if (!SSL_set_fd (sslHandle_, sock_))
+                ERR_print_errors_fp (stderr);
+
+            // Initiate SSL handshake
+            if (SSL_connect (sslHandle_) != 1)
+                ERR_print_errors_fp (stderr);
 #endif
         }
     }

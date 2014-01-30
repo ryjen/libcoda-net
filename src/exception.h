@@ -8,6 +8,9 @@ namespace arg3
 {
     namespace net
     {
+        /*!
+         * custom exception
+         */
         class socket_exception : public std::exception
         {
         public:
@@ -49,43 +52,18 @@ namespace arg3
         };
 
 
-        class rest_exception : public std::exception
+        /*!
+         * exception used by the rest client class
+         */
+        class rest_exception : public socket_exception
         {
         public:
-            rest_exception ( const std::string &s ) : message_ ( s ) {};
+            rest_exception ( const std::string &s ) : socket_exception ( s ) {};
             virtual ~rest_exception() throw() {}
-            rest_exception (const rest_exception &e) : std::exception(e), message_(e.message_)
+            rest_exception (const rest_exception &e) : socket_exception(e)
             {}
-            rest_exception (rest_exception &&e) : std::exception(std::move(e)), message_(std::move(e.message_))
+            rest_exception (rest_exception &&e) : socket_exception(std::move(e))
             {}
-
-            rest_exception &operator=(const rest_exception &e)
-            {
-                if (this != &e)
-                {
-                    std::exception::operator=(e);
-                    message_ = e.message_;
-                }
-                return *this;
-            }
-
-            rest_exception &operator=(rest_exception && e)
-            {
-                if (this != &e)
-                {
-                    std::exception::operator=(std::move(e));
-                    message_ = std::move(e.message_);
-                }
-                return *this;
-            }
-
-            virtual const char *what() const throw()
-            {
-                return message_.c_str();
-            }
-        private:
-
-            std::string message_;
 
         };
     }

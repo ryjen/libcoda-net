@@ -25,28 +25,37 @@ namespace arg3
         void telnet_client::on_will_read()
         {}
 
-        void telnet_client::handle_telopt(const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_client::handle_telopt(const socket::data_buffer::iterator &it)
         {
+            if ((it + 1) == inBuffer_.end()) return pos;
+
             on_telopt(*it, *(it + 1));
 
-            inBuffer_.erase(it, it + 2);
+            if (it + 2 == inBuffer_.end()) return pos;
+
+            return inBuffer_.erase(it, it + 2);
         }
 
-        void telnet_client::handle_sub_neg(const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_client::handle_sub_neg(const socket::data_buffer::iterator &it)
         {
+            if ((it + 1) == inBuffer_.end())
+                return it;
+
             auto type = *(it + 1);
 
             auto pos = find(it + 1, inBuffer_.end(), telnet::IAC);
 
-            if (pos == inBuffer_.end() || *pos != telnet::IAC) return;
+            if (pos == inBuffer_.end() || *pos != telnet::IAC)
+                return it;
 
-            if ((pos + 1) == inBuffer_.end() || *(pos + 1) != telnet::SE) return;
+            if ((pos + 1) == inBuffer_.end() || *(pos + 1) != telnet::SE || (it + 2) == inBuffer_.end())
+                return it;
 
             socket::data_buffer buf(it + 2, pos);
 
             on_sub_neg(type, buf);
 
-            inBuffer_.erase(it, pos + 2);
+            return inBuffer_.erase(it, pos + 2);
         }
 
         void telnet_client::on_did_read()
@@ -58,17 +67,17 @@ namespace arg3
                 switch (*pos)
                 {
                 case telnet::IAC:
-                    pos = inBuffer_.erase(pos, pos);
+                    pos = inBuffer_.erase(pos - 1, pos);
                     break;
                 case telnet::WILL:
                 case telnet::WONT:
                 case telnet::DO:
                 case telnet::DONT:
-                    handle_telopt(pos);
+                    pos = handle_telopt(pos);
                     break;
 
                 case telnet::SB:
-                    handle_sub_neg(pos);
+                    pos = handle_sub_neg(pos);
                 }
 
                 pos = find(pos, inBuffer_.end(), telnet::IAC);

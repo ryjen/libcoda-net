@@ -171,7 +171,7 @@ namespace arg3
                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
             case http::DELETE:
-                curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::DELETE);
+                curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);
                 break;
             }
 
@@ -212,11 +212,14 @@ namespace arg3
             }
             else
             {
-                sock.connect(host(), http::HTTP_PORT);
+                sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT);
             }
 
+            if (is_secure())
+                sock.set_secure(true);
+
             // send the method and path
-            snprintf(buf, http::MAX_URL_LEN, http::HTTP_REQUEST, http::method_names[method], path.c_str());
+            snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());
 
             sock.writeln(buf);
 
@@ -256,7 +259,7 @@ namespace arg3
 
             string line = sock.readln();
 
-            if (sscanf(line.c_str(), http::HTTP_RESPONSE, &responseCode_, buf) == 2)
+            if (sscanf(line.c_str(), http::RESPONSE_HEADER, &responseCode_, buf) == 2)
             {
                 // parse out the rest of the header
                 while (!line.empty())

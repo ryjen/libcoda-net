@@ -21,8 +21,8 @@ namespace arg3
             void on_connect();
             void on_close();
         private:
-            void handle_telopt(const socket::data_buffer::iterator &it);
-            void handle_sub_neg(const socket::data_buffer::iterator &it);
+            socket::data_buffer::iterator handle_telopt(const socket::data_buffer::iterator &it);
+            socket::data_buffer::iterator handle_sub_neg(const socket::data_buffer::iterator &it);
         };
     }
 }

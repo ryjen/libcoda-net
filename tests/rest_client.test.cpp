@@ -122,6 +122,17 @@ Context(rest_client_test)
         }
     }
 
+    Spec(testSecure)
+    {
+        rest_client client("beta.epactnetwork.com");
+
+        client.set_secure(true);
+
+        client.get("us");
+
+        Assert::That(client.response().empty(), Equals(false));
+    }
+
     Spec(testPost)
     {
         rest_client client("localhost:9876");

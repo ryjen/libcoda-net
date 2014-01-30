@@ -8,19 +8,26 @@ namespace arg3
         namespace http
         {
 
-            extern const char *const DELETE_METHOD;
+            constexpr const unsigned MAX_URL_LEN = 2000;
 
-            extern const unsigned MAX_URL_LEN;
+            constexpr const char *const SCHEME = "http";
 
-            extern const char *const SCHEME;
+            constexpr const char *const SECURE_SCHEME = "https";
 
-            extern const char *const SECURE_SCHEME;
+            // default port
+            constexpr static int DEFAULT_PORT = 80;
 
-            constexpr static int HTTP_PORT = 80;
+            constexpr static int DEFAULT_SECURE_PORT = 443;
 
-            constexpr static const char *const HTTP_REQUEST = "%s /%s HTTP/1.0";
+            /*!
+             * An http request header preamble
+             */
+            constexpr static const char *const REQUEST_HEADER = "%s /%s HTTP/1.0";
 
-            constexpr static const char *const HTTP_RESPONSE = "HTTP / 1.1 %d %s";
+            /*!
+             * An http response header preamble
+             */
+            constexpr static const char *const RESPONSE_HEADER = "HTTP / 1.1 %d %s";
 
             typedef enum
             {

@@ -23,6 +23,7 @@ AC_ARG_WITH([curl],
 if test "x$without_curl" != xtrue; then
 	AC_CHECK_LIB(curl, curl_easy_init)
 fi
+AC_CHECK_LIB(ssl, SSL_library_init)
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h])
