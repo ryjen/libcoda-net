@@ -176,7 +176,7 @@ namespace arg3
             /*!
              * puts the socket in listen mode
              */
-            bool listen();
+            virtual bool listen();
 
             /*!
              * sets the socket in blocking or non blocking mode

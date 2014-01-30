@@ -47,12 +47,15 @@ namespace arg3
         void socket_server::close()
         {
             socket::close();
+
+            notify_stop();
         }
 
         void socket_server::stop()
         {
             close();
         }
+
         void socket_server::add_listener(socket_server_listener *listener)
         {
             listeners_.push_back(listener);
@@ -90,12 +93,21 @@ namespace arg3
 
         thread socket_server::startThread()
         {
-            return thread(&socket_server::loop, this);
+            return thread(&socket_server::run, this);
+        }
+
+        bool socket_server::listen()
+        {
+            bool success = socket::listen();
+
+            notify_start();
+
+            return success;
         }
 
         void socket_server::start()
         {
-            loop();
+            run();
         }
 
         void socket_server::on_poll()
@@ -112,7 +124,7 @@ namespace arg3
             sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
         }
 
-        void socket_server::update()
+        void socket_server::poll()
         {
             static struct timeval null_time = {0};
 
@@ -201,6 +213,8 @@ namespace arg3
                 return false;
             });
 
+
+            // strategically placed
             notify_poll();
 
             /* write to all writable connections, removing failed sockets */
@@ -224,16 +238,17 @@ namespace arg3
             });
         }
 
-        void socket_server::loop()
+        void socket_server::run()
         {
             struct timeval last_time;
 
             if (!is_valid())
-                listen();
+            {
+                if (!listen())
+                    return;
+            }
 
             gettimeofday(&last_time, NULL);
-
-            on_start();
 
             while (is_valid())
             {
@@ -278,10 +293,8 @@ namespace arg3
 
                 gettimeofday(&last_time, NULL);
 
-                update();
+                poll();
             }
-
-            on_stop();
         }
     }
 }

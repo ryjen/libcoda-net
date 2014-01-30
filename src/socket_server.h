@@ -110,18 +110,20 @@ namespace arg3
              * - will do nothing if the server is not alive
              * - is called by the server based on the poll frequency
              */
-            void update();
+            void poll();
 
             void close();
 
             void stop();
+
+            bool listen();
 
         protected:
 
             /*!
              * starts a syncronous loop of updating connections
              */
-            void loop();
+            void run();
 
             /*!
              * can override these without adding a listener

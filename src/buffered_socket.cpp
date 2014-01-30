@@ -67,6 +67,7 @@ namespace arg3
             if (pos == inBuffer_.end())
                 return string(inBuffer_.begin(), inBuffer_.end());
 
+            string temp(inBuffer_.begin(), pos);
 
             /* Skip all new line characters */
             while (pos != inBuffer_.end() &&
@@ -74,8 +75,6 @@ namespace arg3
             {
                 pos++;
             }
-
-            string temp(inBuffer_.begin(), pos);
 
             inBuffer_.erase(inBuffer_.begin(), pos);
 
