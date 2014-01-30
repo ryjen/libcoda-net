@@ -27,11 +27,11 @@ namespace arg3
 
         socket::data_buffer::iterator telnet_client::handle_telopt(const socket::data_buffer::iterator &it)
         {
-            if ((it + 1) == inBuffer_.end()) return pos;
+            if ((it + 1) == inBuffer_.end()) return it;
 
             on_telopt(*it, *(it + 1));
 
-            if (it + 2 == inBuffer_.end()) return pos;
+            if (it + 2 == inBuffer_.end()) return it;
 
             return inBuffer_.erase(it, it + 2);
         }
