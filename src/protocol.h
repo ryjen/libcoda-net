@@ -16,11 +16,19 @@ namespace arg3
 
             extern const char *const SECURE_SCHEME;
 
+            constexpr static int HTTP_PORT = 80;
+
+            constexpr static const char *const HTTP_REQUEST = "%s /%s HTTP/1.0";
+
+            constexpr static const char *const HTTP_RESPONSE = "HTTP / 1.1 %d %s";
+
             typedef enum
             {
                 GET, POST, PUT, DELETE
             }
             method;
+
+            constexpr static const char *const method_names[] = { "GET", "POST", "PUT", "DELETE" };
         }
     }
 }

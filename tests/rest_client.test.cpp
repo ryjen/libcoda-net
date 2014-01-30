@@ -106,7 +106,7 @@ Context(rest_client_test)
 
     Spec(testGet)
     {
-        rest_client client("localhost:9876", "1");
+        rest_client client("localhost:9876");
 
         testFactory.set_response("Hello, World!");
 
@@ -124,7 +124,7 @@ Context(rest_client_test)
 
     Spec(testPost)
     {
-        rest_client client("localhost:9876", "1");
+        rest_client client("localhost:9876");
 
         client.set_payload("Hello, World!");
 

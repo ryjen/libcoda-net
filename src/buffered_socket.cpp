@@ -5,11 +5,19 @@ namespace arg3
     namespace net
     {
 
-        static const socket::data_type NEWLINE[] = { '\r', '\n' };
+        static const socket::data_buffer NEWLINE = { '\r', '\n' };
+
+        buffered_socket::buffered_socket()
+        {}
 
         buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr), listeners_()
         {
         }
+
+        buffered_socket::buffered_socket(const std::string &host, const int port) : socket(host, port)
+        {
+        }
+
 
         buffered_socket::buffered_socket(buffered_socket &&other) : socket(std::move(other)), inBuffer_(std::move(other.inBuffer_)),
             outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
@@ -57,21 +65,24 @@ namespace arg3
 
         string buffered_socket::readln()
         {
-            if (inBuffer_.empty()) return string(inBuffer_.begin(), inBuffer_.end());
-
-            data_type needle[] = { '\n', '\r' };
+            if (inBuffer_.empty()) return string();
 
             /* find a new line character */
-            auto pos = find_first_of(inBuffer_.begin(), inBuffer_.end(), needle, needle + 2);
+            auto pos = find_first_of(inBuffer_.begin(), inBuffer_.end(), NEWLINE.begin(), NEWLINE.end());
 
             if (pos == inBuffer_.end())
-                return string(inBuffer_.begin(), inBuffer_.end());
+            {
+                string temp(inBuffer_.begin(), inBuffer_.end());
+
+                inBuffer_.clear();
+
+                return temp;
+            }
 
             string temp(inBuffer_.begin(), pos);
 
             /* Skip all new line characters */
-            while (pos != inBuffer_.end() &&
-                    (*pos == '\n' || *pos == '\r'))
+            while (pos != inBuffer_.end() && find(NEWLINE.begin(), NEWLINE.end(), *pos) != NEWLINE.end())
             {
                 pos++;
             }
@@ -104,13 +115,13 @@ namespace arg3
         buffered_socket &buffered_socket::writeln(const string &value)
         {
             outBuffer_.insert(outBuffer_.end(), value.begin(), value.end());
-            outBuffer_.insert(outBuffer_.end(), NEWLINE, NEWLINE + 2);
+            outBuffer_.insert(outBuffer_.end(), NEWLINE.begin(), NEWLINE.end());
             return *this;
         }
 
         buffered_socket &buffered_socket::writeln()
         {
-            outBuffer_.insert(outBuffer_.end(), NEWLINE, NEWLINE + 2);
+            outBuffer_.insert(outBuffer_.end(), NEWLINE.begin(), NEWLINE.end());
             return *this;
         }
 

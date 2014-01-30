@@ -4,8 +4,9 @@
 #include "config.h"
 
 #ifdef HAVE_LIBCURL
-
 #include <curl/curl.h>
+#endif
+
 #include "protocol.h"
 #include <string>
 #include <map>
@@ -19,7 +20,7 @@ namespace arg3
         class rest_client
         {
         public:
-            rest_client(const string &host, const string &version);
+            rest_client(const string &host);
             rest_client();
             virtual ~rest_client();
             rest_client(const rest_client &other);
@@ -32,7 +33,6 @@ namespace arg3
             string header(const string &key);
 
             string host() const;
-            string version() const;
             string payload() const;
             int response_code() const;
             string response() const;
@@ -40,7 +40,6 @@ namespace arg3
             bool is_secure() const;
 
             void set_host(const string &);
-            void set_version(const string &);
 
             rest_client &set_payload(const string &value);
 
@@ -59,7 +58,6 @@ namespace arg3
         private:
             string scheme_;
             string host_;
-            string version_;
             string payload_;
             int responseCode_;
             string response_;
@@ -67,7 +65,5 @@ namespace arg3
         };
     }
 }
-
-#endif
 
 #endif

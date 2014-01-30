@@ -1,14 +1,19 @@
 #include "config.h"
 
-#ifdef HAVE_LIBCURL
-
 #include "rest_client.h"
 #include "exception.h"
+
+#ifndef HAVE_LIBCURL
+#include "buffered_socket.h"
+#endif
 
 namespace arg3
 {
     namespace net
     {
+
+#ifdef HAVE_LIBCURL
+
         size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
         {
             if (s == NULL) return 0;
@@ -25,13 +30,16 @@ namespace arg3
 
             return new_len;
         }
+#endif
 
-        rest_client::rest_client(const string &host, const string &version) : scheme_(http::SCHEME), host_(host), version_(version)
+        rest_client::rest_client(const string &host) : scheme_(http::SCHEME), host_(host)
         {
+            add_header("User-Agent", "libarg3net");
         }
 
         rest_client::rest_client()
         {
+            add_header("User-Agent", "libarg3net");
         }
 
         rest_client::~rest_client()
@@ -39,44 +47,36 @@ namespace arg3
         }
 
         rest_client::rest_client(const rest_client &other) : scheme_(other.scheme_), host_(other.host_),
-            version_(other.version_), payload_(other.payload_), responseCode_(other.responseCode_),
+            payload_(other.payload_), responseCode_(other.responseCode_),
             response_(other.response_), headers_(other.headers_)
         {
         }
 
         rest_client::rest_client(rest_client &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
-            version_(std::move(other.version_)), payload_(std::move(other.payload_)), responseCode_(other.responseCode_),
+            payload_(std::move(other.payload_)), responseCode_(other.responseCode_),
             response_(std::move(other.response_)), headers_(std::move(other.headers_))
         {
         }
 
         rest_client &rest_client::operator=(const rest_client &other)
         {
-            if (this != &other)
-            {
-                scheme_ = other.scheme_;
-                host_ = other.host_;
-                version_ = other.version_;
-                payload_ = other.payload_;
-                responseCode_ = other.responseCode_;
-                response_ = other.response_;
-                headers_ = other.headers_;
-            }
+            scheme_ = other.scheme_;
+            host_ = other.host_;
+            payload_ = other.payload_;
+            responseCode_ = other.responseCode_;
+            response_ = other.response_;
+            headers_ = other.headers_;
             return *this;
         }
 
         rest_client &rest_client::operator=(rest_client && other)
         {
-            if (this != &other)
-            {
-                scheme_ = std::move(other.scheme_);
-                host_ = std::move(other.host_);
-                version_ = std::move(other.version_);
-                payload_ = std::move(other.payload_);
-                responseCode_ = std::move(other.responseCode_);
-                response_ = std::move(other.response_);
-                headers_ = std::move(other.headers_);
-            }
+            scheme_ = std::move(other.scheme_);
+            host_ = std::move(other.host_);
+            payload_ = std::move(other.payload_);
+            responseCode_ = std::move(other.responseCode_);
+            response_ = std::move(other.response_);
+            headers_ = std::move(other.headers_);
             return *this;
         }
 
@@ -93,11 +93,6 @@ namespace arg3
         string rest_client::header(const string &key)
         {
             return headers_[key];
-        }
-
-        string rest_client::version() const
-        {
-            return version_;
         }
 
         string rest_client::host() const
@@ -130,11 +125,6 @@ namespace arg3
             host_ = host;
         }
 
-        void rest_client::set_version(const string &version)
-        {
-            version_ = version;
-        }
-
         void rest_client::set_secure(bool value)
         {
             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
@@ -148,9 +138,10 @@ namespace arg3
 
         rest_client &rest_client::request(http::method method, const string &path)
         {
-            struct curl_slist *headers = NULL;
-
             char buf[http::MAX_URL_LEN + 1];
+
+#ifdef HAVE_LIBCURL
+            struct curl_slist *headers = NULL;
 
             CURL *curl_ = curl_easy_init();
 
@@ -159,7 +150,7 @@ namespace arg3
                 throw rest_exception("unable to initialize request");
             }
 
-            snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s/%s", scheme_.c_str(), host_.c_str(), version_.c_str(), path.c_str());
+            snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", scheme_.c_str(), host_.c_str(), path.c_str());
 
             curl_easy_setopt(curl_, CURLOPT_URL, buf);
 
@@ -207,7 +198,87 @@ namespace arg3
             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
 
             curl_easy_cleanup(curl_);
+#else
+            buffered_socket sock;
 
+            // create the socket based on hostname and port
+            auto pos = host().find(':');
+
+            if (pos != string::npos)
+            {
+                string hostname = host().substr(0, pos);
+                int port = stoi(host().substr(pos + 1));
+                sock.connect(hostname, port);
+            }
+            else
+            {
+                sock.connect(host(), http::HTTP_PORT);
+            }
+
+            // send the method and path
+            snprintf(buf, http::MAX_URL_LEN, http::HTTP_REQUEST, http::method_names[method], path.c_str());
+
+            sock.writeln(buf);
+
+            // specify the host
+            snprintf(buf, http::MAX_URL_LEN, "Host: %s", host().c_str());
+
+            sock.writeln(buf);
+
+            // add the headers
+            for (auto & h : headers_)
+            {
+                snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
+
+                sock.writeln(buf);
+            }
+
+            // if we have a payload, add the size
+            if (!payload_.empty())
+            {
+                snprintf(buf, http::MAX_URL_LEN, "Content-Size: %ld", payload_.size());
+
+                sock.writeln(buf);
+            }
+
+            // finish header
+            sock.writeln();
+
+            // add the payload
+            if (payload_.empty())
+            {
+                sock.writeln(payload_);
+            }
+
+            sock.write_from_buffer();
+
+            sock.read_to_buffer();
+
+            string line = sock.readln();
+
+            if (sscanf(line.c_str(), http::HTTP_RESPONSE, &responseCode_, buf) == 2)
+            {
+                // parse out the rest of the header
+                while (!line.empty())
+                {
+                    line = sock.readln();
+                    response_ += line;
+                }
+                response_.clear();
+            }
+            else
+            {
+                // could be plain text
+                response_ = line;
+            }
+
+            auto input = sock.input();
+
+            if (!input.empty())
+                response_.append(input.begin(), input.end());
+
+            sock.close();
+#endif
             return *this;
         }
 
@@ -233,4 +304,3 @@ namespace arg3
     }
 }
 
-#endif

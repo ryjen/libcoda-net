@@ -62,6 +62,10 @@ namespace arg3
              */
             buffered_socket(SOCKET sock, const sockaddr_in &addr);
 
+            buffered_socket(const std::string &host, const int port);
+
+            buffered_socket();
+
             /*!
             * Non copyable
             */
@@ -180,6 +184,7 @@ namespace arg3
             virtual void on_connect();
             virtual void on_close();
 
+            /* the actual buffers */
             data_buffer inBuffer_;
             data_buffer outBuffer_;
         private:

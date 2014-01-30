@@ -69,6 +69,8 @@ namespace arg3
 
         int socket::send ( const data_buffer &s, int flags )
         {
+            if (s.size() == 0) return 0;
+
             return ::send ( sock_, &s[0], s.size(), flags );
         }
 
@@ -159,7 +161,8 @@ namespace arg3
 
         bool socket::connect ( const string &host, const int port )
         {
-            if ( ! is_valid() ) return false;
+
+            if ( ! is_valid() ) create();
 
             struct hostent *hp;
 

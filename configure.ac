@@ -12,8 +12,17 @@ LT_INIT
 AC_PROG_CXX
 AC_PROG_CC
 
+AC_ARG_WITH([curl],
+            [AS_HELP_STRING([--without-curl],
+              [use the curl library for http transport])],
+            [without_curl=true],
+            [])
+
 # Checks for libraries.
-AC_CHECK_LIB(curl, curl_easy_init)
+
+if test "x$without_curl" != xtrue; then
+	AC_CHECK_LIB(curl, curl_easy_init)
+fi
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h])
