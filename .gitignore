@@ -25,3 +25,4 @@ stamp-h1
 *.status
 config.h
 arg3net_test
+*~
