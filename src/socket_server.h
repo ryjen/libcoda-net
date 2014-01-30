@@ -107,7 +107,8 @@ namespace arg3
 
             /*!
              * updates the servers connections (performs read/writes)
-             * will do nothing if the server is not alive
+             * - will do nothing if the server is not alive
+             * - is called by the server based on the poll frequency
              */
             void update();
 
