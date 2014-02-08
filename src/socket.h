@@ -47,7 +47,7 @@ namespace arg3
             /*!
              * the base data type for sockets
              */
-            typedef char data_type;
+            typedef unsigned char data_type;
 
             /*!
              * data type for a data buffer
