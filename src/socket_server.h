@@ -82,7 +82,7 @@ namespace arg3
              */
             void start();
 
-            thread startThread();
+            thread start_thread();
 
             /*!
              * Sets the frequency of connection updates (used when looping)

@@ -87,7 +87,7 @@ Context(rest_client_test)
     {
         try
         {
-            serverThread = testServer.startThread();
+            serverThread = testServer.start_thread();
 
             //log::trace("Mock server started");
         }

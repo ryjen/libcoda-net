@@ -91,7 +91,7 @@ namespace arg3
             }
         }
 
-        thread socket_server::startThread()
+        thread socket_server::start_thread()
         {
             return thread(&socket_server::run, this);
         }

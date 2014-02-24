@@ -1,6 +1,7 @@
-#include "client.h"
+#include "telnet_client.h"
 #include "protocol.h"
 #include <algorithm>
+#include <cassert>
 
 namespace arg3
 {
@@ -8,19 +9,6 @@ namespace arg3
     {
         telnet_client::telnet_client(SOCKET sock, const sockaddr_in &addr) : buffered_socket(sock, addr)
         {}
-
-        void telnet_client::on_telopt(socket::data_type type, socket::data_type option)
-        {
-            switch (type)
-            {
-
-            }
-        }
-
-        void telnet_client::on_sub_neg(socket::data_type type, const socket::data_buffer &params)
-        {
-
-        }
 
         void telnet_client::on_will_read()
         {}
@@ -82,6 +70,16 @@ namespace arg3
 
                 pos = find(pos, inBuffer_.end(), telnet::IAC);
             }
+        }
+
+        void telnet_client::send_telopt(socket::data_type action, socket::data_type option_value)
+        {
+            assert(action == telnet::WILL || action == telnet::DO
+                   || action == telnet::WONT || action == telnet::DONT);
+
+            const socket::data_type packet[] = { telnet::IAC, action, option_value };
+
+            send( (void *) packet, 3);
         }
 
         void telnet_client::on_will_write()
