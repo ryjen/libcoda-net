@@ -9,8 +9,13 @@ AM_INIT_AUTOMAKE
 LT_INIT
 
 # Checks for programs.
-AC_PROG_CXX
-AC_PROG_CC
+AC_PROG_CXX([clang++ g++])
+
+if test "x$CXX" == "xclang++"; then
+	AC_SUBST([AM_CPPFLAGS], ["-std=c++11 -stdlib=libc++ -Wall -Werror"])
+else
+	AC_SUBST([AM_CPPFLAGS], ["-std=c++0x -Wall -Werror"])
+fi
 
 AC_ARG_WITH([curl],
             [AS_HELP_STRING([--without-curl],
@@ -36,5 +41,5 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostbyname gettimeofday inet_ntoa memset select socket strerror])
 
-AC_CONFIG_FILES([Makefile src/Makefile src/telnet/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT

@@ -19,8 +19,6 @@ namespace arg3
 
             on_telopt(*it, *(it + 1));
 
-            if (it + 2 == inBuffer_.end()) return it;
-
             return inBuffer_.erase(it, it + 2);
         }
 
