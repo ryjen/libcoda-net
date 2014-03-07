@@ -48,8 +48,12 @@ namespace arg3
 
             int status = socket::recv(chunk);
 
+            int size = 0;
+
             while (status > 0)
             {
+                size += chunk.size();
+
                 inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
 
                 status = socket::recv(chunk);
@@ -57,7 +61,7 @@ namespace arg3
 
             bool success = status == 0 || errno == EWOULDBLOCK;
 
-            if (success)
+            if (success && size > 0)
                 notify_did_read();
 
             return success;
