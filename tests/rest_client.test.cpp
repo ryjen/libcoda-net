@@ -1,4 +1,4 @@
-#ifndef ARG3_NO_CURL
+#ifndef HAVE_LIBCURL
 
 #include <igloo/igloo.h>
 #include "rest_client.h"

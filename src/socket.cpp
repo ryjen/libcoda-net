@@ -85,9 +85,9 @@ namespace arg3
             if (s.empty()) return 0;
 #ifdef HAVE_LIBSSL
             if (sslHandle_)
-                return SSL_write(sock_, &s[0], s.size() );
+                return SSL_write(sock_, s.data(), s.size() );
 #endif
-            return ::send ( sock_, &s[0], s.size(), flags );
+            return ::send ( sock_, s.data(), s.size(), flags );
         }
 
         int socket::send( void *s, size_t len, int flags)
@@ -155,10 +155,14 @@ namespace arg3
             if (status > 0)
             {
                 s.insert(s.end(), &buf[0], &buf[status]);
+
+                on_recv(s);
             }
 
             return status;
         }
+
+        void socket::on_recv(data_buffer &s) {}
 
         socket &socket::operator << ( const data_buffer &s )
         {

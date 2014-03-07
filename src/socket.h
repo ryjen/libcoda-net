@@ -198,6 +198,8 @@ namespace arg3
             static const int INVALID = -1;
             static const int BACKLOG_SIZE = 10;
 
+            virtual void on_recv(data_buffer &s);
+
             // the raw socket
             SOCKET sock_;
             // the socket address

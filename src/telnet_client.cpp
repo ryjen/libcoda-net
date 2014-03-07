@@ -10,63 +10,68 @@ namespace arg3
         telnet_client::telnet_client(SOCKET sock, const sockaddr_in &addr) : buffered_socket(sock, addr)
         {}
 
-        void telnet_client::on_will_read()
+        telnet_client::telnet_client(const string &host, const int port) : buffered_socket(host, port)
         {}
 
-        socket::data_buffer::iterator telnet_client::handle_telopt(const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_client::handle_telopt(data_buffer &s, const socket::data_buffer::iterator &it)
         {
-            if ((it + 1) == inBuffer_.end()) return it;
+            auto pos = (it + 1);
 
-            on_telopt(*it, *(it + 1));
+            if (pos == s.end()) return pos;
 
-            return inBuffer_.erase(it, it + 2);
+            on_telopt(*it, *pos);
+
+            return s.erase(it, pos + 1);
         }
 
-        socket::data_buffer::iterator telnet_client::handle_sub_neg(const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_client::handle_sub_neg(data_buffer &s, const socket::data_buffer::iterator &it)
         {
-            if ((it + 1) == inBuffer_.end())
+            if ((it + 1) == s.end())
                 return it;
 
             auto type = *(it + 1);
 
-            auto pos = find(it + 1, inBuffer_.end(), telnet::IAC);
+            auto pos = find(it + 1, s.end(), telnet::IAC);
 
-            if (pos == inBuffer_.end() || *pos != telnet::IAC)
+            if (pos == s.end() || *pos != telnet::IAC)
                 return it;
 
-            if ((pos + 1) == inBuffer_.end() || *(pos + 1) != telnet::SE || (it + 2) == inBuffer_.end())
+            if ((pos + 1) == s.end() || *(pos + 1) != telnet::SE || (it + 2) == s.end())
                 return it;
 
             socket::data_buffer buf(it + 2, pos);
 
             on_sub_neg(type, buf);
 
-            return inBuffer_.erase(it, pos + 2);
+            return s.erase(it, pos + 2);
         }
 
-        void telnet_client::on_did_read()
+        void telnet_client::on_recv(data_buffer &s)
         {
-            auto pos = find(inBuffer_.begin(), inBuffer_.end(), telnet::IAC);
+            auto pos = find(s.begin(), s.end(), telnet::IAC);
 
-            while (pos != inBuffer_.end() && ++pos != inBuffer_.end())
+            while (pos != s.end() && (pos + 1) != s.end())
             {
-                switch (*pos)
+                auto next = s.erase(pos);
+
+                switch (*next)
                 {
                 case telnet::IAC:
-                    pos = inBuffer_.erase(pos - 1, pos);
+                    pos = s.erase(next);
                     break;
                 case telnet::WILL:
                 case telnet::WONT:
                 case telnet::DO:
                 case telnet::DONT:
-                    pos = handle_telopt(pos);
+                    pos = handle_telopt(s, next);
                     break;
 
                 case telnet::SB:
-                    pos = handle_sub_neg(pos);
+                    pos = handle_sub_neg(s, next);
+                    break;
                 }
 
-                pos = find(pos, inBuffer_.end(), telnet::IAC);
+                pos = find(pos, s.end(), telnet::IAC);
             }
         }
 
@@ -79,18 +84,6 @@ namespace arg3
 
             send( (void *) packet, 3);
         }
-
-        void telnet_client::on_will_write()
-        {}
-
-        void telnet_client::on_did_write()
-        {}
-
-        void telnet_client::on_connect()
-        {}
-
-        void telnet_client::on_close()
-        {}
 
     }
 }
