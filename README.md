@@ -3,6 +3,7 @@ libarg3net
 
 useful code for network related activities
 
+[View Testing Code Coverage](http://htmlpreview.github.com/?https://github.com/c0der78/arg3net/blob/master/coverage/index.html)
 
 Building
 ========
