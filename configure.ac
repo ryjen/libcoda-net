@@ -8,6 +8,10 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE
 LT_INIT
 
+: ${CXXFLAGS=""}
+
+AC_CONFIG_MACRO_DIR([m4])
+
 # Checks for programs.
 AC_PROG_CXX([clang++ g++])
 
@@ -22,6 +26,12 @@ AC_ARG_WITH([curl],
               [use the curl library for http transport])],
             [without_curl=true],
             [])
+
+m4_include([m4/gcov.m4])
+AC_TDD_GCOV
+AC_SUBST(COVERAGE_CFLAGS)
+AC_SUBST(COVERAGE_CXXFLAGS)
+AC_SUBST(COVERAGE_LDFLAGS)
 
 # Checks for libraries.
 

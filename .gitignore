@@ -26,3 +26,5 @@ stamp-h1
 config.h
 arg3net_test
 *~
+*.gcno
+coverage.info

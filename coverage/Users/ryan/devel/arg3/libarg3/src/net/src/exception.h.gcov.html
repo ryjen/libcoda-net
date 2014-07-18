@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Code Coverage - /Users/ryan/devel/arg3/libarg3/src/net/src/exception.h</title>
+  <link rel="stylesheet" type="text/css" href="../../../../../../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../../../../../../index.html">top level</a> - <a href="index.html">Users/ryan/devel/arg3/libarg3/src/net/src</a> - exception.h<span style="font-size: 80%;"> (source / <a href="exception.h.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Code Coverage</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">5</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2014-07-18</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">11</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Legend:</td>
+            <td class="headerValueLeg">            Lines:
+            <span class="coverLegendCov">hit</span>
+            <span class="coverLegendNoCov">not hit</span>
+</td>
+            <td></td>
+          </tr>
+          <tr><td><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #ifndef ARG3_NET_EXCEPTION_H</a>
+<span class="lineNum">       2 </span>            : #define ARG3_NET_EXCEPTION_H
+<span class="lineNum">       3 </span>            : 
+<span class="lineNum">       4 </span>            : #include &lt;exception&gt;
+<span class="lineNum">       5 </span>            : #include &lt;string&gt;
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : namespace arg3
+<span class="lineNum">       8 </span>            : {
+<span class="lineNum">       9 </span>            :     namespace net
+<span class="lineNum">      10 </span>            :     {
+<span class="lineNum">      11 </span>            :         /*!
+<span class="lineNum">      12 </span>            :          * custom exception
+<span class="lineNum">      13 </span>            :          */
+<span class="lineNum">      14 </span>            :         class socket_exception : public std::exception
+<a name="15"><span class="lineNum">      15 </span>            :         {</a>
+<a name="16"><span class="lineNum">      16 </span>            :         public:</a>
+<span class="lineNum">      17 </span><span class="lineNoCov">          0 :             socket_exception ( const std::string &amp;s ) : message_ ( s ) {};</span>
+<span class="lineNum">      18 </span><span class="lineNoCov">          0 :             virtual ~socket_exception() throw() {}</span>
+<span class="lineNum">      19 </span>            :             socket_exception (const socket_exception &amp;e) : std::exception(e), message_(e.message_)
+<span class="lineNum">      20 </span>            :             {}
+<span class="lineNum">      21 </span>            :             socket_exception (socket_exception &amp;&amp;e) : std::exception(std::move(e)), message_(std::move(e.message_))
+<span class="lineNum">      22 </span>            :             {}
+<span class="lineNum">      23 </span>            : 
+<span class="lineNum">      24 </span>            :             socket_exception &amp;operator=(const socket_exception &amp;e)
+<span class="lineNum">      25 </span>            :             {
+<span class="lineNum">      26 </span>            :                 if (this != &amp;e)
+<span class="lineNum">      27 </span>            :                 {
+<span class="lineNum">      28 </span>            :                     std::exception::operator=(e);
+<span class="lineNum">      29 </span>            :                     message_ = e.message_;
+<span class="lineNum">      30 </span>            :                 }
+<span class="lineNum">      31 </span>            :                 return *this;
+<span class="lineNum">      32 </span>            :             }
+<span class="lineNum">      33 </span>            : 
+<span class="lineNum">      34 </span>            :             socket_exception &amp;operator=(socket_exception &amp;&amp; e)
+<span class="lineNum">      35 </span>            :             {
+<span class="lineNum">      36 </span>            :                 if (this != &amp;e)
+<span class="lineNum">      37 </span>            :                 {
+<span class="lineNum">      38 </span>            :                     std::exception::operator=(std::move(e));
+<span class="lineNum">      39 </span>            :                     message_ = std::move(e.message_);
+<span class="lineNum">      40 </span>            :                 }
+<span class="lineNum">      41 </span>            :                 return *this;
+<a name="42"><span class="lineNum">      42 </span>            :             }</a>
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span>            :             virtual const char *what() const throw()
+<span class="lineNum">      45 </span>            :             {
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :                 return message_.c_str();</span>
+<span class="lineNum">      47 </span>            :             }
+<span class="lineNum">      48 </span>            :         private:
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span>            :             std::string message_;
+<span class="lineNum">      51 </span>            : 
+<span class="lineNum">      52 </span>            :         };
+<span class="lineNum">      53 </span>            : 
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            :         /*!
+<span class="lineNum">      56 </span>            :          * exception used by the rest client class
+<span class="lineNum">      57 </span>            :          */
+<span class="lineNum">      58 </span>            :         class rest_exception : public socket_exception
+<a name="59"><span class="lineNum">      59 </span>            :         {</a>
+<a name="60"><span class="lineNum">      60 </span>            :         public:</a>
+<span class="lineNum">      61 </span><span class="lineNoCov">          0 :             rest_exception ( const std::string &amp;s ) : socket_exception ( s ) {};</span>
+<span class="lineNum">      62 </span><span class="lineNoCov">          0 :             virtual ~rest_exception() throw() {}</span>
+<span class="lineNum">      63 </span>            :             rest_exception (const rest_exception &amp;e) : socket_exception(e)
+<span class="lineNum">      64 </span>            :             {}
+<span class="lineNum">      65 </span>            :             rest_exception (rest_exception &amp;&amp;e) : socket_exception(std::move(e))
+<span class="lineNum">      66 </span>            :             {}
+<span class="lineNum">      67 </span>            : 
+<span class="lineNum">      68 </span>            :         };
+<span class="lineNum">      69 </span>            :     }
+<span class="lineNum">      70 </span>            : }
+<span class="lineNum">      71 </span>            : 
+<span class="lineNum">      72 </span>            : #endif
+<span class="lineNum">      73 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
