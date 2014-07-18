@@ -1,7 +1,7 @@
 
 noinst_PROGRAMS = arg3net_test
 
-arg3net_test_SOURCES = arg3.test.cpp rest_client.test.cpp telnet_client.test.cpp
+arg3net_test_SOURCES = arg3.test.cpp http_client.test.cpp telnet_client.test.cpp
 
 AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Ivendor -Wall -Werror
 

@@ -1,5 +1,5 @@
-#ifndef ARG3_NET_REST_CLIENT_H
-#define ARG3_NET_REST_CLIENT_H
+#ifndef ARG3_NET_http_client_H
+#define ARG3_NET_http_client_H
 
 #include "config.h"
 
@@ -17,16 +17,16 @@ namespace arg3
 {
     namespace net
     {
-        class rest_client
+        class http_client
         {
         public:
-            rest_client(const string &host);
-            rest_client();
-            virtual ~rest_client();
-            rest_client(const rest_client &other);
-            rest_client(rest_client &&other);
-            rest_client &operator=(const rest_client &other);
-            rest_client &operator=(rest_client && other);
+            http_client(const string &host);
+            http_client();
+            virtual ~http_client();
+            http_client(const http_client &other);
+            http_client(http_client &&other);
+            http_client &operator=(const http_client &other);
+            http_client &operator=(http_client && other);
 
             /*!
              * adds an HTTP header to the request
@@ -76,32 +76,32 @@ namespace arg3
             /*!
              * sets the payload for this request
              */
-            rest_client &set_payload(const string &value);
+            http_client &set_payload(const string &value);
 
             /*!
              * performs a request
              */
-            rest_client &request(http::method method, const string &path);
+            http_client &request(http::method method, const string &path);
 
             /*!
              * performs a GET request
              */
-            rest_client &get(const string &path);
+            http_client &get(const string &path);
 
             /*!
              * performs a POST request
              */
-            rest_client &post(const string &path);
+            http_client &post(const string &path);
 
             /*!
              * performs a PUT request
              */
-            rest_client &put(const string &path);
+            http_client &put(const string &path);
 
             /*!
              * performs a DELETE request
              */
-            rest_client &de1ete(const string &path);
+            http_client &de1ete(const string &path);
 
             /*!
              * sets whether this request uses HTTPS

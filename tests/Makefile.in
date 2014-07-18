@@ -92,7 +92,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_arg3net_test_OBJECTS = arg3.test.$(OBJEXT) \
-	rest_client.test.$(OBJEXT) telnet_client.test.$(OBJEXT)
+	http_client.test.$(OBJEXT) telnet_client.test.$(OBJEXT)
 arg3net_test_OBJECTS = $(am_arg3net_test_OBJECTS)
 arg3net_test_DEPENDENCIES = ../src/libarg3net-0.2.la
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -280,7 +280,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-arg3net_test_SOURCES = arg3.test.cpp rest_client.test.cpp telnet_client.test.cpp
+arg3net_test_SOURCES = arg3.test.cpp http_client.test.cpp telnet_client.test.cpp
 arg3net_test_LDADD = ../src/libarg3net-0.2.la
 all: all-am
 
@@ -337,7 +337,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arg3.test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rest_client.test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/http_client.test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/telnet_client.test.Po@am__quote@
 
 .cpp.o:

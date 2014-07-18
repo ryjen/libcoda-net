@@ -1,6 +1,6 @@
 #include "config.h"
 
-#include "rest_client.h"
+#include "http_client.h"
 #include "exception.h"
 
 #ifndef HAVE_LIBCURL
@@ -32,33 +32,33 @@ namespace arg3
         }
 #endif
 
-        rest_client::rest_client(const string &host) : scheme_(http::SCHEME), host_(host)
+        http_client::http_client(const string &host) : scheme_(http::SCHEME), host_(host)
         {
             add_header("User-Agent", "libarg3net");
         }
 
-        rest_client::rest_client()
+        http_client::http_client()
         {
             add_header("User-Agent", "libarg3net");
         }
 
-        rest_client::~rest_client()
+        http_client::~http_client()
         {
         }
 
-        rest_client::rest_client(const rest_client &other) : scheme_(other.scheme_), host_(other.host_),
+        http_client::http_client(const http_client &other) : scheme_(other.scheme_), host_(other.host_),
             payload_(other.payload_), responseCode_(other.responseCode_),
             response_(other.response_), headers_(other.headers_)
         {
         }
 
-        rest_client::rest_client(rest_client &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
+        http_client::http_client(http_client &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
             payload_(std::move(other.payload_)), responseCode_(other.responseCode_),
             response_(std::move(other.response_)), headers_(std::move(other.headers_))
         {
         }
 
-        rest_client &rest_client::operator=(const rest_client &other)
+        http_client &http_client::operator=(const http_client &other)
         {
             scheme_ = other.scheme_;
             host_ = other.host_;
@@ -69,7 +69,7 @@ namespace arg3
             return *this;
         }
 
-        rest_client &rest_client::operator=(rest_client && other)
+        http_client &http_client::operator=(http_client && other)
         {
             scheme_ = std::move(other.scheme_);
             host_ = std::move(other.host_);
@@ -80,63 +80,63 @@ namespace arg3
             return *this;
         }
 
-        void rest_client::add_header(const string &key, const string &value)
+        void http_client::add_header(const string &key, const string &value)
         {
             headers_[key] = value;
         }
 
-        void rest_client::remove_header(const string &key)
+        void http_client::remove_header(const string &key)
         {
             headers_.erase(key);
         }
 
-        string rest_client::header(const string &key)
+        string http_client::header(const string &key)
         {
             return headers_[key];
         }
 
-        string rest_client::host() const
+        string http_client::host() const
         {
             return host_;
         }
 
-        int rest_client::response_code() const
+        int http_client::response_code() const
         {
             return responseCode_;
         }
 
-        string rest_client::payload() const
+        string http_client::payload() const
         {
             return payload_;
         }
 
-        string rest_client::response() const
+        string http_client::response() const
         {
             return response_;
         }
 
-        bool rest_client::is_secure() const
+        bool http_client::is_secure() const
         {
             return scheme_ == http::SECURE_SCHEME;
         }
 
-        void rest_client::set_host(const string &host)
+        void http_client::set_host(const string &host)
         {
             host_ = host;
         }
 
-        void rest_client::set_secure(bool value)
+        void http_client::set_secure(bool value)
         {
             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
         }
 
-        rest_client &rest_client::set_payload(const string &payload)
+        http_client &http_client::set_payload(const string &payload)
         {
             payload_ = payload;
             return *this;
         }
 
-        rest_client &rest_client::request(http::method method, const string &path)
+        http_client &http_client::request(http::method method, const string &path)
         {
             char buf[http::MAX_URL_LEN + 1];
 
@@ -285,25 +285,24 @@ namespace arg3
             return *this;
         }
 
-        rest_client &rest_client::get(const string &path)
+        http_client &http_client::get(const string &path)
         {
             return request(http::GET, path);
         }
 
-        rest_client &rest_client::post(const string &path)
+        http_client &http_client::post(const string &path)
         {
             return request(http::POST, path);
         }
 
-        rest_client &rest_client::put(const string &path)
+        http_client &http_client::put(const string &path)
         {
             return request(http::PUT, path);
         }
 
-        rest_client &rest_client::de1ete(const string &path)
+        http_client &http_client::de1ete(const string &path)
         {
             return request(http::DELETE, path);
         }
     }
 }
-

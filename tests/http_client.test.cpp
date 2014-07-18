@@ -1,7 +1,7 @@
 #ifndef HAVE_LIBCURL
 
 #include <igloo/igloo.h>
-#include "rest_client.h"
+#include "http_client.h"
 #include "socket_server.h"
 #include "buffered_socket.h"
 #include <string>
@@ -81,7 +81,7 @@ socket_server testServer(9876, &testFactory);
 
 thread serverThread;
 
-Context(rest_client_test)
+Context(http_client_test)
 {
     static void SetUpContext()
     {
@@ -106,7 +106,7 @@ Context(rest_client_test)
 
     Spec(testGet)
     {
-        rest_client client("localhost:9876");
+        http_client client("localhost:9876");
 
         testFactory.set_response("Hello, World!");
 
@@ -124,7 +124,7 @@ Context(rest_client_test)
 
     Spec(testSecure)
     {
-        rest_client client("beta.epactnetwork.com");
+        http_client client("beta.epactnetwork.com");
 
         client.set_secure(true);
 
@@ -135,7 +135,7 @@ Context(rest_client_test)
 
     Spec(testPost)
     {
-        rest_client client("localhost:9876");
+        http_client client("localhost:9876");
 
         client.set_payload("Hello, World!");
 
