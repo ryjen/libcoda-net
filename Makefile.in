@@ -791,7 +791,7 @@ uninstall-am:
 @HAVE_GCOV_TRUE@.PHONY: clean-gcda
 @HAVE_GCOV_TRUE@clean-gcda:
 @HAVE_GCOV_TRUE@	@echo Removing old coverage results
-@HAVE_GCOV_TRUE@	-find -name '*.gcda' -print | xargs -r rm
+@HAVE_GCOV_TRUE@	-find $(top_builddir) -name '*.gcda' -print | xargs rm
 
 @HAVE_GCOV_TRUE@.PHONY: coverage-html generate-coverage-html clean-coverage-html
 @HAVE_GCOV_TRUE@coverage-html: clean-gcda
@@ -801,7 +801,7 @@ uninstall-am:
 @HAVE_GCOV_TRUE@generate-coverage-html:
 @HAVE_GCOV_TRUE@	@echo Collecting coverage data
 @HAVE_GCOV_TRUE@	$(LCOV) --directory $(top_builddir) --capture --output-file coverage.info --no-checksum --compat-libtool --gcov-tool /usr/local/bin/gcov-4.2 --no-external
-@HAVE_GCOV_TRUE@	$(GENHTML) --prefix $(top_builddir) --output-directory coverage --title "Code Coverage" --legend --show-details coverage.info
+@HAVE_GCOV_TRUE@	$(GENHTML) --output-directory coverage --title "Code Coverage" --legend --show-details coverage.info
 
 @HAVE_GCOV_TRUE@clean-coverage-html: clean-gcda
 @HAVE_GCOV_TRUE@	-$(LCOV) --directory $(top_builddir) -z

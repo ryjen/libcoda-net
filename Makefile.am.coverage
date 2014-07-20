@@ -6,7 +6,7 @@ if HAVE_GCOV
 .PHONY: clean-gcda
 clean-gcda:
 	@echo Removing old coverage results
-	-find -name '*.gcda' -print | xargs -r rm
+	-find $(top_builddir) -name '*.gcda' -print | xargs rm
 
 .PHONY: coverage-html generate-coverage-html clean-coverage-html
 coverage-html: clean-gcda
@@ -16,7 +16,7 @@ coverage-html: clean-gcda
 generate-coverage-html:
 	@echo Collecting coverage data
 	$(LCOV) --directory $(top_builddir) --capture --output-file coverage.info --no-checksum --compat-libtool --gcov-tool /usr/local/bin/gcov-4.2 --no-external
-	$(GENHTML) --prefix $(top_builddir) --output-directory coverage --title "Code Coverage" --legend --show-details coverage.info
+	$(GENHTML) --output-directory coverage --title "Code Coverage" --legend --show-details coverage.info
 
 clean-coverage-html: clean-gcda
 	-$(LCOV) --directory $(top_builddir) -z
