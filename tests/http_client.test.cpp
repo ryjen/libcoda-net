@@ -124,11 +124,11 @@ Context(http_client_test)
 
     Spec(testSecure)
     {
-        http_client client("beta.epactnetwork.com");
+        http_client client("google.com");
 
         client.set_secure(true);
 
-        client.get("us");
+        client.get("/settings/personalinfo");
 
         Assert::That(client.response().empty(), Equals(false));
     }

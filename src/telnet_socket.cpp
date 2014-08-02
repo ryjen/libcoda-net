@@ -1,4 +1,4 @@
-#include "telnet_client.h"
+#include "telnet_socket.h"
 #include "protocol.h"
 #include <algorithm>
 #include <cassert>
@@ -7,13 +7,13 @@ namespace arg3
 {
     namespace net
     {
-        telnet_client::telnet_client(SOCKET sock, const sockaddr_in &addr) : buffered_socket(sock, addr)
+        telnet_socket::telnet_socket(SOCKET sock, const sockaddr_in &addr) : buffered_socket(sock, addr)
         {}
 
-        telnet_client::telnet_client(const string &host, const int port) : buffered_socket(host, port)
+        telnet_socket::telnet_socket(const string &host, const int port) : buffered_socket(host, port)
         {}
 
-        socket::data_buffer::iterator telnet_client::handle_telopt(data_buffer &s, const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_socket::handle_telopt(data_buffer &s, const socket::data_buffer::iterator &it)
         {
             auto pos = (it + 1);
 
@@ -24,7 +24,7 @@ namespace arg3
             return s.erase(it, pos + 1);
         }
 
-        socket::data_buffer::iterator telnet_client::handle_sub_neg(data_buffer &s, const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_socket::handle_sub_neg(data_buffer &s, const socket::data_buffer::iterator &it)
         {
             if ((it + 1) == s.end())
                 return it;
@@ -46,7 +46,7 @@ namespace arg3
             return s.erase(it, pos + 2);
         }
 
-        void telnet_client::on_recv(data_buffer &s)
+        void telnet_socket::on_recv(data_buffer &s)
         {
             auto pos = find(s.begin(), s.end(), telnet::IAC);
 
@@ -75,7 +75,7 @@ namespace arg3
             }
         }
 
-        void telnet_client::send_telopt(socket::data_type action, socket::data_type option_value)
+        void telnet_socket::send_telopt(socket::data_type action, socket::data_type option_value)
         {
             assert(action == telnet::WILL || action == telnet::DO
                    || action == telnet::WONT || action == telnet::DONT);

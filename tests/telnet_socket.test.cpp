@@ -1,6 +1,6 @@
 
 #include <igloo/igloo.h>
-#include "telnet_client.h"
+#include "telnet_socket.h"
 #include "socket_server.h"
 #include "buffered_socket.h"
 #include "protocol.h"
@@ -15,15 +15,15 @@ using namespace arg3;
 
 using namespace std;
 
-class telnet_test_client : public telnet_client
+class telnet_test_client : public telnet_socket
 {
 
 public:
-    telnet_test_client(SOCKET sock, const sockaddr_in &addr) : telnet_client(sock, addr)
+    telnet_test_client(SOCKET sock, const sockaddr_in &addr) : telnet_socket(sock, addr)
     {
     }
 
-    telnet_test_client(const string &host, const int port) : telnet_client(host, port)
+    telnet_test_client(const string &host, const int port) : telnet_socket(host, port)
     {
 
     }
@@ -62,7 +62,7 @@ private:
 public:
     std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr)
     {
-        auto socket = make_shared<buffered_socket>(sock, addr);
+        auto socket = make_shared<telnet_test_client>(sock, addr);
 
         socket->add_listener(this);
 

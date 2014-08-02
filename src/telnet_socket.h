@@ -1,5 +1,5 @@
-#ifndef ARG3_NET_TELNET_CLIENT_H_
-#define ARG3_NET_TELNET_CLIENT_H_
+#ifndef ARG3_NET_TELNET_SOCKET_H_
+#define ARG3_NET_TELNET_SOCKET_H_
 
 #include "buffered_socket.h"
 
@@ -7,11 +7,11 @@ namespace arg3
 {
     namespace net
     {
-        class telnet_client : public buffered_socket
+        class telnet_socket : public buffered_socket
         {
         public:
-            telnet_client(SOCKET sock, const sockaddr_in &addr);
-            telnet_client(const string &host, const int port);
+            telnet_socket(SOCKET sock, const sockaddr_in &addr);
+            telnet_socket(const string &host, const int port);
         protected:
             virtual void on_telopt(socket::data_type type, socket::data_type option) = 0;
             virtual void on_sub_neg(socket::data_type type, const socket::data_buffer &parameters) = 0;

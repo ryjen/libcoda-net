@@ -126,7 +126,7 @@ am_libarg3net_0_2_la_OBJECTS = libarg3net_0_2_la-buffered_socket.lo \
 	libarg3net_0_2_la-http_client.lo libarg3net_0_2_la-socket.lo \
 	libarg3net_0_2_la-socket_factory.lo \
 	libarg3net_0_2_la-socket_server.lo \
-	libarg3net_0_2_la-telnet_client.lo
+	libarg3net_0_2_la-telnet_socket.lo
 libarg3net_0_2_la_OBJECTS = $(am_libarg3net_0_2_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -326,9 +326,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libarg3net-0.2.la
-libarg3net_0_2_la_SOURCES = buffered_socket.cpp http_client.cpp socket.cpp socket_factory.cpp socket_server.cpp telnet_client.cpp
+libarg3net_0_2_la_SOURCES = buffered_socket.cpp http_client.cpp socket.cpp socket_factory.cpp socket_server.cpp telnet_socket.cpp
 libarg3net_0_2_la_CXXFLAGS = $(LIBARG3NET_0_2_LA_CXXFLAGS) $(COVERAGE_CFLAGS)
-pkginclude_HEADERS = buffered_socket.h exception.h protocol.h http_client.h socket.h socket_factory.h socket_server.h telnet_client.h
+pkginclude_HEADERS = buffered_socket.h exception.h protocol.h http_client.h socket.h socket_factory.h socket_server.h telnet_socket.h
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -429,7 +429,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarg3net_0_2_la-socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarg3net_0_2_la-socket_factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarg3net_0_2_la-socket_server.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarg3net_0_2_la-telnet_client.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarg3net_0_2_la-telnet_socket.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -487,12 +487,12 @@ libarg3net_0_2_la-socket_server.lo: socket_server.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libarg3net_0_2_la_CXXFLAGS) $(CXXFLAGS) -c -o libarg3net_0_2_la-socket_server.lo `test -f 'socket_server.cpp' || echo '$(srcdir)/'`socket_server.cpp
 
-libarg3net_0_2_la-telnet_client.lo: telnet_client.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libarg3net_0_2_la_CXXFLAGS) $(CXXFLAGS) -MT libarg3net_0_2_la-telnet_client.lo -MD -MP -MF $(DEPDIR)/libarg3net_0_2_la-telnet_client.Tpo -c -o libarg3net_0_2_la-telnet_client.lo `test -f 'telnet_client.cpp' || echo '$(srcdir)/'`telnet_client.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libarg3net_0_2_la-telnet_client.Tpo $(DEPDIR)/libarg3net_0_2_la-telnet_client.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='telnet_client.cpp' object='libarg3net_0_2_la-telnet_client.lo' libtool=yes @AMDEPBACKSLASH@
+libarg3net_0_2_la-telnet_socket.lo: telnet_socket.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libarg3net_0_2_la_CXXFLAGS) $(CXXFLAGS) -MT libarg3net_0_2_la-telnet_socket.lo -MD -MP -MF $(DEPDIR)/libarg3net_0_2_la-telnet_socket.Tpo -c -o libarg3net_0_2_la-telnet_socket.lo `test -f 'telnet_socket.cpp' || echo '$(srcdir)/'`telnet_socket.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libarg3net_0_2_la-telnet_socket.Tpo $(DEPDIR)/libarg3net_0_2_la-telnet_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='telnet_socket.cpp' object='libarg3net_0_2_la-telnet_socket.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libarg3net_0_2_la_CXXFLAGS) $(CXXFLAGS) -c -o libarg3net_0_2_la-telnet_client.lo `test -f 'telnet_client.cpp' || echo '$(srcdir)/'`telnet_client.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libarg3net_0_2_la_CXXFLAGS) $(CXXFLAGS) -c -o libarg3net_0_2_la-telnet_socket.lo `test -f 'telnet_socket.cpp' || echo '$(srcdir)/'`telnet_socket.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo
