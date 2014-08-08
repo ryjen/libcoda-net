@@ -22,14 +22,11 @@ namespace arg3
 
         socket_server &socket_server::operator=(socket_server && other)
         {
-            if (this != &other)
-            {
-                socket::operator=(std::move(other));
+            socket::operator=(std::move(other));
 
-                pollFrequency_ = other.pollFrequency_;
+            pollFrequency_ = other.pollFrequency_;
 
-                factory_ = std::move(other.factory_);
-            }
+            factory_ = std::move(other.factory_);
 
             return *this;
         }
