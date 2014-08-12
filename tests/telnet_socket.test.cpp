@@ -1,5 +1,5 @@
 
-#include <igloo/igloo.h>
+#include <bandit/bandit.h>
 #include "telnet_socket.h"
 #include "socket_server.h"
 #include "buffered_socket.h"
@@ -7,7 +7,7 @@
 #include <string>
 #include <thread>
 
-using namespace igloo;
+using namespace bandit;
 
 using namespace arg3::net;
 
@@ -123,54 +123,61 @@ socket_server telnetServer(9876, &telnetFactory);
 
 thread telnetThread;
 
-Context(telnet_client_test)
+go_bandit([]()
 {
-    static void SetUpContext()
+
+    describe("a telnet socket", []()
     {
-        try
+        before_each([]()
         {
-            telnetServer.add_listener(&telnetFactory);
+            try
+            {
+                telnetServer.add_listener(&telnetFactory);
 
-            telnetThread = telnetServer.start_thread();
+                telnetThread = telnetServer.start_thread();
 
-            //log::trace("Mock server started");
-        }
-        catch (const exception &e)
+                //log::trace("Mock server started");
+            }
+            catch (const exception &e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
+        });
+
+        after_each([]()
         {
-            std::cerr << e.what() << std::endl;
-        }
-    }
+            telnetServer.close();
 
-    static void TearDownContext()
-    {
-        telnetServer.close();
+            telnetThread.join();
+        });
 
-        telnetThread.join();
-    }
+        it("supports ECHO", []()
+        {
 
-    Spec(testEcho)
-    {
+            telnet_test_client client("127.0.0.1", 9876);
 
-        telnet_test_client client("127.0.0.1", 9876);
+            client.set_non_blocking(false);
 
-        client.set_non_blocking(false);
+            sleep(1);
 
-        sleep(1);
+            Assert::That(client.is_valid(), Equals(true));
 
-        Assert::That(client.is_valid(), Equals(true));
+            char buf[101] = {0};
+            snprintf(buf, 100, "got %d %d", arg3::net::telnet::WILL, arg3::net::telnet::ECHO);
 
-        char buf[101] = {0};
-        snprintf(buf, 100, "got %d %d", arg3::net::telnet::WILL, arg3::net::telnet::ECHO);
+            string test(buf);
 
-        string test(buf);
+            arg3::net::socket::data_buffer data;
 
-        arg3::net::socket::data_buffer data;
+            client.recv(data);
 
-        client.recv(data);
+            string output(client.output().begin(), client.output().end());
 
-        string output(client.output().begin(), client.output().end());
+            Assert::That(output, Equals(test));
 
-        Assert::That(output, Equals(test));
+        });
+    });
 
-    }
-};
+
+});
+

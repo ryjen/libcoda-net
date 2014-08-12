@@ -1,13 +1,13 @@
 #ifndef HAVE_LIBCURL
 
-#include <igloo/igloo.h>
+#include <bandit/bandit.h>
 #include "http_client.h"
 #include "socket_server.h"
 #include "buffered_socket.h"
 #include <string>
 #include <thread>
 
-using namespace igloo;
+using namespace bandit;
 
 using namespace arg3::net;
 
@@ -81,75 +81,80 @@ socket_server testServer(9876, &testFactory);
 
 thread serverThread;
 
-Context(http_client_test)
+go_bandit([]()
 {
-    static void SetUpContext()
+
+    describe("an http client", []()
     {
-        try
+        before_each([]()
         {
-            serverThread = testServer.start_thread();
+            try
+            {
+                serverThread = testServer.start_thread();
 
-            //log::trace("Mock server started");
-        }
-        catch (const exception &e)
+                //log::trace("Mock server started");
+            }
+            catch (const exception &e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
+        });
+
+        after_each([]()
         {
-            std::cerr << e.what() << std::endl;
-        }
-    }
+            testServer.close();
 
-    static void TearDownContext()
-    {
-        testServer.close();
+            serverThread.join();
+        });
 
-        serverThread.join();
-    }
-
-    Spec(testGet)
-    {
-        http_client client("localhost:9876");
-
-        testFactory.set_response("Hello, World!");
-
-        try
+        it("can get", []()
         {
-            client.get("test");
-            Assert::That(client.response(), Equals("GET: Hello, World!"));
-        }
-        catch (const exception &e)
+            http_client client("localhost:9876");
+
+            testFactory.set_response("Hello, World!");
+
+            try
+            {
+                client.get("test");
+                Assert::That(client.response(), Equals("GET: Hello, World!"));
+            }
+            catch (const exception &e)
+            {
+                std::cerr << e.what() << std::endl;
+                throw e;
+            }
+        });
+
+        it("is secure", []()
         {
-            std::cerr << e.what() << std::endl;
-            throw e;
-        }
-    }
+            http_client client("google.com");
 
-    Spec(testSecure)
-    {
-        http_client client("google.com");
+            client.set_secure(true);
 
-        client.set_secure(true);
+            client.get("/settings/personalinfo");
 
-        client.get("/settings/personalinfo");
+            Assert::That(client.response().empty(), Equals(false));
+        });
 
-        Assert::That(client.response().empty(), Equals(false));
-    }
-
-    Spec(testPost)
-    {
-        http_client client("localhost:9876");
-
-        client.set_payload("Hello, World!");
-
-        try
+        it("can post", []()
         {
-            client.post("test");
-            Assert::That(client.response(), Equals("POST: Hello, World!"));
-        }
-        catch (const exception &e)
-        {
-            std::cerr << e.what() << std::endl;
-            throw e;
-        }
-    }
-};
+            http_client client("localhost:9876");
+
+            client.set_payload("Hello, World!");
+
+            try
+            {
+                client.post("test");
+                Assert::That(client.response(), Equals("POST: Hello, World!"));
+            }
+            catch (const exception &e)
+            {
+                std::cerr << e.what() << std::endl;
+                throw e;
+            }
+        });
+    });
+
+});
 
 #endif
