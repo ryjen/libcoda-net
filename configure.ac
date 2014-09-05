@@ -33,6 +33,13 @@ AC_SUBST(COVERAGE_CFLAGS)
 AC_SUBST(COVERAGE_CXXFLAGS)
 AC_SUBST(COVERAGE_LDFLAGS)
 
+AC_CHECK_PROG(GIT_CHECK,git,yes)
+if test x"$GIT_CHECK" != x"yes" ; then
+    AC_MSG_ERROR([Required program 'git' not found.])
+else
+    git submodule update --init --recursive
+fi
+
 # Checks for libraries.
 
 if test "x$without_curl" != xtrue; then
