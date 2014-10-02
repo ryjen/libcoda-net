@@ -199,6 +199,7 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AM_LDFLAGS = @AM_LDFLAGS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -812,6 +813,8 @@ uninstall-am:
 @HAVE_GCOV_TRUE@	-rm -rf coverage.info
 
 @HAVE_GCOV_TRUE@clean-local: clean-coverage-html
+
+test: check
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

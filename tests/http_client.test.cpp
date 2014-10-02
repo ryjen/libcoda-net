@@ -91,7 +91,7 @@ go_bandit([]()
             try
             {
                 serverThread = testServer.start_thread();
-
+	
                 //log::trace("Mock server started");
             }
             catch (const exception &e)

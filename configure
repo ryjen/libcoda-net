@@ -645,6 +645,7 @@ LCOV
 SHTOOL
 HAVE_GCOV_FALSE
 HAVE_GCOV_TRUE
+AM_LDFLAGS
 AM_CPPFLAGS
 CXXCPP
 am__fastdepCXX_FALSE
@@ -15231,7 +15232,9 @@ if test "x$CXX" == "xclang++"; then
 	AM_CPPFLAGS="-std=c++11 -stdlib=libc++ -Wall -Werror"
 
 else
-	AM_CPPFLAGS="-std=c++0x -Wall -Werror"
+	AM_CPPFLAGS="-std=c++11 -Wall -Werror"
+
+	AM_LDFLAGS="-pthread"
 
 fi
 

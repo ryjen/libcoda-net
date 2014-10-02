@@ -1,4 +1,5 @@
-
+#include <algorithm>
+#include <cstring>
 #include "socket_server.h"
 #include "exception.h"
 

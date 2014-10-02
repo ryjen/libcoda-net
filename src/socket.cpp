@@ -1,6 +1,7 @@
 
 #include <cerrno>
 #include <fstream>
+#include <cstring>
 #include "socket.h"
 #include "exception.h"
 #ifndef _WIN32

@@ -1,4 +1,5 @@
 #include "buffered_socket.h"
+#include <algorithm>
 
 namespace arg3
 {
