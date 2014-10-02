@@ -204,6 +204,9 @@ namespace arg3
             // create the socket based on hostname and port
             auto pos = host().find(':');
 
+            if (is_secure())
+                sock.set_secure(true);
+
             if (pos != string::npos)
             {
                 string hostname = host().substr(0, pos);
@@ -214,9 +217,6 @@ namespace arg3
             {
                 sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT);
             }
-
-            if (is_secure())
-                sock.set_secure(true);
 
             // send the method and path
             snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());

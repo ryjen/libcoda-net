@@ -26,17 +26,26 @@ namespace arg3
 
         socket::socket() :
             sock_ ( INVALID ), backlogSize_(BACKLOG_SIZE), port_(0)
+#ifdef HAVE_LIBSSL
+            , sslHandle_(NULL), sslContext_(NULL)
+#endif
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
         socket::socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr), backlogSize_(BACKLOG_SIZE), port_(0)
+#ifdef HAVE_LIBSSL
+            , sslHandle_(NULL), sslContext_(NULL)
+#endif
         {
 
         }
 
         socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), /*references_(std::move(other.references_)),*/
             backlogSize_(other.backlogSize_), port_(other.port_)
+#ifdef HAVE_LIBSSL
+            , sslHandle_(other.sslHandle_), sslContext_(other.sslContext_)
+#endif
         {
             other.sock_ = INVALID;
         }
@@ -47,7 +56,10 @@ namespace arg3
             addr_ = std::move(other.addr_);
             backlogSize_ = other.backlogSize_;
             port_ = other.port_;
-
+#ifdef HAVE_LIBSSL
+            sslHandle_ = other.sslHandle_;
+            sslContext_ = other.sslContext_;
+#endif
             other.sock_ = INVALID;
 
             return *this;
@@ -86,7 +98,7 @@ namespace arg3
             if (s.empty()) return 0;
 #ifdef HAVE_LIBSSL
             if (sslHandle_)
-                return SSL_write(sock_, s.data(), s.size() );
+                return SSL_write(sslHandle_, s.data(), s.size() );
 #endif
             return ::send ( sock_, s.data(), s.size(), flags );
         }
@@ -95,7 +107,7 @@ namespace arg3
         {
 #ifdef HAVE_LIBSSL
             if (sslHandle_)
-                return SSL_write(sock_, s, len );
+                return SSL_write(sslHandle_, s, len );
 #endif
 #ifdef _WIN32
             return ::send(sock_, reinterpret_cast<const char *>(s), len, flags);
@@ -210,6 +222,18 @@ namespace arg3
             if ( status == 0 )
             {
                 port_ = port;
+#ifdef HAVE_LIBSSL
+                if (sslHandle_ != NULL)
+                {
+                    // Connect the SSL struct to our connection
+                    if (!SSL_set_fd (sslHandle_, sock_))
+                        ERR_print_errors_fp (stderr);
+
+                    // Initiate SSL handshake
+                    if (SSL_connect (sslHandle_) != 1)
+                        ERR_print_errors_fp (stderr);
+                }
+#endif
                 return true;
             }
             else
@@ -314,6 +338,15 @@ namespace arg3
                 return false;
             }
 
+#ifdef HAVE_LIBSSL
+            if (sslHandle_ != NULL)
+            {
+                if (!SSL_accept(sslHandle_))
+                {
+                    ERR_print_errors_fp (stderr);
+                }
+            }
+#endif
             return sock;
         }
 
@@ -342,7 +375,6 @@ namespace arg3
         void socket::set_secure(const bool b)
         {
 #ifndef HAVE_LIBSSL
-
             throw socket_exception("SSL not supported");
 #else
             if (!b)
@@ -383,13 +415,6 @@ namespace arg3
             if (sslHandle_ == NULL)
                 ERR_print_errors_fp (stderr);
 
-            // Connect the SSL struct to our connection
-            if (!SSL_set_fd (sslHandle_, sock_))
-                ERR_print_errors_fp (stderr);
-
-            // Initiate SSL handshake
-            if (SSL_connect (sslHandle_) != 1)
-                ERR_print_errors_fp (stderr);
 #endif
         }
     }

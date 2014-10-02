@@ -15229,7 +15229,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 if test "x$CXX" == "xclang++"; then
-	AM_CPPFLAGS="-std=c++11 -stdlib=libc++ -Wall -Werror"
+	AM_CPPFLAGS="-std=c++11 -Wno-error=deprecated-declarations -stdlib=libc++ -Wall -Werror"
+
 
 else
 	AM_CPPFLAGS="-std=c++11 -Wall -Werror"
