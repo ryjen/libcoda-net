@@ -16,9 +16,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CXX([clang++ g++])
 
 if test "x$CXX" == "xclang++"; then
-	AC_SUBST([AM_CPPFLAGS], ["-std=c++11 -stdlib=libc++ -Wall -Werror"])
+	AC_SUBST([AM_CPPFLAGS], ["-std=c++11 -Wno-error=deprecated-declarations -stdlib=libc++ -Wall -Werror"])
 else
-	AC_SUBST([AM_CPPFLAGS], ["-std=c++0x -Wall -Werror"])
+	AC_SUBST([AM_CPPFLAGS], ["-std=c++11 -Wall -Werror"])
 fi
 
 AC_ARG_WITH([curl],
