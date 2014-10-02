@@ -88,6 +88,6 @@ funky_factory funkyFactory;
 
 arg3::net::socket_server funky_server(1337, &funkyFactory);
 
-funky_server.start(); // run in thread, use loop() for single thread
+funky_server.start(); 
 ```
 
