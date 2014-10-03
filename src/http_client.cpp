@@ -2,7 +2,7 @@
 
 #include "http_client.h"
 #include "exception.h"
-
+#include <cinttypes>
 #ifndef HAVE_LIBCURL
 #include "buffered_socket.h"
 #endif
@@ -239,7 +239,7 @@ namespace arg3
             // if we have a payload, add the size
             if (!payload_.empty())
             {
-                snprintf(buf, http::MAX_URL_LEN, "Content-Size: %ld", payload_.size());
+                snprintf(buf, http::MAX_URL_LEN, "Content-Size: %" PRId32, payload_.size());
 
                 sock.writeln(buf);
             }
