@@ -19,7 +19,7 @@
         <table cellpadding=1 border=0 width="100%">
           <tr>
             <td width="10%" class="headerItem">Current view:</td>
-            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">src</a> - http_client.cpp<span style="font-size: 80%;"> (source / <a href="http_client.cpp.func.html">functions</a>)</span></td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">src</a> - http_client.cpp<span style="font-size: 80%;"> (source / <a href="http_client.cpp.func-sort-c.html">functions</a>)</span></td>
             <td width="5%"></td>
             <td width="15%"></td>
             <td width="10%" class="headerCovTableHead">Hit</td>
@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2014-07-19</td>
+            <td class="headerValue">2014-10-18 13:58:12</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">12</td>
@@ -72,7 +72,7 @@
 <span class="lineNum">       2 </span>            : 
 <span class="lineNum">       3 </span>            : #include &quot;http_client.h&quot;
 <span class="lineNum">       4 </span>            : #include &quot;exception.h&quot;
-<span class="lineNum">       5 </span>            : 
+<span class="lineNum">       5 </span>            : #include &lt;cinttypes&gt;
 <span class="lineNum">       6 </span>            : #ifndef HAVE_LIBCURL
 <span class="lineNum">       7 </span>            : #include &quot;buffered_socket.h&quot;
 <span class="lineNum">       8 </span>            : #endif
@@ -86,20 +86,20 @@
 <span class="lineNum">      16 </span>            : 
 <span class="lineNum">      17 </span>            :         size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
 <span class="lineNum">      18 </span>            :         {
-<span class="lineNum">      19 </span><span class="lineCov">         18 :             if (s == NULL) return 0;</span>
+<span class="lineNum">      19 </span><span class="lineCov">          4 :             if (s == NULL) return 0;</span>
 <span class="lineNum">      20 </span>            : 
-<span class="lineNum">      21 </span><span class="lineCov">         18 :             const size_t new_len = size * nmemb;</span>
+<span class="lineNum">      21 </span><span class="lineCov">          4 :             const size_t new_len = size * nmemb;</span>
 <span class="lineNum">      22 </span>            : 
-<span class="lineNum">      23 </span><span class="lineCov">         18 :             char buf[new_len + 1];</span>
+<span class="lineNum">      23 </span><span class="lineCov">          4 :             char buf[new_len + 1];</span>
 <span class="lineNum">      24 </span>            : 
-<span class="lineNum">      25 </span><span class="lineCov">         18 :             memcpy(buf, ptr, size * nmemb);</span>
+<span class="lineNum">      25 </span><span class="lineCov">          4 :             memcpy(buf, ptr, size * nmemb);</span>
 <span class="lineNum">      26 </span>            : 
-<span class="lineNum">      27 </span><span class="lineCov">         18 :             buf[new_len] = '\0';</span>
+<span class="lineNum">      27 </span><span class="lineCov">          4 :             buf[new_len] = '\0';</span>
 <span class="lineNum">      28 </span>            : 
-<span class="lineNum">      29 </span><span class="lineCov">         18 :             s-&gt;append(buf);</span>
+<span class="lineNum">      29 </span><span class="lineCov">          4 :             s-&gt;append(buf);</span>
 <span class="lineNum">      30 </span>            : 
-<span class="lineNum">      31 </span><span class="lineCov">         18 :             return new_len;</span>
-<span class="lineNum">      32 </span><span class="lineCov">         36 :         }</span>
+<span class="lineNum">      31 </span><span class="lineCov">          4 :             return new_len;</span>
+<span class="lineNum">      32 </span><span class="lineCov">          8 :         }</span>
 <a name="33"><span class="lineNum">      33 </span>            : #endif</a>
 <span class="lineNum">      34 </span>            : 
 <span class="lineNum">      35 </span>            :         http_client::http_client(const string &amp;host) : scheme_(http::SCHEME), host_(host)
@@ -274,19 +274,19 @@
 <span class="lineNum">     204 </span>            :             // create the socket based on hostname and port
 <span class="lineNum">     205 </span>            :             auto pos = host().find(':');
 <span class="lineNum">     206 </span>            : 
-<span class="lineNum">     207 </span>            :             if (pos != string::npos)
-<span class="lineNum">     208 </span>            :             {
-<span class="lineNum">     209 </span>            :                 string hostname = host().substr(0, pos);
-<span class="lineNum">     210 </span>            :                 int port = stoi(host().substr(pos + 1));
-<span class="lineNum">     211 </span>            :                 sock.connect(hostname, port);
-<span class="lineNum">     212 </span>            :             }
-<span class="lineNum">     213 </span>            :             else
-<span class="lineNum">     214 </span>            :             {
-<span class="lineNum">     215 </span>            :                 sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT);
-<span class="lineNum">     216 </span>            :             }
-<span class="lineNum">     217 </span>            : 
-<span class="lineNum">     218 </span>            :             if (is_secure())
-<span class="lineNum">     219 </span>            :                 sock.set_secure(true);
+<span class="lineNum">     207 </span>            :             if (is_secure())
+<span class="lineNum">     208 </span>            :                 sock.set_secure(true);
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            :             if (pos != string::npos)
+<span class="lineNum">     211 </span>            :             {
+<span class="lineNum">     212 </span>            :                 string hostname = host().substr(0, pos);
+<span class="lineNum">     213 </span>            :                 int port = stoi(host().substr(pos + 1));
+<span class="lineNum">     214 </span>            :                 sock.connect(hostname, port);
+<span class="lineNum">     215 </span>            :             }
+<span class="lineNum">     216 </span>            :             else
+<span class="lineNum">     217 </span>            :             {
+<span class="lineNum">     218 </span>            :                 sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT);
+<span class="lineNum">     219 </span>            :             }
 <span class="lineNum">     220 </span>            : 
 <span class="lineNum">     221 </span>            :             // send the method and path
 <span class="lineNum">     222 </span>            :             snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());
@@ -309,7 +309,7 @@
 <span class="lineNum">     239 </span>            :             // if we have a payload, add the size
 <span class="lineNum">     240 </span>            :             if (!payload_.empty())
 <span class="lineNum">     241 </span>            :             {
-<span class="lineNum">     242 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;Content-Size: %ld&quot;, payload_.size());
+<span class="lineNum">     242 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;Content-Size: %&quot; PRId32, payload_.size());
 <span class="lineNum">     243 </span>            : 
 <span class="lineNum">     244 </span>            :                 sock.writeln(buf);
 <span class="lineNum">     245 </span>            :             }
@@ -384,7 +384,7 @@
 
   <table width="100%" border=0 cellspacing=0 cellpadding=0>
     <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
-    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.11</a></td></tr>
   </table>
   <br>
 
