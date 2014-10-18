@@ -1,5 +1,5 @@
 
-noinst_PROGRAMS = arg3net_test
+check_PROGRAMS = arg3net_test
 
 arg3net_test_SOURCES = arg3.test.cpp http_client.test.cpp telnet_socket.test.cpp
 
