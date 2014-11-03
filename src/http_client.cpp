@@ -140,6 +140,8 @@ namespace arg3
         {
             char buf[http::MAX_URL_LEN + 1];
 
+            response_.clear();
+
 #ifdef HAVE_LIBCURL
             struct curl_slist *headers = NULL;
 

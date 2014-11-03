@@ -9,6 +9,7 @@ namespace arg3
     {
         namespace http
         {
+            constexpr static const int OK = 200;
 
             constexpr const unsigned MAX_URL_LEN = 2000;
 
