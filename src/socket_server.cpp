@@ -14,7 +14,8 @@ namespace arg3
 
         socket_server::socket_server(socket_server &&other)
             : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(other.factory_),
-              backgroundThread_(std::move(other.backgroundThread_)), sockets_(std::move(other.sockets_))
+              backgroundThread_(std::move(other.backgroundThread_)),
+              listeners_(std::move(other.listeners_)), sockets_(std::move(other.sockets_))
         {
             other.sock_ = INVALID;
             other.factory_ = NULL;
@@ -35,6 +36,8 @@ namespace arg3
             backgroundThread_ = std::move(other.backgroundThread_);
 
             sockets_ = std::move(other.sockets_);
+
+            listeners_ = std::move(other.listeners_);
 
             other.sock_ = INVALID;
             other.factory_ = NULL;
@@ -86,7 +89,7 @@ namespace arg3
         {
             on_poll();
 
-            for (auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->on_poll(this);
             }
@@ -96,7 +99,7 @@ namespace arg3
         {
             on_start();
 
-            for (auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->on_start(this);
             }
@@ -106,7 +109,7 @@ namespace arg3
         {
             on_stop();
 
-            for (auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->on_stop(this);
             }
@@ -140,7 +143,7 @@ namespace arg3
         void socket_server::on_stop()
         {}
 
-        void socket_server::check_connections(std::function<bool(std::shared_ptr<buffered_socket>)> delegate)
+        void socket_server::check_connections(std::function<bool(std::shared_ptr<buffered_socket> &)> delegate)
         {
             sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(), delegate), sockets_.end());
         }
@@ -167,7 +170,7 @@ namespace arg3
             // prepare for sockets for polling
             check_connections([&](std::shared_ptr<buffered_socket> c)
             {
-                if (!c->is_valid()) return true;
+                if (!is_valid() || !c->is_valid()) return true;
 
                 maxdesc = std::max(maxdesc, c->sock_);
                 FD_SET(c->sock_, &in_set);
@@ -186,7 +189,7 @@ namespace arg3
             }
 
             // check for new connection
-            if (FD_ISSET(sock_, &in_set))
+            if (is_valid() && FD_ISSET(sock_, &in_set))
             {
                 sockaddr_in addr;
 
@@ -202,7 +205,7 @@ namespace arg3
             /* check for freaky connections */
             check_connections([&](std::shared_ptr<buffered_socket> c)
             {
-                if (!c->is_valid()) return true;
+                if (!is_valid() || !c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &err_set))
                 {
@@ -218,7 +221,7 @@ namespace arg3
             /* read from all readable connections, removing failed sockets */
             check_connections([&](std::shared_ptr<buffered_socket> c)
             {
-                if (!c->is_valid()) return true;
+                if (!is_valid() || !c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &in_set))
                 {
@@ -233,7 +236,6 @@ namespace arg3
 
                 return false;
             });
-
 
             // strategically placed
             notify_poll();
