@@ -42,6 +42,16 @@ namespace arg3
             return *this;
         }
 
+        bool buffered_socket::connect(const string &host, const int port)
+        {
+            if (socket::connect(host, port))
+            {
+                notify_connect();
+                return true;
+            }
+            return false;
+        }
+
         bool buffered_socket::read_to_buffer()
         {
             data_buffer chunk;
@@ -208,7 +218,7 @@ namespace arg3
         {
             on_connect();
 
-            for (auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->on_connect(this);
             }
@@ -218,7 +228,7 @@ namespace arg3
         {
             on_will_read();
 
-            for (auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->on_will_read(this);
             }
@@ -228,7 +238,7 @@ namespace arg3
         {
             on_did_read();
 
-            for (auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->on_did_read(this);
             }
@@ -238,7 +248,7 @@ namespace arg3
         {
             on_will_write();
 
-            for (auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->on_will_write(this);
             }
@@ -248,7 +258,7 @@ namespace arg3
         {
             on_did_write();
 
-            for (auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->on_did_write(this);
             }
@@ -258,7 +268,7 @@ namespace arg3
         {
             on_close();
 
-            for (auto &l : listeners_)
+            for (auto & l : listeners_)
             {
                 l->on_close(this);
             }

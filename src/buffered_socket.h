@@ -97,6 +97,11 @@ namespace arg3
             void close();
 
             /*!
+             * Client initialization, connects to a host and port
+             */
+            virtual bool connect ( const std::string &host, const int port );
+
+            /*!
              * Reads data from the socket into the read buffer
              * @returns true if no errors occured
              */

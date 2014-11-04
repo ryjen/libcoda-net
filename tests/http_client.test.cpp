@@ -91,8 +91,6 @@ go_bandit([]()
             try
             {
                 testServer.start_in_background();
-
-                //log::trace("Mock server started");
             }
             catch (const exception &e)
             {
@@ -123,7 +121,7 @@ go_bandit([]()
                 //throw e;
             }
         });
-#ifdef HAVE_LIBSSL
+#if defined(HAVE_LIBCURL) || defined(HAVE_LIBSSL)
         it("is secure", []()
         {
             http_client client("google.com");
