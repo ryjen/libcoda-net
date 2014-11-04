@@ -9,12 +9,12 @@ namespace arg3
     namespace net
     {
         socket_server::socket_server(int port, socket_factory *factory, int queueSize)
-            : socket(port, queueSize), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr)
+            : socket(port, queueSize), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr), sockets_()
         {}
 
         socket_server::socket_server(socket_server &&other)
             : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(other.factory_),
-              backgroundThread_(std::move(other.backgroundThread_))
+              backgroundThread_(std::move(other.backgroundThread_)), sockets_(std::move(other.sockets_))
         {
             other.sock_ = INVALID;
             other.factory_ = NULL;
@@ -33,6 +33,8 @@ namespace arg3
             factory_ = other.factory_;
 
             backgroundThread_ = std::move(other.backgroundThread_);
+
+            sockets_ = std::move(other.sockets_);
 
             other.sock_ = INVALID;
             other.factory_ = NULL;

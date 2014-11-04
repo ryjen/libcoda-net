@@ -156,12 +156,12 @@ namespace arg3
             /*!
              * Appends some data to the write buffer
              */
-            buffered_socket &operator << ( const std::string & );
+            buffered_socket &operator << ( const std::string &);
 
             /*!
              * Appends the read buffer to a string
              */
-            buffered_socket &operator >> ( std::string & );
+            buffered_socket &operator >> ( std::string &);
 
             /*!
              * Adds a listener to this socket
