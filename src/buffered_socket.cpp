@@ -1,3 +1,4 @@
+#include "config.h"
 #include "buffered_socket.h"
 #include <algorithm>
 

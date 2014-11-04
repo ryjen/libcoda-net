@@ -1,3 +1,4 @@
+#include "config.h"
 #include "telnet_socket.h"
 #include "protocol.h"
 #include <algorithm>

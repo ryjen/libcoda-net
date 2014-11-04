@@ -1,6 +1,4 @@
 
-#include "config.h"
-
 // Definition of the socket class
 
 #ifndef _ARG3_SOCKET_H_
