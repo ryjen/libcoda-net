@@ -77,12 +77,14 @@ namespace arg3
              */
             socket_server &operator=(socket_server && other);
 
+            bool is_valid() const;
+
             /*!
              * starts the server
              */
             void start();
 
-            thread start_thread();
+            void start_in_background();
 
             /*!
              * Sets the frequency of connection updates (used when looping)
@@ -148,6 +150,8 @@ namespace arg3
             unsigned pollFrequency_;
 
             socket_factory *factory_;
+
+            shared_ptr<thread> backgroundThread_;
 
             vector<socket_server_listener *> listeners_;
 

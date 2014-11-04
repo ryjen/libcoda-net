@@ -77,23 +77,21 @@ public:
     }
 };
 
-test_socket_factory testFactory;
-
-socket_server testServer(9876, &testFactory);
-
-thread serverThread;
-
 go_bandit([]()
 {
 
-    describe("an http client", []()
+    test_socket_factory testFactory;
+
+    socket_server testServer(9876, &testFactory);
+
+    describe("an http client", [&]()
     {
-        before_each([]()
+        before_each([&]()
         {
             try
             {
-                serverThread = testServer.start_thread();
-	
+                testServer.start_in_background();
+
                 //log::trace("Mock server started");
             }
             catch (const exception &e)
@@ -102,14 +100,12 @@ go_bandit([]()
             }
         });
 
-        after_each([]()
+        after_each([&]()
         {
-            testServer.close();
-
-            serverThread.join();
+            testServer.stop();
         });
 
-        it("can get", []()
+        it("can get", [&]()
         {
             http_client client("localhost:9876");
 

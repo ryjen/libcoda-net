@@ -1,3 +1,4 @@
+#include "config.h"
 #include <algorithm>
 #include <cstring>
 #include "socket_server.h"
@@ -8,14 +9,16 @@ namespace arg3
     namespace net
     {
         socket_server::socket_server(int port, socket_factory *factory, int queueSize)
-            : socket(port, queueSize), pollFrequency_(4), factory_(factory)
+            : socket(port, queueSize), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr)
         {}
 
         socket_server::socket_server(socket_server &&other)
-            : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(std::move(other.factory_))
+            : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(other.factory_),
+              backgroundThread_(std::move(other.backgroundThread_))
         {
             other.sock_ = INVALID;
             other.factory_ = NULL;
+            other.backgroundThread_ = nullptr;
         }
 
         socket_server::~socket_server()
@@ -27,7 +30,13 @@ namespace arg3
 
             pollFrequency_ = other.pollFrequency_;
 
-            factory_ = std::move(other.factory_);
+            factory_ = other.factory_;
+
+            backgroundThread_ = std::move(other.backgroundThread_);
+
+            other.sock_ = INVALID;
+            other.factory_ = NULL;
+            other.backgroundThread_ = nullptr;
 
             return *this;
         }
@@ -42,6 +51,11 @@ namespace arg3
             return !operator==(other);
         }
 
+        bool socket_server::is_valid() const
+        {
+            return socket::is_valid() && factory_ != NULL;
+        }
+
         void socket_server::close()
         {
             socket::close();
@@ -52,6 +66,13 @@ namespace arg3
         void socket_server::stop()
         {
             close();
+
+            if (backgroundThread_ != nullptr)
+            {
+                backgroundThread_->join();
+
+                backgroundThread_ = nullptr;
+            }
         }
 
         void socket_server::add_listener(socket_server_listener *listener)
@@ -63,7 +84,7 @@ namespace arg3
         {
             on_poll();
 
-            for (auto & listener : listeners_)
+            for (auto &listener : listeners_)
             {
                 listener->on_poll(this);
             }
@@ -73,7 +94,7 @@ namespace arg3
         {
             on_start();
 
-            for (auto & listener : listeners_)
+            for (auto &listener : listeners_)
             {
                 listener->on_start(this);
             }
@@ -83,15 +104,15 @@ namespace arg3
         {
             on_stop();
 
-            for (auto & listener : listeners_)
+            for (auto &listener : listeners_)
             {
                 listener->on_stop(this);
             }
         }
 
-        thread socket_server::start_thread()
+        void socket_server::start_in_background()
         {
-            return thread(&socket_server::run, this);
+            backgroundThread_  =  make_shared<thread>(&socket_server::run, this);
         }
 
         bool socket_server::listen()

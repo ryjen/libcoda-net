@@ -16,6 +16,8 @@ namespace arg3
 
         socket::data_buffer::iterator telnet_socket::handle_telopt(data_buffer &s, const socket::data_buffer::iterator &it)
         {
+            if (it == s.end()) return it;
+
             auto pos = (it + 1);
 
             if (pos == s.end()) return pos;
@@ -27,7 +29,7 @@ namespace arg3
 
         socket::data_buffer::iterator telnet_socket::handle_sub_neg(data_buffer &s, const socket::data_buffer::iterator &it)
         {
-            if ((it + 1) == s.end())
+            if (it == s.end() || (it + 1) == s.end())
                 return it;
 
             auto type = *(it + 1);

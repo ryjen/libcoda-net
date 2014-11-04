@@ -9,10 +9,10 @@ namespace arg3
 
         static const socket::data_buffer NEWLINE = { '\r', '\n' };
 
-        buffered_socket::buffered_socket()
+        buffered_socket::buffered_socket() : socket()
         {}
 
-        buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr), listeners_()
+        buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr)
         {
         }
 
@@ -208,7 +208,7 @@ namespace arg3
         {
             on_connect();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_connect(this);
             }
@@ -218,7 +218,7 @@ namespace arg3
         {
             on_will_read();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_will_read(this);
             }
@@ -228,7 +228,7 @@ namespace arg3
         {
             on_did_read();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_did_read(this);
             }
@@ -238,7 +238,7 @@ namespace arg3
         {
             on_will_write();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_will_write(this);
             }
@@ -248,7 +248,7 @@ namespace arg3
         {
             on_did_write();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_did_write(this);
             }
@@ -258,7 +258,7 @@ namespace arg3
         {
             on_close();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_close(this);
             }

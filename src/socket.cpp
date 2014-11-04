@@ -48,7 +48,23 @@ namespace arg3
 #endif
         {
             other.sock_ = INVALID;
+#ifdef HAVE_LIBSSL
+            other.sslHandle_ = NULL;
+            other.sslContext_ = NULL;
+#endif
         }
+
+        socket::socket(const std::string &host, const int port) : socket()
+        {
+            connect(host, port);
+        }
+
+
+        socket::socket(int port, int queueSize) : sock_(INVALID), backlogSize_(queueSize), port_(port)
+#ifdef HAVE_LIBSSL
+            , sslHandle_(NULL), sslContext_(NULL)
+#endif
+        {}
 
         socket &socket::operator=(socket && other)
         {
@@ -59,6 +75,8 @@ namespace arg3
 #ifdef HAVE_LIBSSL
             sslHandle_ = other.sslHandle_;
             sslContext_ = other.sslContext_;
+            other.sslHandle_ = NULL;
+            other.sslContext_ = NULL;
 #endif
             other.sock_ = INVALID;
 
@@ -135,10 +153,12 @@ namespace arg3
         {
             return port_ == 0 ? addr_.sin_port : port_;
         }
+
         void socket::set_port(const int port)
         {
             port_ = port;
         }
+
         void socket::set_ip(const string &ip)
         {
 #ifdef WIN32
@@ -198,11 +218,6 @@ namespace arg3
             return *this;
         }
 
-        socket::socket(const std::string &host, const int port) : socket()
-        {
-            connect(host, port);
-        }
-
         bool socket::connect ( const string &host, const int port )
         {
 
@@ -217,7 +232,7 @@ namespace arg3
             addr_.sin_port = htons ( port );
             addr_.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
 
-            int status = ::connect ( sock_, ( sockaddr * ) &addr_, sizeof ( addr_ ) );
+            int status = ::connect ( sock_, ( sockaddr *) &addr_, sizeof ( addr_ ) );
 
             if ( status == 0 )
             {
@@ -239,10 +254,6 @@ namespace arg3
             else
                 return false;
         }
-
-
-        socket::socket(int port, int queueSize) : sock_(INVALID), backlogSize_(queueSize), port_(port)
-        {}
 
         bool socket::create()
         {
@@ -289,7 +300,7 @@ namespace arg3
             addr_.sin_addr.s_addr = INADDR_ANY;
             addr_.sin_port = htons ( port_ );
 
-            int bind_return = ::bind ( sock_, ( struct sockaddr * ) &addr_, sizeof ( addr_ ) );
+            int bind_return = ::bind ( sock_, ( struct sockaddr *) &addr_, sizeof ( addr_ ) );
 
 
             if ( bind_return == -1 )
@@ -331,7 +342,7 @@ namespace arg3
         {
             int addr_length = sizeof ( addr );
 
-            SOCKET sock = ::accept ( sock_, ( sockaddr * ) &addr, ( socklen_t * ) &addr_length );
+            SOCKET sock = ::accept ( sock_, ( sockaddr *) &addr, ( socklen_t *) &addr_length );
 
             if ( sock <= 0 )
             {

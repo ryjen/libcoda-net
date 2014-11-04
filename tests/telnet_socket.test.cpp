@@ -1,4 +1,5 @@
-
+#include "config.h"
+#undef VERSION
 #include <bandit/bandit.h>
 #include "telnet_socket.h"
 #include "socket_server.h"
@@ -14,6 +15,7 @@ using namespace arg3::net;
 using namespace arg3;
 
 using namespace std;
+
 
 class telnet_test_client : public telnet_socket
 {
@@ -117,24 +119,22 @@ public:
     }
 };
 
-telnet_socket_factory telnetFactory;
-
-socket_server telnetServer(9876, &telnetFactory);
-
-thread telnetThread;
-
 go_bandit([]()
 {
 
-    describe("a telnet socket", []()
+    telnet_socket_factory telnetFactory;
+
+    socket_server telnetServer(9876, &telnetFactory);
+
+    telnetServer.add_listener(&telnetFactory);
+
+    describe("a telnet socket", [&]()
     {
-        before_each([]()
+        before_each([&]()
         {
             try
             {
-                telnetServer.add_listener(&telnetFactory);
-
-                telnetThread = telnetServer.start_thread();
+                telnetServer.start_in_background();
 
                 //log::trace("Mock server started");
             }
@@ -144,11 +144,9 @@ go_bandit([]()
             }
         });
 
-        after_each([]()
+        after_each([&]()
         {
-            telnetServer.close();
-
-            telnetThread.join();
+            telnetServer.stop();
         });
 
         it("supports ECHO", []()

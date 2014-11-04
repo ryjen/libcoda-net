@@ -177,7 +177,7 @@ namespace arg3
                 break;
             }
 
-            for (auto & h : headers_)
+            for (auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -231,7 +231,7 @@ namespace arg3
             sock.writeln(buf);
 
             // add the headers
-            for (auto & h : headers_)
+            for (auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
