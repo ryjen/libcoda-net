@@ -139,7 +139,7 @@ namespace arg3
             /*!
              * Will loop each connection and if the delegate returns false, will remove the connection
              */
-            void check_connections(std::function<bool(std::shared_ptr<buffered_socket> &)> delegate);
+            void check_connections(std::function<bool(std::shared_ptr<buffered_socket>)> delegate);
 
             void notify_poll();
 

@@ -32,12 +32,12 @@ namespace arg3
 
         buffered_socket &buffered_socket::operator=(buffered_socket && other)
         {
-            socket::operator=(std::move(other));
-
             inBuffer_ = std::move(other.inBuffer_);
             outBuffer_ = std::move(other.outBuffer_);
 
             listeners_ = std::move(other.listeners_);
+
+            socket::operator=(std::move(other));
 
             return *this;
         }
