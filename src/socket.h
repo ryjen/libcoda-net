@@ -55,6 +55,11 @@ namespace arg3
             typedef std::vector<data_type> data_buffer;
 
             /*!
+             * default constructor
+             */
+            socket();
+
+            /*!
              * constructor to take a raw socket and its address
              */
             socket(SOCKET sock, const sockaddr_in &addr);
@@ -63,18 +68,6 @@ namespace arg3
              * Constructor to open a socket given the host and port
              */
             socket(const std::string &host, const int port);
-
-            /*!
-             * Constructor to listen on a port
-             * @param port the port to listen on
-             * @param backlog the max number of simultaneous new connections (not the same as the num of current connections)
-             */
-            socket (int port, int backlog = BACKLOG_SIZE);
-
-            /*!
-             * default constructor
-             */
-            socket();
 
             /*!
              * Non copyable
@@ -153,16 +146,6 @@ namespace arg3
             int port() const;
 
             /*!
-             * sets the port of the socket
-             */
-            void set_port(const int port);
-
-            /*!
-             * sets the ip of the socket
-             */
-            void set_ip(const std::string &ip);
-
-            /*!
              * closes the socket
              */
             virtual void close();
@@ -182,7 +165,7 @@ namespace arg3
             /*!
              * puts the socket in listen mode
              */
-            virtual bool listen();
+            virtual bool listen(const int port, const int backlogSize = BACKLOG_SIZE);
 
             /*!
              * sets the socket in blocking or non blocking mode
@@ -215,10 +198,7 @@ namespace arg3
             /*!
              * binds the socket to its address
              */
-            bool bind ();
-
-            int backlogSize_;
-            int port_;
+            bool bind (const int port);
 
 #ifdef HAVE_LIBSSL
             SSL *sslHandle_;

@@ -8,8 +8,8 @@ namespace arg3
 {
     namespace net
     {
-        socket_server::socket_server(int port, socket_factory *factory, int queueSize)
-            : socket(port, queueSize), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr)
+        socket_server::socket_server(socket_factory *factory)
+            : socket(), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr)
         {
         }
 
@@ -53,7 +53,10 @@ namespace arg3
 
         bool socket_server::operator==(const socket_server &other)
         {
-            return port_ == other.port_;
+            if (!is_valid() || !other.is_valid())
+                return false;
+
+            return port() == other.port();
         }
 
         bool socket_server::operator!=(const socket_server &other)
@@ -116,22 +119,45 @@ namespace arg3
             }
         }
 
-        void socket_server::start_in_background()
+        bool socket_server::listen(const int port, const int backlogSize)
         {
-            backgroundThread_ = make_shared<thread>(&socket_server::run, this);
-        }
+            bool success = socket::listen(port, backlogSize);
 
-        bool socket_server::listen()
-        {
-            bool success = socket::listen();
-
-            notify_start();
+            if (success)
+                notify_start();
 
             return success;
         }
 
-        void socket_server::start()
+        void socket_server::start_in_background(int port, int backlogSize)
         {
+
+            if (is_valid())
+            {
+                throw socket_exception("server already started");
+            }
+
+            if (!listen(port, backlogSize))
+            {
+                throw socket_exception("unable to listen on port");
+            }
+
+            backgroundThread_ = make_shared<thread>(&socket_server::run, this);
+        }
+
+        void socket_server::start(int port, int backlogSize)
+        {
+
+            if (is_valid())
+            {
+                throw socket_exception("server already started");
+            }
+
+            if (!listen(port, backlogSize))
+            {
+                throw socket_exception("unable to listen on port");
+            }
+
             run();
         }
 
@@ -267,12 +293,6 @@ namespace arg3
         void socket_server::run()
         {
             struct timeval last_time;
-
-            if (!is_valid())
-            {
-                if (!listen())
-                    return;
-            }
 
             gettimeofday(&last_time, NULL);
 

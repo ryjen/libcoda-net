@@ -46,11 +46,9 @@ namespace arg3
         public:
             /*!
              * default constructor takes a port
-             * @port the port to listen on
              * @factory the factory to create sockets with
-             * @blacklogSize the max number of simultaneous new connections (not the same as the number of current connections)
              */
-            socket_server(int port, socket_factory *factory = &default_socket_factory, int backlogSize = BACKLOG_SIZE);
+            socket_server(socket_factory *factory = &default_socket_factory);
 
             /*!
              * non-copyable constructor
@@ -82,9 +80,9 @@ namespace arg3
             /*!
              * starts the server
              */
-            void start();
+            void start(int port, int backlogSize = BACKLOG_SIZE);
 
-            void start_in_background();
+            void start_in_background(int port, int backlogSize = BACKLOG_SIZE);
 
             /*!
              * Sets the frequency of connection updates (used when looping)
@@ -116,7 +114,7 @@ namespace arg3
 
             void stop();
 
-            bool listen();
+            bool listen(const int port, const int backlogSize);
 
         protected:
 

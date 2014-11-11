@@ -25,7 +25,7 @@ namespace arg3
 #endif
 
         socket::socket() :
-            sock_ ( INVALID ), backlogSize_(BACKLOG_SIZE), port_(0)
+            sock_ ( INVALID )
 #ifdef HAVE_LIBSSL
             , sslHandle_(NULL), sslContext_(NULL)
 #endif
@@ -33,7 +33,7 @@ namespace arg3
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
-        socket::socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr), backlogSize_(BACKLOG_SIZE), port_(0)
+        socket::socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr)
 #ifdef HAVE_LIBSSL
             , sslHandle_(NULL), sslContext_(NULL)
 #endif
@@ -41,8 +41,7 @@ namespace arg3
 
         }
 
-        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), /*references_(std::move(other.references_)),*/
-            backlogSize_(other.backlogSize_), port_(other.port_)
+        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_))
 #ifdef HAVE_LIBSSL
             , sslHandle_(other.sslHandle_), sslContext_(other.sslContext_)
 #endif
@@ -59,19 +58,10 @@ namespace arg3
             connect(host, port);
         }
 
-
-        socket::socket(int port, int queueSize) : sock_(INVALID), backlogSize_(queueSize), port_(port)
-#ifdef HAVE_LIBSSL
-            , sslHandle_(NULL), sslContext_(NULL)
-#endif
-        {}
-
         socket &socket::operator=(socket && other)
         {
             sock_ = other.sock_;
             addr_ = std::move(other.addr_);
-            backlogSize_ = other.backlogSize_;
-            port_ = other.port_;
 #ifdef HAVE_LIBSSL
             sslHandle_ = other.sslHandle_;
             sslContext_ = other.sslContext_;
@@ -150,21 +140,7 @@ namespace arg3
 
         int socket::port() const
         {
-            return port_ == 0 ? addr_.sin_port : port_;
-        }
-
-        void socket::set_port(const int port)
-        {
-            port_ = port;
-        }
-
-        void socket::set_ip(const string &ip)
-        {
-#ifdef WIN32
-            addr_.sin_addr.s_addr = inet_addr(ip);
-#else
-            inet_aton(ip.c_str(), &addr_.sin_addr);
-#endif
+            return is_valid() ? ntohs(addr_.sin_port) : INVALID;
         }
 
         int socket::recv(data_buffer &s)
@@ -235,7 +211,6 @@ namespace arg3
 
             if ( status == 0 )
             {
-                port_ = port;
 #ifdef HAVE_LIBSSL
                 if (sslHandle_ != NULL)
                 {
@@ -288,7 +263,7 @@ namespace arg3
 
         }
 
-        bool socket::bind ( )
+        bool socket::bind ( const int port)
         {
             if ( ! is_valid() )
             {
@@ -297,7 +272,7 @@ namespace arg3
 
             addr_.sin_family = AF_INET;
             addr_.sin_addr.s_addr = INADDR_ANY;
-            addr_.sin_port = htons ( port_ );
+            addr_.sin_port = htons ( port );
 
             int bind_return = ::bind ( sock_, ( struct sockaddr *) &addr_, sizeof ( addr_ ) );
 
@@ -310,14 +285,14 @@ namespace arg3
             return true;
         }
 
-        bool socket::listen()
+        bool socket::listen(const int port, const int backlogSize)
         {
             if ( ! create() )
             {
                 throw socket_exception ( "Could not create server socket." );
             }
 
-            if ( ! bind ( ) )
+            if ( ! bind ( port ) )
             {
                 throw socket_exception ( "Could not bind to port." );
             }
@@ -327,7 +302,7 @@ namespace arg3
                 return false;
             }
 
-            int listen_return = ::listen ( sock_, backlogSize_ );
+            int listen_return = ::listen ( sock_, backlogSize );
 
             if ( listen_return == -1 )
             {

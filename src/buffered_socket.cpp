@@ -166,18 +166,22 @@ namespace arg3
 
         void buffered_socket::flush()
         {
-            send(outBuffer_);
+            if (is_valid())
+                send(outBuffer_);
 
             outBuffer_.clear();
         }
 
         void buffered_socket::close()
         {
-            notify_close();
+            if (is_valid())
+            {
+                notify_close();
 
-            flush();
+                flush();
 
-            socket::close();
+                socket::close();
+            }
         }
 
         bool buffered_socket::write_from_buffer()
@@ -267,7 +271,7 @@ namespace arg3
         {
             on_close();
 
-            for (auto &l : listeners_)
+            for (auto l : listeners_)
             {
                 l->on_close(this);
             }

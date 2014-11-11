@@ -124,7 +124,7 @@ go_bandit([]()
 
     telnet_socket_factory telnetFactory;
 
-    socket_server telnetServer(9876, &telnetFactory);
+    socket_server telnetServer(&telnetFactory);
 
     telnetServer.add_listener(&telnetFactory);
 
@@ -134,7 +134,7 @@ go_bandit([]()
         {
             try
             {
-                telnetServer.start_in_background();
+                telnetServer.start_in_background(9876);
 
                 //log::trace("Mock server started");
             }

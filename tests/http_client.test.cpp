@@ -82,7 +82,7 @@ go_bandit([]()
 
     test_socket_factory testFactory;
 
-    socket_server testServer(9876, &testFactory);
+    socket_server testServer(&testFactory);
 
     describe("an http client", [&]()
     {
@@ -90,7 +90,7 @@ go_bandit([]()
         {
             try
             {
-                testServer.start_in_background();
+                testServer.start_in_background(9876);
             }
             catch (const exception &e)
             {
