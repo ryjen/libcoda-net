@@ -191,6 +191,8 @@ namespace arg3
 
             void set_secure(const bool);
 
+            bool is_secure() const;
+
         protected:
 
             static const int MAXHOSTNAME = 200;

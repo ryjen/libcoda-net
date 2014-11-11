@@ -20,7 +20,6 @@ namespace arg3
         {
         }
 
-
         buffered_socket::buffered_socket(buffered_socket &&other) : socket(std::move(other)), inBuffer_(std::move(other.inBuffer_)),
             outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
         {
@@ -218,7 +217,7 @@ namespace arg3
         {
             on_connect();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_connect(this);
             }
@@ -228,7 +227,7 @@ namespace arg3
         {
             on_will_read();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_will_read(this);
             }
@@ -238,7 +237,7 @@ namespace arg3
         {
             on_did_read();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_did_read(this);
             }
@@ -248,7 +247,7 @@ namespace arg3
         {
             on_will_write();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_will_write(this);
             }
@@ -258,7 +257,7 @@ namespace arg3
         {
             on_did_write();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_did_write(this);
             }
@@ -268,7 +267,7 @@ namespace arg3
         {
             on_close();
 
-            for (auto & l : listeners_)
+            for (auto &l : listeners_)
             {
                 l->on_close(this);
             }

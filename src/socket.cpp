@@ -83,7 +83,6 @@ namespace arg3
             return *this;
         }
 
-
         socket::~socket()
         {
             if ( is_valid())
@@ -383,6 +382,14 @@ namespace arg3
 #endif
         }
 
+        bool socket::is_secure() const
+        {
+#ifdef HAVE_LIBSSL
+            return sslHandle_ != NULL && sslContext_ != NULL;
+#else
+            return false;
+#endif
+        }
         void socket::set_secure(const bool b)
         {
 #ifndef HAVE_LIBSSL
