@@ -74,7 +74,7 @@ namespace arg3
             scheme_ = std::move(other.scheme_);
             host_ = std::move(other.host_);
             payload_ = std::move(other.payload_);
-            responseCode_ = std::move(other.responseCode_);
+            responseCode_ = other.responseCode_;
             response_ = std::move(other.response_);
             headers_ = std::move(other.headers_);
             return *this;

@@ -151,7 +151,6 @@ go_bandit([]()
 
         it("supports ECHO", []()
         {
-
             telnet_test_client client("127.0.0.1", 9876);
 
             client.set_non_blocking(false);

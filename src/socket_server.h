@@ -114,8 +114,6 @@ namespace arg3
              */
             void poll();
 
-            void close();
-
             void stop();
 
             bool listen();

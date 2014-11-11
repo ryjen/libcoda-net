@@ -129,12 +129,12 @@ namespace arg3
             /*!
              * Writes a data buffer to the socket
              */
-            socket &operator << ( const data_buffer & );
+            socket &operator << ( const data_buffer &);
 
             /*!
              * Reads data from the socket into a data buffer
              */
-            socket &operator >> ( data_buffer & );
+            socket &operator >> ( data_buffer &);
 
             /*!
              * @returns the raw socket
