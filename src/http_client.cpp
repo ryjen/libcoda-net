@@ -241,7 +241,7 @@ namespace arg3
             // if we have a payload, add the size
             if (!payload_.empty())
             {
-                snprintf(buf, http::MAX_URL_LEN, "Content-Size: %" PRId32, payload_.size());
+                snprintf(buf, http::MAX_URL_LEN, "Content-Size: %zu", payload_.size());
 
                 sock.writeln(buf);
             }
