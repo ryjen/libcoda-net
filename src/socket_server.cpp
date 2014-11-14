@@ -25,8 +25,7 @@ namespace arg3
 
         socket_server::~socket_server()
         {
-            if (is_valid())
-                stop();
+            stop();
         }
 
         socket_server &socket_server::operator=(socket_server && other)
@@ -86,7 +85,8 @@ namespace arg3
 
         void socket_server::add_listener(socket_server_listener *listener)
         {
-            listeners_.push_back(listener);
+            if (find(listeners_.begin(), listeners_.end(), listener) == listeners_.end())
+                listeners_.push_back(listener);
         }
 
         void socket_server::notify_poll()

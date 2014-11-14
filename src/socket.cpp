@@ -75,16 +75,16 @@ namespace arg3
 
         socket::~socket()
         {
-            if ( is_valid())
-            {
-                close();
-            }
+            close();
         }
 
         void socket::close()
         {
-            closesocket(sock_);
-            sock_ = INVALID;
+            if (sock_ != INVALID)
+            {
+                closesocket(sock_);
+                sock_ = INVALID;
+            }
 #ifdef HAVE_LIBSSL
             if (sslHandle_)
             {
@@ -112,6 +112,8 @@ namespace arg3
 
         int socket::send( void *s, size_t len, int flags)
         {
+            if (len == 0) return 0;
+
 #ifdef HAVE_LIBSSL
             if (sslHandle_)
                 return SSL_write(sslHandle_, s, len );
@@ -145,7 +147,7 @@ namespace arg3
 
         int socket::recv(data_buffer &s)
         {
-            unsigned char buf [ MAXRECV + 1 ];
+            unsigned char buf [ MAXRECV + 1 ] = {0};
 
             int status;
 
@@ -386,7 +388,6 @@ namespace arg3
                 }
 
                 return;
-
             }
 
             // check we're already initialized
