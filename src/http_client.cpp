@@ -80,9 +80,10 @@ namespace arg3
             return *this;
         }
 
-        void http_client::add_header(const string &key, const string &value)
+        http_client &http_client::add_header(const string &key, const string &value)
         {
             headers_[key] = value;
+            return *this;
         }
 
         void http_client::remove_header(const string &key)
@@ -120,14 +121,16 @@ namespace arg3
             return scheme_ == http::SECURE_SCHEME;
         }
 
-        void http_client::set_host(const string &host)
+        http_client &http_client::set_host(const string &host)
         {
             host_ = host;
+            return *this;
         }
 
-        void http_client::set_secure(bool value)
+        http_client &http_client::set_secure(bool value)
         {
             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
+            return *this;
         }
 
         http_client &http_client::set_payload(const string &payload)
@@ -142,6 +145,9 @@ namespace arg3
 
             response_.clear();
 
+            if (host_.empty())
+                throw socket_exception("no host");
+
 #ifdef HAVE_LIBCURL
             struct curl_slist *headers = NULL;
 
@@ -152,7 +158,10 @@ namespace arg3
                 throw rest_exception("unable to initialize request");
             }
 
-            snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", scheme_.c_str(), host_.c_str(), path.c_str());
+            if (path.empty())
+                snprintf(buf, http::MAX_URL_LEN, "%s://%s", scheme_.c_str(), host_.c_str());
+            else
+                snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", scheme_.c_str(), host_.c_str(), path.c_str());
 
             curl_easy_setopt(curl_, CURLOPT_URL, buf);
 
@@ -165,19 +174,25 @@ namespace arg3
                 break;
             case http::POST:
                 curl_easy_setopt(curl_, CURLOPT_POST, 1L);
-                curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-                curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                if (!payload_.empty())
+                {
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                }
                 break;
             case http::PUT:
                 curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
-                curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-                curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                if (!payload_.empty())
+                {
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                }
             case http::DELETE:
                 curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);
                 break;
             }
 
-            for (auto &h : headers_)
+            for (auto & h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -221,7 +236,11 @@ namespace arg3
             }
 
             // send the method and path
-            snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());
+
+            if (path.empty())
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], "/");
+            else
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());
 
             sock.writeln(buf);
 
@@ -231,7 +250,7 @@ namespace arg3
             sock.writeln(buf);
 
             // add the headers
-            for (auto &h : headers_)
+            for (auto & h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -250,7 +269,7 @@ namespace arg3
             sock.writeln();
 
             // add the payload
-            if (payload_.empty())
+            if (!payload_.empty())
             {
                 sock.writeln(payload_);
             }

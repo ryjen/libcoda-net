@@ -29,7 +29,7 @@ namespace arg3
             /*!
              * adds an HTTP header to the request
              */
-            void add_header(const string &key, const string &value);
+            http_client &add_header(const string &key, const string &value);
 
             /*!
              * Removes an HTTP header from the request
@@ -69,7 +69,7 @@ namespace arg3
             /*!
              * sets the host for this request
              */
-            void set_host(const string &);
+            http_client &set_host(const string &);
 
             /*!
              * sets the payload for this request
@@ -104,7 +104,7 @@ namespace arg3
             /*!
              * sets whether this request uses HTTPS
              */
-            void set_secure(bool value);
+            http_client &set_secure(bool value);
 
         private:
             string scheme_;

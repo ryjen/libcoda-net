@@ -18,6 +18,7 @@ namespace arg3
         public:
             /* creates a buffered socket from a raw socket */
             virtual std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr) = 0;
+            virtual ~socket_factory() {}
         };
 
         namespace detail

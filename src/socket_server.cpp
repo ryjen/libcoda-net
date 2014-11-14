@@ -9,7 +9,7 @@ namespace arg3
     namespace net
     {
         socket_server::socket_server(socket_factory *factory)
-            : socket(), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr)
+            : socket(), pollFrequency_(4), factory_(factory), backgroundThread_(nullptr), listeners_(), sockets_()
         {
         }
 
@@ -93,7 +93,7 @@ namespace arg3
         {
             on_poll();
 
-            for (auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->on_poll(this);
             }
@@ -103,7 +103,7 @@ namespace arg3
         {
             on_start();
 
-            for (auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->on_start(this);
             }
@@ -113,7 +113,7 @@ namespace arg3
         {
             on_stop();
 
-            for (auto &listener : listeners_)
+            for (auto & listener : listeners_)
             {
                 listener->on_stop(this);
             }
