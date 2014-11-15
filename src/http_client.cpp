@@ -5,6 +5,8 @@
 #include <cinttypes>
 #ifndef HAVE_LIBCURL
 #include "buffered_socket.h"
+#else
+#include <cstring>
 #endif
 
 namespace arg3
