@@ -4,6 +4,7 @@
 #include "socket_factory.h"
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <sys/time.h>
 
 using namespace std;
