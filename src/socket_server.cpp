@@ -238,7 +238,7 @@ namespace arg3
             // check for new connection
             if (is_valid() && FD_ISSET(sock_, &in_set))
             {
-                sockaddr_in addr;
+                sockaddr_storage addr;
 
                 auto sock = factory_->create_socket(this, accept(addr), addr);
 

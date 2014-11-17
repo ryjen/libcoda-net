@@ -8,7 +8,7 @@ namespace arg3
 {
     namespace net
     {
-        telnet_socket::telnet_socket(SOCKET sock, const sockaddr_in &addr) : buffered_socket(sock, addr)
+        telnet_socket::telnet_socket(SOCKET sock, const sockaddr_storage &addr) : buffered_socket(sock, addr)
         {}
 
         telnet_socket::telnet_socket(const string &host, const int port) : buffered_socket(host, port)

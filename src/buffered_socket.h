@@ -60,7 +60,7 @@ namespace arg3
             /*!
              * Default constructor accepts a raw socket and its address
              */
-            buffered_socket(SOCKET sock, const sockaddr_in &addr);
+            buffered_socket(SOCKET sock, const sockaddr_storage &addr);
 
             buffered_socket(const std::string &host, const int port);
 

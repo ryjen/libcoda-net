@@ -24,7 +24,7 @@ private:
     string response_;
 
 public:
-    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr)
+    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_storage &addr)
     {
         auto socket = make_shared<buffered_socket>(sock, addr);
 

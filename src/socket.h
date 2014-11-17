@@ -62,7 +62,7 @@ namespace arg3
             /*!
              * constructor to take a raw socket and its address
              */
-            socket(SOCKET sock, const sockaddr_in &addr);
+            socket(SOCKET sock, const sockaddr_storage &addr);
 
             /*!
              * Constructor to open a socket given the host and port
@@ -160,7 +160,7 @@ namespace arg3
              * @param addr the address structure to populate
              * @returns the connected socket
              */
-            SOCKET accept(sockaddr_in &addr) const;
+            SOCKET accept(sockaddr_storage &addr) const;
 
             /*!
              * puts the socket in listen mode
@@ -187,18 +187,9 @@ namespace arg3
 
             // the raw socket
             SOCKET sock_;
+
             // the socket address
-            sockaddr_in addr_;
-
-            /*!
-             * creates a new socket
-             */
-            bool create ();
-
-            /*!
-             * binds the socket to its address
-             */
-            bool bind (const int port);
+            struct sockaddr_storage addr_;
 
 #ifdef HAVE_LIBSSL
             SSL *sslHandle_;

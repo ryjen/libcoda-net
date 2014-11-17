@@ -21,7 +21,7 @@ class telnet_test_client : public telnet_socket
 {
 
 public:
-    telnet_test_client(SOCKET sock, const sockaddr_in &addr) : telnet_socket(sock, addr)
+    telnet_test_client(SOCKET sock, const sockaddr_storage &addr) : telnet_socket(sock, addr)
     {
     }
 
@@ -62,7 +62,7 @@ class telnet_socket_factory : public socket_factory, public buffered_socket_list
 
 private:
 public:
-    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr)
+    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_storage &addr)
     {
         auto socket = make_shared<telnet_test_client>(sock, addr);
 

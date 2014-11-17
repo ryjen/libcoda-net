@@ -33,7 +33,7 @@ namespace arg3
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
-        socket::socket(SOCKET sock, const sockaddr_in &addr) : sock_(sock), addr_(addr)
+        socket::socket(SOCKET sock, const sockaddr_storage &addr) : sock_(sock), addr_(addr)
 #ifdef HAVE_LIBSSL
             , sslHandle_(NULL), sslContext_(NULL)
 #endif
@@ -137,12 +137,38 @@ namespace arg3
 
         const char *socket::ip() const
         {
-            return is_valid() ? inet_ntoa(addr_.sin_addr) : "invalid";
+            if (!is_valid()) return "invalid";
+
+            if (addr_.ss_family == AF_INET)
+            {
+                sockaddr_in *addr4 = (struct sockaddr_in *) &addr_;
+
+                return inet_ntoa(addr4->sin_addr);
+            }
+            else
+            {
+                static char straddr[INET6_ADDRSTRLEN] = {0};
+
+                sockaddr_in6 *addr6 = (struct sockaddr_in6 *) &addr_;
+
+                return inet_ntop(AF_INET6, &addr6->sin6_addr, straddr, sizeof(straddr) - 1);
+            }
         }
 
         int socket::port() const
         {
-            return is_valid() ? ntohs(addr_.sin_port) : INVALID;
+            if (!is_valid()) return INVALID;
+
+            if (addr_.ss_family == AF_INET)
+            {
+                struct sockaddr_in *addr4 = (struct sockaddr_in *) &addr_;
+                return ntohs(addr4->sin_port);
+            }
+            else
+            {
+                struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *) &addr_;
+                return ntohs(addr6->sin6_port);
+            }
         }
 
         int socket::recv(data_buffer &s)
@@ -198,110 +224,111 @@ namespace arg3
         bool socket::connect ( const string &host, const int port )
         {
 
-            if ( ! is_valid() ) create();
+            struct addrinfo hints, *result, *p;
 
-            struct hostent *hp;
+            memset(&hints, 0, sizeof hints);
+            hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
+            hints.ai_socktype = SOCK_STREAM;
 
-            if ((hp = gethostbyname(host.c_str())) == 0)
+            char servnam[101] = {0};
+            snprintf(servnam, 100, "%d", port);
+
+            if (getaddrinfo(host.c_str(), servnam, &hints, &result) != 0)
                 return false;
 
-            addr_.sin_family = AF_INET;
-            addr_.sin_port = htons ( port );
-            addr_.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
-
-            int status = ::connect ( sock_, ( sockaddr *) &addr_, sizeof ( addr_ ) );
-
-            if ( status == 0 )
+            if (is_valid())
             {
+                close();
+            }
+
+            for (p = result; p != NULL; p = p->ai_next)
+            {
+                sock_ = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+
+                if (sock_ == INVALID) continue;
+
+                if (::connect ( sock_, p->ai_addr, p->ai_addrlen ) != INVALID)
+                    break;
+
+                closesocket(sock_);
+                sock_ = INVALID;
+            }
+
+            freeaddrinfo(result);
+
+            if (p == NULL || sock_ == INVALID)
+            {
+                return false;
+            }
+
+            memcpy(&addr_, p->ai_addr, p->ai_addrlen);
+
 #ifdef HAVE_LIBSSL
-                if (sslHandle_ != NULL)
-                {
-                    // Connect the SSL struct to our connection
-                    if (!SSL_set_fd (sslHandle_, sock_))
-                        ERR_print_errors_fp (stderr);
-
-                    // Initiate SSL handshake
-                    if (SSL_connect (sslHandle_) != 1)
-                        ERR_print_errors_fp (stderr);
-                }
-#endif
-                return true;
-            }
-            else
-                return false;
-        }
-
-        bool socket::create()
-        {
-#ifdef _WIN32
-            static int started = 0;
-            if (!started)
+            if (sslHandle_ != NULL)
             {
-                short wVersionRequested = 0x101;
-                WSADATA wsaData;
-                if (WSAStartup( wVersionRequested, &wsaData ) == -1)
-                {
-                    return false;
-                }
-                if (wsaData.wVersion != 0x101)
-                {
-                    return false;
-                }
-                started = 1;
+                // Connect the SSL struct to our connection
+                if (!SSL_set_fd (sslHandle_, sock_))
+                    ERR_print_errors_fp (stderr);
+
+                // Initiate SSL handshake
+                if (SSL_connect (sslHandle_) != 1)
+                    ERR_print_errors_fp (stderr);
             }
 #endif
-
-            sock_ = ::socket ( AF_INET, SOCK_STREAM, 0 );
-
-            if ( ! is_valid() )
-                return false;
-
-            int on = 1;
-            if ( setsockopt ( sock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof ( on ) ) == -1 )
-                return false;
-
-
-            return true;
-
-        }
-
-        bool socket::bind ( const int port)
-        {
-            if ( ! is_valid() )
-            {
-                return false;
-            }
-
-            addr_.sin_family = AF_INET;
-            addr_.sin_addr.s_addr = INADDR_ANY;
-            addr_.sin_port = htons ( port );
-
-            int bind_return = ::bind ( sock_, ( struct sockaddr *) &addr_, sizeof ( addr_ ) );
-
-            if ( bind_return == -1 )
-            {
-                return false;
-            }
-
             return true;
         }
 
         bool socket::listen(const int port, const int backlogSize)
         {
-            if ( ! create() )
+            struct addrinfo hints, *result, *p;
+
+            const int on = 1;
+
+            memset(&hints, 0, sizeof hints);
+            hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+            hints.ai_socktype = SOCK_STREAM;
+            hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
+
+            char servnam[101] = {0};
+            snprintf(servnam, 100, "%d", port);
+
+            int r = getaddrinfo(NULL, servnam, &hints, &result);
+
+            if (r != 0)
             {
-                throw socket_exception ( "Could not create server socket." );
+                throw socket_exception( gai_strerror(r));
             }
 
-            if ( ! bind ( port ) )
+            if (result == NULL)
             {
-                throw socket_exception ( "Could not bind to port." );
+                throw socket_exception("unable to get address info");
             }
 
-            if ( ! is_valid() )
+            for (p = result; p != NULL; p = p->ai_next)
+            {
+                sock_ = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+
+                if ( sock_ == INVALID )
+                    continue;
+
+                if ( setsockopt ( sock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof ( on ) ) == -1 )
+                    continue;
+
+                if ( ::bind(sock_, p->ai_addr, p->ai_addrlen) == 0 )
+                    break;
+
+                closesocket(sock_);
+                sock_ = INVALID;
+            }
+
+            freeaddrinfo(result);
+
+            if (p == NULL)
             {
                 return false;
             }
+
+            memcpy(&addr_, p->ai_addr, p->ai_addrlen);
 
             int listen_return = ::listen ( sock_, backlogSize );
 
@@ -313,11 +340,11 @@ namespace arg3
             return true;
         }
 
-        SOCKET socket::accept (sockaddr_in &addr) const
+        SOCKET socket::accept ( sockaddr_storage &addr) const
         {
-            int addr_length = sizeof ( addr );
+            socklen_t addr_length = sizeof(addr);
 
-            SOCKET sock = ::accept ( sock_, ( sockaddr *) &addr, ( socklen_t *) &addr_length );
+            SOCKET sock = ::accept ( sock_, (struct sockaddr *) &addr, &addr_length );
 
             if ( sock <= 0 )
             {

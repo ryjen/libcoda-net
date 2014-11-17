@@ -12,7 +12,7 @@ namespace arg3
         buffered_socket::buffered_socket() : socket()
         {}
 
-        buffered_socket::buffered_socket(SOCKET sock, const sockaddr_in &addr) : socket(sock, addr)
+        buffered_socket::buffered_socket(SOCKET sock, const sockaddr_storage &addr) : socket(sock, addr)
         {
         }
 
