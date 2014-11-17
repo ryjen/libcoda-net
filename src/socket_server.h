@@ -151,11 +151,11 @@ namespace arg3
 
             shared_ptr<thread> backgroundThread_;
 
-            std::mutex sockets_mutex_;
+            mutex sockets_mutex_;
 
             vector<std::shared_ptr<buffered_socket>> sockets_;
 
-            std::mutex listeners_mutex_;
+            mutex listeners_mutex_;
 
             vector<socket_server_listener *> listeners_;
 
