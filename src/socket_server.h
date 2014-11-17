@@ -45,7 +45,7 @@ namespace arg3
         {
         public:
             /*!
-             * default constructor takes a port
+             * default constructor
              * @factory the factory to create sockets with
              */
             socket_server(socket_factory *factory = &default_socket_factory);
@@ -116,6 +116,8 @@ namespace arg3
 
             bool listen(const int port, const int backlogSize);
 
+            void set_socket_factory(socket_factory *factory);
+
         protected:
 
             /*!
@@ -135,7 +137,7 @@ namespace arg3
             /*!
              * Will loop each connection and if the delegate returns false, will remove the connection
              */
-            void check_connections(std::function<bool(std::shared_ptr<buffered_socket>)> delegate);
+            void check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate);
 
             void notify_poll();
 
@@ -149,9 +151,14 @@ namespace arg3
 
             shared_ptr<thread> backgroundThread_;
 
-            vector<socket_server_listener *> listeners_;
+            std::mutex sockets_mutex_;
 
             vector<std::shared_ptr<buffered_socket>> sockets_;
+
+            std::mutex listeners_mutex_;
+
+            vector<socket_server_listener *> listeners_;
+
         };
     }
 }

@@ -779,6 +779,7 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 with_curl
+with_ssl
 enable_gcov
 '
       ac_precious_vars='build_alias
@@ -1434,6 +1435,7 @@ Optional Packages:
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
   --without-curl          use the curl library for http transport
+  --without-ssl           use ssl library for https transport
 
 Some influential environment variables:
   CC          C compiler command
@@ -15277,6 +15279,13 @@ if test "${with_curl+set}" = set; then :
 fi
 
 
+
+# Check whether --with-ssl was given.
+if test "${with_ssl+set}" = set; then :
+  withval=$with_ssl; without_ssl=true
+fi
+
+
 # Copyright 2012 Canonical Ltd.
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -15596,7 +15605,8 @@ _ACEOF
 fi
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
+if test "x$without_ssl" != xtrue; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
 $as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
 if ${ac_cv_lib_ssl_SSL_library_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -15641,6 +15651,7 @@ _ACEOF
 
 fi
 
+fi
 
 # Checks for header files.
 for ac_header in arpa/inet.h fcntl.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h

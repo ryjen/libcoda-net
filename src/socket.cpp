@@ -86,13 +86,13 @@ namespace arg3
                 sock_ = INVALID;
             }
 #ifdef HAVE_LIBSSL
-            if (sslHandle_)
+            if (sslHandle_ != NULL)
             {
                 SSL_shutdown (sslHandle_);
                 SSL_free (sslHandle_);
                 sslHandle_ = NULL;
             }
-            if (sslContext_)
+            if (sslContext_ != NULL)
             {
                 SSL_CTX_free (sslContext_);
                 sslContext_ = NULL;
@@ -104,7 +104,7 @@ namespace arg3
         {
             if (s.empty()) return 0;
 #ifdef HAVE_LIBSSL
-            if (sslHandle_)
+            if (sslHandle_ != NULL)
                 return SSL_write(sslHandle_, s.data(), s.size() );
 #endif
             return ::send ( sock_, s.data(), s.size(), flags );
@@ -115,7 +115,7 @@ namespace arg3
             if (len == 0) return 0;
 
 #ifdef HAVE_LIBSSL
-            if (sslHandle_)
+            if (sslHandle_ != NULL)
                 return SSL_write(sslHandle_, s, len );
 #endif
 #ifdef _WIN32
@@ -156,7 +156,7 @@ namespace arg3
             s.clear();
 
 #ifdef HAVE_LIBSSL
-            if (sslHandle_)
+            if (sslHandle_ != NULL)
                 status = SSL_read( sslHandle_, buf, MAXRECV );
             else
 #endif
@@ -277,7 +277,6 @@ namespace arg3
             addr_.sin_port = htons ( port );
 
             int bind_return = ::bind ( sock_, ( struct sockaddr *) &addr_, sizeof ( addr_ ) );
-
 
             if ( bind_return == -1 )
             {
