@@ -162,6 +162,8 @@ namespace arg3
 
             if (path.empty())
                 snprintf(buf, http::MAX_URL_LEN, "%s://%s", scheme_.c_str(), host_.c_str());
+            else if (path[0] == '/')
+                snprintf(buf, http::MAX_URL_LEN, "%s://%s%s", scheme_.c_str(), host_.c_str(), path.c_str());
             else
                 snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", scheme_.c_str(), host_.c_str(), path.c_str());
 
@@ -194,7 +196,7 @@ namespace arg3
                 break;
             }
 
-            for (auto & h : headers_)
+            for (auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -252,7 +254,7 @@ namespace arg3
             sock.writeln(buf);
 
             // add the headers
-            for (auto & h : headers_)
+            for (auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
