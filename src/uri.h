@@ -1,7 +1,7 @@
 #ifndef _ARG3_NET_URI_H_
 #define _ARG3_NET_URI_H_
 
-#include <uriparser/uri.h>
+#include <uriparser/Uri.h>
 #include <string>
 
 namespace arg3
