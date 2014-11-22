@@ -26,12 +26,14 @@ namespace arg3
 
         private:
             std::string uri_;
-            UriUriA     uriParse_;
             bool        isValid_;
+#ifdef HAVE_LIBURIPARSER
+            UriUriA     uriParse_;
 
             std::string fromRange(const UriTextRangeA &rng) const;
 
             std::string fromList(UriPathSegmentA *xs, const std::string &delim) const;
+#endif
         };
     }
 }

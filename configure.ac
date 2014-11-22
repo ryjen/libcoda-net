@@ -57,6 +57,8 @@ if test "x$without_ssl" != xtrue; then
 	AC_CHECK_LIB(ssl, SSL_library_init)
 fi
 
+AC_CHECK_LIB(uriparser, uriParseUriA)
+
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h])
 
