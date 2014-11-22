@@ -1,7 +1,12 @@
 #ifndef _ARG3_NET_URI_H_
 #define _ARG3_NET_URI_H_
 
+#include "config.h"
+
+#ifdef HAVE_LIBURIPARSER
 #include <uriparser/Uri.h>
+#endif
+
 #include <string>
 
 namespace arg3
