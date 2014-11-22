@@ -92,11 +92,12 @@ namespace arg3
                 SSL_free (sslHandle_);
                 sslHandle_ = NULL;
             }
-            if (sslContext_ != NULL)
-            {
-                SSL_CTX_free (sslContext_);
-                sslContext_ = NULL;
-            }
+            // automatically freed above?
+            // if (sslContext_ != NULL)
+            // {
+            //     SSL_CTX_free (sslContext_);
+            //     sslContext_ = NULL;
+            // }
 #endif
         }
 
@@ -268,11 +269,11 @@ namespace arg3
             {
                 // Connect the SSL struct to our connection
                 if (!SSL_set_fd (sslHandle_, sock_))
-                    ERR_print_errors_fp (stderr);
+                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
 
                 // Initiate SSL handshake
                 if (SSL_connect (sslHandle_) != 1)
-                    ERR_print_errors_fp (stderr);
+                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
             }
 #endif
             return true;
@@ -337,6 +338,18 @@ namespace arg3
                 return false;
             }
 
+#ifdef HAVE_LIBSSL
+            if (sslHandle_ != NULL)
+            {
+                // Connect the SSL struct to our connection
+                if (!SSL_set_fd (sslHandle_, sock_))
+                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
+
+                // Initiate SSL handshake
+                if (SSL_connect (sslHandle_) != 1)
+                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
+            }
+#endif
             return true;
         }
 
@@ -356,7 +369,7 @@ namespace arg3
             {
                 if (!SSL_accept(sslHandle_))
                 {
-                    ERR_print_errors_fp (stderr);
+                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
                 }
             }
 #endif
@@ -407,11 +420,12 @@ namespace arg3
                     SSL_free (sslHandle_);
                     sslHandle_ = NULL;
                 }
-                if (sslContext_)
-                {
-                    SSL_CTX_free (sslContext_);
-                    sslContext_ = NULL;
-                }
+                // automatically freed above?
+                // if (sslContext_)
+                // {
+                //     SSL_CTX_free (sslContext_);
+                //     sslContext_ = NULL;
+                // }
 
                 return;
             }
@@ -420,21 +434,33 @@ namespace arg3
             if (sslHandle_)
                 return;
 
-            // Register the error strings for libcrypto & libssl
-            SSL_load_error_strings ();
-            // Register the available ciphers and digests
-            SSL_library_init ();
+            if (is_valid())
+                throw socket_exception("socket already initalized");
+
+            static bool initialized = false;
+
+            if (!initialized)
+            {
+                // Register the available ciphers and digests
+                SSL_library_init ();
+                // Register the error strings for libcrypto & libssl
+                SSL_load_error_strings ();
+
+                initialized = true;
+            }
 
             // New context saying we are a client, and using SSL 2 or 3
             sslContext_ = SSL_CTX_new (SSLv23_client_method ());
             if (sslContext_ == NULL)
-                ERR_print_errors_fp (stderr);
+            {
+                throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
+            }
 
             // Create an SSL struct for the connection
             sslHandle_ = SSL_new (sslContext_);
-            if (sslHandle_ == NULL)
-                ERR_print_errors_fp (stderr);
 
+            if (sslHandle_ == NULL)
+                throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
 #endif
         }
     }

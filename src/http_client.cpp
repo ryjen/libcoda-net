@@ -13,6 +13,7 @@ namespace arg3
 {
     namespace net
     {
+#define THIS_USER_AGENT "libarg3net"
 
 #ifdef HAVE_LIBCURL
 
@@ -36,12 +37,12 @@ namespace arg3
 
         http_client::http_client(const string &host) : scheme_(http::SCHEME), host_(host)
         {
-            add_header("User-Agent", "libarg3net");
+            add_header(http::USER_AGENT, THIS_USER_AGENT);
         }
 
         http_client::http_client()
         {
-            add_header("User-Agent", "libarg3net");
+            add_header(http::USER_AGENT, THIS_USER_AGENT);
         }
 
         http_client::~http_client()
@@ -141,16 +142,12 @@ namespace arg3
             return *this;
         }
 
-        http_client &http_client::request(http::method method, const string &path)
-        {
-            char buf[http::MAX_URL_LEN + 1];
-
-            response_.clear();
-
-            if (host_.empty())
-                throw socket_exception("no host");
-
 #ifdef HAVE_LIBCURL
+        void http_client::request_curl(http::method method, const string &path)
+        {
+
+            char buf[http::MAX_URL_LEN + 1] = {0};
+
             struct curl_slist *headers = NULL;
 
             CURL *curl_ = curl_easy_init();
@@ -196,7 +193,7 @@ namespace arg3
                 break;
             }
 
-            for (auto &h : headers_)
+            for (auto & h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -219,7 +216,13 @@ namespace arg3
             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
 
             curl_easy_cleanup(curl_);
+        }
 #else
+        void http_client::request_socket(http::method method, const string &path)
+        {
+
+            char buf[http::MAX_URL_LEN + 1] = {0};
+
             buffered_socket sock;
 
             // create the socket based on hostname and port
@@ -254,7 +257,7 @@ namespace arg3
             sock.writeln(buf);
 
             // add the headers
-            for (auto &h : headers_)
+            for (auto & h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -264,7 +267,7 @@ namespace arg3
             // if we have a payload, add the size
             if (!payload_.empty())
             {
-                snprintf(buf, http::MAX_URL_LEN, "Content-Size: %zu", payload_.size());
+                snprintf(buf, http::MAX_URL_LEN, http::CONTENT_SIZE_FORMAT, payload_.size());
 
                 sock.writeln(buf);
             }
@@ -306,6 +309,20 @@ namespace arg3
                 response_.append(input.begin(), input.end());
 
             sock.close();
+        }
+#endif
+
+        http_client &http_client::request(http::method method, const string &path)
+        {
+            response_.clear();
+
+            if (host_.empty())
+                throw socket_exception("no host");
+
+#ifdef HAVE_LIBCURL
+            request_curl(method, path);
+#else
+            request_socket(method, path);
 #endif
             return *this;
         }

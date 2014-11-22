@@ -22,6 +22,8 @@ namespace arg3
 
             constexpr static int DEFAULT_SECURE_PORT = 443;
 
+            constexpr static const char *const USER_AGENT = "User-Agent";
+
             /*!
              * An http request header preamble
              */
@@ -31,6 +33,8 @@ namespace arg3
              * An http response header preamble
              */
             constexpr static const char *const RESPONSE_HEADER = "HTTP / 1.1 %d %s";
+
+            constexpr static const char *const CONTENT_SIZE_FORMAT = "Content-Size: %zu";
 
             typedef enum
             {

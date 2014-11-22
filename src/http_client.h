@@ -107,6 +107,12 @@ namespace arg3
             http_client &set_secure(bool value);
 
         private:
+
+#ifdef HAVE_LIBCURL
+            void request_curl(http::method method, const string &path);
+#else
+            void request_socket(http::method method, const string &path);
+#endif
             string scheme_;
             string host_;
             string payload_;
