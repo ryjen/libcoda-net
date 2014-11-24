@@ -10,7 +10,7 @@ namespace arg3
     namespace net
     {
         socket_server::socket_server(socket_factory *factory)
-            : pollFrequency_(4), factory_(factory), backgroundThread_(nullptr)
+            : pollFrequency_(4), factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
         {
         }
 
@@ -74,9 +74,10 @@ namespace arg3
 
             notify_stop();
 
-            sockets_mutex_.lock();
-            sockets_.clear();
-            sockets_mutex_.unlock();
+            {
+                std::lock_guard<std::mutex> lock(sockets_mutex_);
+                sockets_.clear();
+            }
 
             if (backgroundThread_ != nullptr)
             {
@@ -89,12 +90,10 @@ namespace arg3
 
         void socket_server::add_listener(socket_server_listener *listener)
         {
-            listeners_mutex_.lock();
+            std::lock_guard<std::mutex> lock(listeners_mutex_);
 
             if (find(listeners_.begin(), listeners_.end(), listener) == listeners_.end())
                 listeners_.push_back(listener);
-
-            listeners_mutex_.unlock();
         }
 
         void socket_server::set_socket_factory(socket_factory *factory)
@@ -106,38 +105,36 @@ namespace arg3
         {
             on_poll();
 
-            listeners_mutex_.lock();
+            std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (auto listener : listeners_)
+            for (const auto & listener : listeners_)
             {
                 listener->on_poll(this);
             }
-
-            listeners_mutex_.unlock();
         }
 
         void socket_server::notify_start()
         {
             on_start();
 
-            listeners_mutex_.lock();
-            for (auto listener : listeners_)
+            std::lock_guard<std::mutex> lock(listeners_mutex_);
+
+            for (const auto & listener : listeners_)
             {
                 listener->on_start(this);
             }
-            listeners_mutex_.unlock();
         }
 
         void socket_server::notify_stop()
         {
             on_stop();
 
-            listeners_mutex_.lock();
-            for (auto listener : listeners_)
+            std::lock_guard<std::mutex> lock(listeners_mutex_);
+
+            for (const auto & listener : listeners_)
             {
                 listener->on_stop(this);
             }
-            listeners_mutex_.unlock();
         }
 
         bool socket_server::listen(const int port, const int backlogSize)
@@ -194,9 +191,10 @@ namespace arg3
         {
             if (!is_valid()) return;
 
-            sockets_mutex_.lock();
+            std::lock_guard<std::mutex> lock(sockets_mutex_);
+
             sockets_.erase(std::remove_if(std::begin(sockets_), std::end(sockets_), delegate), std::end(sockets_));
-            sockets_mutex_.unlock();
+
         }
 
         void socket_server::poll()
@@ -246,9 +244,8 @@ namespace arg3
 
                 sock->notify_connect();
 
-                sockets_mutex_.lock();
+                std::lock_guard<std::mutex> lock(sockets_mutex_);
                 sockets_.push_back(sock);
-                sockets_mutex_.unlock();
             }
 
             /* check for freaky connections */

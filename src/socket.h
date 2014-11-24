@@ -20,6 +20,8 @@
 #include <exception>
 #include <vector>
 
+#include "config.h"
+
 #ifdef HAVE_LIBSSL
 #include <openssl/rand.h>
 #include <openssl/ssl.h>

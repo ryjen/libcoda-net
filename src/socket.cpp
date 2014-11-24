@@ -53,8 +53,13 @@ namespace arg3
 #endif
         }
 
-        socket::socket(const std::string &host, const int port) : socket()
+        socket::socket(const std::string &host, const int port) : sock_(INVALID)
+#ifdef HAVE_LIBSSL
+            , sslHandle_(NULL), sslContext_(NULL)
+#endif
         {
+            memset ( &addr_, 0, sizeof ( addr_ ) );
+
             connect(host, port);
         }
 
@@ -80,11 +85,7 @@ namespace arg3
 
         void socket::close()
         {
-            if (sock_ != INVALID)
-            {
-                closesocket(sock_);
-                sock_ = INVALID;
-            }
+
 #ifdef HAVE_LIBSSL
             if (sslHandle_ != NULL)
             {
@@ -99,6 +100,11 @@ namespace arg3
             //     sslContext_ = NULL;
             // }
 #endif
+            if (sock_ != INVALID)
+            {
+                closesocket(sock_);
+                sock_ = INVALID;
+            }
         }
 
         int socket::send ( const data_buffer &s, int flags )
@@ -255,14 +261,15 @@ namespace arg3
                 sock_ = INVALID;
             }
 
-            freeaddrinfo(result);
-
             if (p == NULL || sock_ == INVALID)
             {
+                freeaddrinfo(result);
                 return false;
             }
 
-            memcpy(&addr_, p->ai_addr, p->ai_addrlen);
+            memmove(&addr_, p->ai_addr, p->ai_addrlen);
+
+            freeaddrinfo(result);
 
 #ifdef HAVE_LIBSSL
             if (sslHandle_ != NULL)
@@ -281,7 +288,7 @@ namespace arg3
 
         bool socket::listen(const int port, const int backlogSize)
         {
-            struct addrinfo hints, *result, *p;
+            struct addrinfo hints, *result = NULL, *p = NULL;
 
             const int on = 1;
 
@@ -322,14 +329,15 @@ namespace arg3
                 sock_ = INVALID;
             }
 
-            freeaddrinfo(result);
-
             if (p == NULL)
             {
+                freeaddrinfo(result);
                 return false;
             }
 
-            memcpy(&addr_, p->ai_addr, p->ai_addrlen);
+            memmove(&addr_, p->ai_addr, p->ai_addrlen);
+
+            freeaddrinfo(result);
 
             int listen_return = ::listen ( sock_, backlogSize );
 
@@ -338,18 +346,6 @@ namespace arg3
                 return false;
             }
 
-#ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
-            {
-                // Connect the SSL struct to our connection
-                if (!SSL_set_fd (sslHandle_, sock_))
-                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
-
-                // Initiate SSL handshake
-                if (SSL_connect (sslHandle_) != 1)
-                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
-            }
-#endif
             return true;
         }
 
@@ -364,15 +360,6 @@ namespace arg3
                 return false;
             }
 
-#ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
-            {
-                if (!SSL_accept(sslHandle_))
-                {
-                    throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
-                }
-            }
-#endif
             return sock;
         }
 

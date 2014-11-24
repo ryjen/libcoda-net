@@ -152,13 +152,12 @@ namespace arg3
 
             shared_ptr<thread> backgroundThread_;
 
-            mutex sockets_mutex_;
-
             vector<std::shared_ptr<buffered_socket>> sockets_;
 
-            mutex listeners_mutex_;
-
             vector<socket_server_listener *> listeners_;
+
+            mutex sockets_mutex_;
+            mutex listeners_mutex_;
 
         };
     }
