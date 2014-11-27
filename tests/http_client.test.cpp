@@ -113,7 +113,7 @@ go_bandit([]()
             {
                 client.get("test");
 
-                Assert::That(client.response(), Equals("GET: Hello, World!"));
+                Assert::That(client.response().full_response(), Equals("GET: Hello, World!"));
             }
             catch (const exception &e)
             {
@@ -142,7 +142,29 @@ go_bandit([]()
             try
             {
                 client.post("test");
-                Assert::That(client.response(), Equals("POST: Hello, World!"));
+                Assert::That(client.response().full_response(), Equals("POST: Hello, World!"));
+            }
+            catch (const exception &e)
+            {
+                std::cerr << e.what() << std::endl;
+                throw e;
+            }
+        });
+
+        it("can read http response", []()
+        {
+            http_client client("www.arg3.com");
+
+            try
+            {
+                client.get("/");
+
+                auto response = client.response();
+
+                Assert::That(response.full_response().empty(), Equals(false));
+
+                Assert::That(response.payload().find("<!DOCTYPE html>"), !Equals(string::npos));
+
             }
             catch (const exception &e)
             {

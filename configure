@@ -1434,8 +1434,8 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
-  --without-curl          use the curl library for http transport
-  --without-ssl           use ssl library for https transport
+  --with-curl             use the curl library for http transport
+  --with-ssl              use ssl library for https transport
 
 Some influential environment variables:
   CC          C compiler command
@@ -15275,14 +15275,14 @@ fi
 
 # Check whether --with-curl was given.
 if test "${with_curl+set}" = set; then :
-  withval=$with_curl; without_curl=true
+  withval=$with_curl; with_curl=true
 fi
 
 
 
 # Check whether --with-ssl was given.
 if test "${with_ssl+set}" = set; then :
-  withval=$with_ssl; without_ssl=true
+  withval=$with_ssl; with_ssl=true
 fi
 
 
@@ -15558,7 +15558,7 @@ fi
 
 # Checks for libraries.
 
-if test "x$without_curl" != xtrue; then
+if test "x$with_curl" == xtrue; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_easy_init in -lcurl" >&5
 $as_echo_n "checking for curl_easy_init in -lcurl... " >&6; }
 if ${ac_cv_lib_curl_curl_easy_init+:} false; then :
@@ -15605,7 +15605,7 @@ _ACEOF
 fi
 
 fi
-if test "x$without_ssl" != xtrue; then
+if test "x$with_ssl" == xtrue; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
 $as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
 if ${ac_cv_lib_ssl_SSL_library_init+:} false; then :

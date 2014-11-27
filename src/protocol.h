@@ -9,6 +9,8 @@ namespace arg3
     {
         namespace http
         {
+            static const socket::data_buffer NEWLINE;
+
             constexpr static const int OK = 200;
 
             constexpr const unsigned MAX_URL_LEN = 2000;
@@ -22,19 +24,26 @@ namespace arg3
 
             constexpr static int DEFAULT_SECURE_PORT = 443;
 
-            constexpr static const char *const USER_AGENT = "User-Agent";
-
             /*!
              * An http request header preamble
              */
-            constexpr static const char *const REQUEST_HEADER = "%s /%s HTTP/1.0";
+            constexpr static const char *const REQUEST_PREAMBLE = "%s %s HTTP/1.1";
 
             /*!
              * An http response header preamble
              */
-            constexpr static const char *const RESPONSE_HEADER = "HTTP / 1.1 %d %s";
+            constexpr static const char *const RESPONSE_PREAMBLE = "HTTP/1.1 %d %s";
 
-            constexpr static const char *const CONTENT_SIZE_FORMAT = "Content-Size: %zu";
+            /*!
+             * header definitions
+             */
+            constexpr static const char *const HEADER_CONTENT_SIZE = "Content-Size";
+
+            constexpr static const char *const HEADER_HOST = "Host";
+
+            constexpr static const char *const HEADER_USER_AGENT = "User-Agent";
+
+            constexpr static const char *const HEADER_CONNECTION = "Connection";
 
             typedef enum
             {

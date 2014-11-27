@@ -15,7 +15,71 @@ namespace arg3
 {
     namespace net
     {
-        class http_client
+        class http_transfer
+        {
+        public:
+            http_transfer();
+            http_transfer(const http_transfer &);
+            http_transfer(http_transfer &&);
+            virtual ~http_transfer();
+
+            http_transfer &operator=(const http_transfer &);
+            http_transfer &operator=(http_transfer && other);
+
+            /*!
+             * the post data usually
+             */
+            string payload() const;
+
+
+            /*!
+             * returns the value for an HTTP header for this request
+             */
+            string header(const string &key);
+
+            const map<string, string> headers() const;
+
+
+        protected:
+            string payload_;
+            map<string, string> headers_;
+        };
+
+        class http_response : public http_transfer
+        {
+        public:
+            http_response();
+            http_response(const string &);
+            http_response(const http_response &);
+            http_response(http_response &&);
+            virtual ~http_response();
+
+            http_response &operator=(const http_response &);
+            http_response &operator=(http_response && other);
+
+            string full_response() const;
+
+            operator string() const;
+
+            /*!
+             * the HTTP response code
+             */
+            int code() const;
+
+        private:
+            void clear();
+
+            void parse();
+            void parse(const string &);
+
+            string response_;
+
+            int responseCode_;
+
+            friend class http_client;
+        };
+
+        class http_client : public http_transfer
         {
         public:
             http_client(const string &host);
@@ -37,29 +101,14 @@ namespace arg3
             void remove_header(const string &key);
 
             /*!
-             * returns the value for an HTTP header for this request
-             */
-            string header(const string &key);
-
-            /*!
              * returns the host used to connect
              */
             string host() const;
 
             /*!
-             * the post data usually
-             */
-            string payload() const;
-
-            /*!
-             * the HTTP response code
-             */
-            int response_code() const;
-
-            /*!
              * the response body
              */
-            string response() const;
+            http_response response() const;
 
             /*!
              * @returns true if the request is using HTTPS
@@ -115,10 +164,7 @@ namespace arg3
 #endif
             string scheme_;
             string host_;
-            string payload_;
-            int responseCode_;
-            string response_;
-            map<string, string> headers_;
+            http_response response_;
         };
     }
 }

@@ -1,5 +1,8 @@
 #include "config.h"
 
+#include <algorithm>
+#include <functional>
+
 #include "http_client.h"
 #include "exception.h"
 #include <cinttypes>
@@ -35,51 +38,210 @@ namespace arg3
         }
 #endif
 
+        size_t skip_newline(const string &s, size_t pos)
+        {
+            for (int i = 0; i < 2; i++, pos++)
+            {
+                if (s[pos] != '\r' && s[pos] != '\n')
+                    break;
+            }
+
+            return pos;
+        }
+
+        http_transfer::http_transfer() {}
+
+        http_transfer::http_transfer(const http_transfer &other) : payload_(other.payload_), headers_(other.headers_)
+        {}
+
+        http_transfer::http_transfer(http_transfer &&other) : payload_(std::move(other.payload_)), headers_(std::move(other.headers_))
+        {}
+
+        http_transfer::~http_transfer() {}
+
+        http_transfer &http_transfer::operator=(const http_transfer &other)
+        {
+            payload_ = other.payload_;
+            headers_ = other.headers_;
+
+            return *this;
+        }
+
+        http_transfer &http_transfer::operator=(http_transfer && other)
+        {
+            payload_ = std::move(other.payload_);
+            headers_ = std::move(other.headers_);
+
+            return *this;
+        }
+
+        string http_transfer::header(const string &key)
+        {
+            return headers_[key];
+        }
+
+        const map<string, string> http_transfer::headers() const
+        {
+            return headers_;
+        }
+
+        string http_transfer::payload() const
+        {
+            return payload_;
+        }
+
+        http_response::http_response() : responseCode_(0)
+        {}
+
+        http_response::http_response(const string &fullResponse) : response_(fullResponse), responseCode_(0)
+        {
+            parse();
+        }
+
+        http_response::http_response(const http_response &other) : http_transfer(other), response_(other.response_),
+            responseCode_(other.responseCode_)
+        {}
+
+        http_response::http_response(http_response &&other) : http_transfer(std::move(other)), response_(std::move(other.response_)),
+            responseCode_(std::move(other.responseCode_))
+        {}
+
+        http_response::~http_response() {}
+
+        http_response &http_response::operator=(const http_response &other)
+        {
+            http_transfer::operator=(other);
+
+            response_ = other.response_;
+
+            responseCode_ = other.responseCode_;
+
+            return *this;
+        }
+
+        http_response &http_response::operator=(http_response && other)
+        {
+            http_transfer::operator=(std::move(other));
+
+            response_ = std::move(other.response_);
+
+            responseCode_ = std::move(other.responseCode_);
+
+            return *this;
+        }
+
+        string http_response::full_response() const
+        {
+            return response_;
+        }
+
+        http_response::operator string() const
+        {
+            return payload_;
+        }
+
+        int http_response::code() const
+        {
+            return responseCode_;
+        }
+
+        void http_response::parse(const string &value)
+        {
+            response_ = value;
+
+            parse();
+        }
+
+        void http_response::clear()
+        {
+            response_.clear();
+            responseCode_ = 0;
+            headers_.clear();
+            payload_.clear();
+
+        }
+
+        void http_response::parse()
+        {
+            auto pos = response_.find("\r\n");
+
+            if (pos == string::npos) return;
+
+            string line = response_.substr(0, pos);
+
+            char buf[http::MAX_URL_LEN + 1] = {0};
+
+            if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, &responseCode_, buf) != 2)
+                return;
+
+            pos = skip_newline(response_, pos);
+
+            while (!line.empty())
+            {
+                auto next = response_.find("\r\n", pos);
+
+                if (next == string::npos) break;
+
+                line = response_.substr(pos, next - pos);
+
+                auto sep = line.find(':');
+
+                if (sep != string::npos)
+                {
+                    auto key = line.substr(0, sep);
+
+                    auto value = line.substr(sep + 2);
+
+                    headers_[key] = value;
+                }
+
+                pos = skip_newline(response_, next);
+            }
+
+            if (pos != string::npos)
+                payload_ = response_.substr(pos);
+        }
+
+
         http_client::http_client(const string &host) : scheme_(http::SCHEME), host_(host)
         {
-            add_header(http::USER_AGENT, THIS_USER_AGENT);
+            add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
         }
 
         http_client::http_client()
         {
-            add_header(http::USER_AGENT, THIS_USER_AGENT);
+            add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
         }
 
         http_client::~http_client()
         {
         }
 
-        http_client::http_client(const http_client &other) : scheme_(other.scheme_), host_(other.host_),
-            payload_(other.payload_), responseCode_(other.responseCode_),
-            response_(other.response_), headers_(other.headers_)
+        http_client::http_client(const http_client &other) : http_transfer(other), scheme_(other.scheme_), host_(other.host_),
+            response_(other.response_)
         {
         }
 
-        http_client::http_client(http_client &&other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
-            payload_(std::move(other.payload_)), responseCode_(other.responseCode_),
-            response_(std::move(other.response_)), headers_(std::move(other.headers_))
+        http_client::http_client(http_client &&other) : http_transfer(std::move(other)), scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
+            response_(std::move(other.response_))
         {
         }
 
         http_client &http_client::operator=(const http_client &other)
         {
+            http_transfer::operator=(other);
             scheme_ = other.scheme_;
             host_ = other.host_;
-            payload_ = other.payload_;
-            responseCode_ = other.responseCode_;
-            response_ = other.response_;
             headers_ = other.headers_;
             return *this;
         }
 
         http_client &http_client::operator=(http_client && other)
         {
+            http_transfer::operator=(std::move(other));
             scheme_ = std::move(other.scheme_);
             host_ = std::move(other.host_);
-            payload_ = std::move(other.payload_);
-            responseCode_ = other.responseCode_;
             response_ = std::move(other.response_);
-            headers_ = std::move(other.headers_);
             return *this;
         }
 
@@ -94,27 +256,12 @@ namespace arg3
             headers_.erase(key);
         }
 
-        string http_client::header(const string &key)
-        {
-            return headers_[key];
-        }
-
         string http_client::host() const
         {
             return host_;
         }
 
-        int http_client::response_code() const
-        {
-            return responseCode_;
-        }
-
-        string http_client::payload() const
-        {
-            return payload_;
-        }
-
-        string http_client::response() const
+        http_response http_client::response() const
         {
             return response_;
         }
@@ -193,7 +340,7 @@ namespace arg3
                 break;
             }
 
-            for (auto & h : headers_)
+            for (auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -202,7 +349,7 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_);
+            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.response_);
 
             CURLcode res = curl_easy_perform(curl_);
 
@@ -213,14 +360,15 @@ namespace arg3
                 throw rest_exception(curl_easy_strerror(res));
             }
 
-            curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
+            curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &response_.responseCode_);
 
             curl_easy_cleanup(curl_);
+
+            response_.parse();
         }
 #else
         void http_client::request_socket(http::method method, const string &path)
         {
-
             char buf[http::MAX_URL_LEN + 1] = {0};
 
             buffered_socket sock;
@@ -245,19 +393,23 @@ namespace arg3
             // send the method and path
 
             if (path.empty())
-                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], "/");
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], "/");
+            else if (path[0] == '/')
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], path.c_str());
             else
-                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], ("/" + path).c_str());
 
             sock.writeln(buf);
 
             // specify the host
-            snprintf(buf, http::MAX_URL_LEN, "Host: %s", host().c_str());
+            snprintf(buf, http::MAX_URL_LEN, "%s: %s", http::HEADER_HOST, host().c_str());
+            sock.writeln(buf);
 
+            snprintf(buf, http::MAX_URL_LEN, "%s: close", http::HEADER_CONNECTION);
             sock.writeln(buf);
 
             // add the headers
-            for (auto & h : headers_)
+            for (auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
@@ -267,7 +419,7 @@ namespace arg3
             // if we have a payload, add the size
             if (!payload_.empty())
             {
-                snprintf(buf, http::MAX_URL_LEN, http::CONTENT_SIZE_FORMAT, payload_.size());
+                snprintf(buf, http::MAX_URL_LEN, "%s: %zu", http::HEADER_CONTENT_SIZE, payload_.size());
 
                 sock.writeln(buf);
             }
@@ -278,35 +430,18 @@ namespace arg3
             // add the payload
             if (!payload_.empty())
             {
-                sock.writeln(payload_);
+                sock.write(payload_);
             }
 
-            sock.write_from_buffer();
+            if (!sock.write_from_buffer())
+                throw socket_exception("unable to write to socket");
 
-            sock.read_to_buffer();
-
-            string line = sock.readln();
-
-            if (sscanf(line.c_str(), http::RESPONSE_HEADER, &responseCode_, buf) == 2)
-            {
-                // parse out the rest of the header
-                while (!line.empty())
-                {
-                    line = sock.readln();
-                    response_ += line;
-                }
-                response_.clear();
-            }
-            else
-            {
-                // could be plain text
-                response_ = line;
-            }
+            if (!sock.read_to_buffer())
+                throw socket_exception("unable to read from socket");
 
             auto input = sock.input();
 
-            if (!input.empty())
-                response_.append(input.begin(), input.end());
+            response_.parse(string(input.begin(), input.end()));
 
             sock.close();
         }
@@ -324,6 +459,7 @@ namespace arg3
 #else
             request_socket(method, path);
 #endif
+
             return *this;
         }
 
