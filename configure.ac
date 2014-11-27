@@ -23,18 +23,6 @@ else
 	AC_SUBST([AM_LDFLAGS], ["-pthread"])
 fi
 
-AC_ARG_WITH([curl],
-            [AS_HELP_STRING([--with-curl],
-            [use the curl library for http transport])],
-            [with_curl=true],
-            [])
-
-AC_ARG_WITH([ssl],
-	    [AS_HELP_STRING([--with-ssl],
-	    [use ssl library for https transport])],
-	    [with_ssl=true],
-            [])
-
 m4_include([m4/gcov.m4])
 AC_TDD_GCOV
 AC_SUBST(COVERAGE_CFLAGS)
@@ -50,12 +38,21 @@ fi
 
 # Checks for libraries.
 
-if test "x$with_curl" == xtrue; then
-	AC_CHECK_LIB(curl, curl_easy_init)
-fi
-if test "x$with_ssl" == xtrue; then
-	AC_CHECK_LIB(ssl, SSL_library_init)
-fi
+AC_ARG_WITH([curl],
+            [AS_HELP_STRING([--with-curl],
+            [use the curl library for http transport])], [],
+            [with_curl=no])
+
+AC_ARG_WITH([ssl],
+	    [AS_HELP_STRING([--with-ssl],
+	    [use ssl library for https transport])], [],
+	    [with_ssl=no])
+
+AS_IF([test "x$with_curl" != "xno"],
+	AC_CHECK_LIB(curl, curl_easy_init))
+
+AS_IF([test "x$with_ssl" != "xno"],
+	AC_CHECK_LIB(ssl, SSL_library_init))
 
 AC_CHECK_LIB(uriparser, uriParseUriA)
 

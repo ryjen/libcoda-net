@@ -778,9 +778,9 @@ enable_dependency_tracking
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+enable_gcov
 with_curl
 with_ssl
-enable_gcov
 '
       ac_precious_vars='build_alias
 host_alias
@@ -15272,20 +15272,6 @@ else
 
 fi
 
-
-# Check whether --with-curl was given.
-if test "${with_curl+set}" = set; then :
-  withval=$with_curl; with_curl=true
-fi
-
-
-
-# Check whether --with-ssl was given.
-if test "${with_ssl+set}" = set; then :
-  withval=$with_ssl; with_ssl=true
-fi
-
-
 # Copyright 2012 Canonical Ltd.
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -15558,8 +15544,26 @@ fi
 
 # Checks for libraries.
 
-if test "x$with_curl" == xtrue; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_easy_init in -lcurl" >&5
+
+# Check whether --with-curl was given.
+if test "${with_curl+set}" = set; then :
+  withval=$with_curl;
+else
+  with_curl=no
+fi
+
+
+
+# Check whether --with-ssl was given.
+if test "${with_ssl+set}" = set; then :
+  withval=$with_ssl;
+else
+  with_ssl=no
+fi
+
+
+if test "x$with_curl" != "xno"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_easy_init in -lcurl" >&5
 $as_echo_n "checking for curl_easy_init in -lcurl... " >&6; }
 if ${ac_cv_lib_curl_curl_easy_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -15605,8 +15609,9 @@ _ACEOF
 fi
 
 fi
-if test "x$with_ssl" == xtrue; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
+
+if test "x$with_ssl" != "xno"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
 $as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
 if ${ac_cv_lib_ssl_SSL_library_init+:} false; then :
   $as_echo_n "(cached) " >&6
