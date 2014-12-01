@@ -130,7 +130,7 @@ go_bandit([]()
 
             client.get("/settings/personalinfo");
 
-            Assert::That(client.response().empty(), Equals(false));
+            Assert::That(client.response().payload().empty(), Equals(false));
         });
 #endif
         it("can post", []()
