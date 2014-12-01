@@ -121,7 +121,7 @@ go_bandit([]()
                 //throw e;
             }
         });
-#if defined(HAVE_LIBCURL) || defined(HAVE_LIBSSL)
+#if defined(HAVE_LIBSSL)
         it("is secure", []()
         {
             http_client client("google.com");
