@@ -31,6 +31,9 @@ namespace arg3
              */
             string payload() const;
 
+            string version() const;
+
+            void set_version(const string &value);
 
             /*!
              * returns the value for an HTTP header for this request
@@ -43,6 +46,7 @@ namespace arg3
         protected:
             string payload_;
             map<string, string> headers_;
+            string version_;
         };
 
         class http_response : public http_transfer

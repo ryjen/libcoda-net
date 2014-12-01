@@ -59,15 +59,15 @@ namespace arg3
 
             int status = socket::recv(chunk);
 
-            size_t size = 0;
+            size_t size = chunk.size();
 
             while (status > 0)
             {
-                size += chunk.size();
-
                 inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
 
                 status = socket::recv(chunk);
+
+                size += chunk.size();
             }
 
             bool success = status == 0 || errno == EWOULDBLOCK;
@@ -96,7 +96,7 @@ namespace arg3
 
             string temp(inBuffer_.begin(), pos);
 
-            /* Skip all new line characters */
+            /* Skip all new line characters, squelching blank lines */
             while (pos != inBuffer_.end() && find(NEWLINE.begin(), NEWLINE.end(), *pos) != NEWLINE.end())
             {
                 pos++;
@@ -166,10 +166,7 @@ namespace arg3
 
         void buffered_socket::flush()
         {
-            if (is_valid())
-                send(outBuffer_);
-
-            outBuffer_.clear();
+            write_from_buffer();
         }
 
         void buffered_socket::close()
@@ -186,9 +183,13 @@ namespace arg3
 
         bool buffered_socket::write_from_buffer()
         {
+            if (!is_valid()) return false;
+
+            if (outBuffer_.empty()) return true;
+
             notify_will_write();
 
-            if (send(outBuffer_) < 0)
+            if (send(outBuffer_) != static_cast<int>(outBuffer_.size()))
             {
                 return false;
             }

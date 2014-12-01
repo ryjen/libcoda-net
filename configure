@@ -1434,7 +1434,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
-  --with-curl             use the curl library for http transport
+  --without-curl          use the curl library for http transport
   --with-ssl              use ssl library for https transport
 
 Some influential environment variables:
@@ -15275,7 +15275,9 @@ fi
 
 # Check whether --with-curl was given.
 if test "${with_curl+set}" = set; then :
-  withval=$with_curl; with_curl=true
+  withval=$with_curl; with_curl=false
+else
+  with_curl=true
 fi
 
 

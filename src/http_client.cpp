@@ -49,12 +49,13 @@ namespace arg3
             return pos;
         }
 
-        http_transfer::http_transfer() {}
+        http_transfer::http_transfer() : version_(http::VERSION_1_1) {}
 
-        http_transfer::http_transfer(const http_transfer &other) : payload_(other.payload_), headers_(other.headers_)
+        http_transfer::http_transfer(const http_transfer &other) : payload_(other.payload_), headers_(other.headers_), version_(other.version_)
         {}
 
-        http_transfer::http_transfer(http_transfer &&other) : payload_(std::move(other.payload_)), headers_(std::move(other.headers_))
+        http_transfer::http_transfer(http_transfer &&other) : payload_(std::move(other.payload_)),
+            headers_(std::move(other.headers_)), version_(std::move(other.version_))
         {}
 
         http_transfer::~http_transfer() {}
@@ -63,7 +64,7 @@ namespace arg3
         {
             payload_ = other.payload_;
             headers_ = other.headers_;
-
+            version_ = other.version_;
             return *this;
         }
 
@@ -71,7 +72,7 @@ namespace arg3
         {
             payload_ = std::move(other.payload_);
             headers_ = std::move(other.headers_);
-
+            version_ = std::move(other.version_);
             return *this;
         }
 
@@ -88,6 +89,16 @@ namespace arg3
         string http_transfer::payload() const
         {
             return payload_;
+        }
+
+        string http_transfer::version() const
+        {
+            return version_;
+        }
+
+        void http_transfer::set_version(const string &value)
+        {
+            version_ = value;
         }
 
         http_response::http_response() : responseCode_(0)
@@ -165,14 +176,19 @@ namespace arg3
         {
             auto pos = response_.find("\r\n");
 
-            if (pos == string::npos) return;
+            if (pos == string::npos)
+                return;
 
             string line = response_.substr(0, pos);
 
             char buf[http::MAX_URL_LEN + 1] = {0};
 
-            if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, &responseCode_, buf) != 2)
+            char version[http::MAX_URL_LEN + 1] = {0};
+
+            if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, version, &responseCode_, buf) != 3)
                 return;
+
+            version_ = version;
 
             pos = skip_newline(response_, pos);
 
@@ -315,6 +331,10 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
 
+#ifdef DEBUG
+            curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1L);
+#endif
+
             switch (method)
             {
             case http::GET:
@@ -349,7 +369,7 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.response_);
+            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.payload_);
 
             CURLcode res = curl_easy_perform(curl_);
 
@@ -383,30 +403,46 @@ namespace arg3
             {
                 string hostname = host().substr(0, pos);
                 int port = stoi(host().substr(pos + 1));
-                sock.connect(hostname, port);
+                if (!sock.connect(hostname, port))
+                    throw socket_exception("unable to connect to " + host());
             }
             else
             {
-                sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT);
+                if (!sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT))
+                    throw socket_exception("unable to connect to " + host());
             }
 
             // send the method and path
 
             if (path.empty())
-                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], "/");
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], "/", version_.c_str());
             else if (path[0] == '/')
-                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], path.c_str());
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], path.c_str(), version_.c_str());
             else
-                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], ("/" + path).c_str());
+                snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], ("/" + path).c_str(), version_.c_str());
 
             sock.writeln(buf);
+
+            bool chunked = headers_.count(http::HEADER_TRANSFER_ENCODING) != 0 && !strcasecmp(headers_[http::HEADER_TRANSFER_ENCODING].c_str(), "chunked");
 
             // specify the host
-            snprintf(buf, http::MAX_URL_LEN, "%s: %s", http::HEADER_HOST, host().c_str());
-            sock.writeln(buf);
+            if (headers_.count(http::HEADER_HOST) == 0)
+            {
+                snprintf(buf, http::MAX_URL_LEN, "%s: %s", http::HEADER_HOST, host().c_str());
+                sock.writeln(buf);
+            }
 
-            snprintf(buf, http::MAX_URL_LEN, "%s: close", http::HEADER_CONNECTION);
-            sock.writeln(buf);
+            if (headers_.count(http::HEADER_ACCEPT) == 0)
+            {
+                snprintf(buf, http::MAX_URL_LEN, "%s: */*", http::HEADER_ACCEPT);
+                sock.writeln(buf);
+            }
+
+            if (headers_.count(http::HEADER_CONNECTION) == 0)
+            {
+                snprintf(buf, http::MAX_URL_LEN, "%s: close", http::HEADER_CONNECTION);
+                sock.writeln(buf);
+            }
 
             // add the headers
             for (auto &h : headers_)
@@ -417,7 +453,7 @@ namespace arg3
             }
 
             // if we have a payload, add the size
-            if (!payload_.empty())
+            if (!chunked && !payload_.empty())
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %zu", http::HEADER_CONTENT_SIZE, payload_.size());
 
@@ -433,6 +469,10 @@ namespace arg3
                 sock.write(payload_);
             }
 
+#ifdef DEBUG
+            cout << string(sock.output().begin(), sock.output().end());
+#endif
+
             if (!sock.write_from_buffer())
                 throw socket_exception("unable to write to socket");
 
@@ -443,7 +483,7 @@ namespace arg3
 
             response_.parse(string(input.begin(), input.end()));
 
-            sock.close();
+            //sock.close();
         }
 #endif
 

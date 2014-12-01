@@ -109,6 +109,8 @@ namespace arg3
 
         int socket::send ( const data_buffer &s, int flags )
         {
+            if (!is_valid()) return INVALID;
+
             if (s.empty()) return 0;
 #ifdef HAVE_LIBSSL
             if (sslHandle_ != NULL)
@@ -119,6 +121,8 @@ namespace arg3
 
         int socket::send( void *s, size_t len, int flags)
         {
+            if (!is_valid()) return INVALID;
+
             if (len == 0) return 0;
 
 #ifdef HAVE_LIBSSL
@@ -180,11 +184,11 @@ namespace arg3
 
         int socket::recv(data_buffer &s)
         {
+            if (!is_valid()) return INVALID;
+
             unsigned char buf [ MAXRECV + 1 ] = {0};
 
             int status;
-
-            memset ( buf, 0, sizeof(buf) );
 
             s.clear();
 
@@ -304,7 +308,11 @@ namespace arg3
 
             if (r != 0)
             {
-                throw socket_exception( gai_strerror(r));
+                for (int i = 0; i < 5 && r != 0; i++)
+                    r = getaddrinfo(NULL, servnam, &hints, &result);
+
+                if (r != 0)
+                    throw socket_exception( gai_strerror(r));
             }
 
             if (result == NULL)

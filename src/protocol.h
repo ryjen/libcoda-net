@@ -24,15 +24,19 @@ namespace arg3
 
             constexpr static int DEFAULT_SECURE_PORT = 443;
 
+            constexpr static const char *const VERSION_1_1 = "1.1";
+
+            constexpr static const char *const VERSION_1_0 = "1.0";
+
             /*!
              * An http request header preamble
              */
-            constexpr static const char *const REQUEST_PREAMBLE = "%s %s HTTP/1.1";
+            constexpr static const char *const REQUEST_PREAMBLE = "%s %s HTTP/%s";
 
             /*!
              * An http response header preamble
              */
-            constexpr static const char *const RESPONSE_PREAMBLE = "HTTP/1.1 %d %s";
+            constexpr static const char *const RESPONSE_PREAMBLE = "HTTP/%s %d %s";
 
             /*!
              * header definitions
@@ -44,6 +48,10 @@ namespace arg3
             constexpr static const char *const HEADER_USER_AGENT = "User-Agent";
 
             constexpr static const char *const HEADER_CONNECTION = "Connection";
+
+            constexpr static const char *const HEADER_ACCEPT = "Accept";
+
+            constexpr static const char *const HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 
             typedef enum
             {

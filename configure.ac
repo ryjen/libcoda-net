@@ -24,10 +24,10 @@ else
 fi
 
 AC_ARG_WITH([curl],
-            [AS_HELP_STRING([--with-curl],
+            [AS_HELP_STRING([--without-curl],
             [use the curl library for http transport])],
-            [with_curl=true],
-            [])
+            [with_curl=false],
+            [with_curl=true])
 
 AC_ARG_WITH([ssl],
 	    [AS_HELP_STRING([--with-ssl],
