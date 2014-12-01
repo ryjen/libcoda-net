@@ -15275,16 +15275,18 @@ fi
 
 # Check whether --with-curl was given.
 if test "${with_curl+set}" = set; then :
-  withval=$with_curl; with_curl=false
+  withval=$with_curl; with_curl=no
 else
-  with_curl=true
+  with_curl=yes
 fi
 
 
 
 # Check whether --with-ssl was given.
 if test "${with_ssl+set}" = set; then :
-  withval=$with_ssl; with_ssl=true
+  withval=$with_ssl; with_ssl=yes
+else
+  with_ssl=no
 fi
 
 
@@ -15560,8 +15562,8 @@ fi
 
 # Checks for libraries.
 
-if test "x$with_curl" == xtrue; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_easy_init in -lcurl" >&5
+if test "x$with_curl" != "xno"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_easy_init in -lcurl" >&5
 $as_echo_n "checking for curl_easy_init in -lcurl... " >&6; }
 if ${ac_cv_lib_curl_curl_easy_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -15607,8 +15609,9 @@ _ACEOF
 fi
 
 fi
-if test "x$with_ssl" == xtrue; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
+
+if test "x$with_ssl" != "xno"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
 $as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
 if ${ac_cv_lib_ssl_SSL_library_init+:} false; then :
   $as_echo_n "(cached) " >&6
