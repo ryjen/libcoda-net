@@ -177,7 +177,10 @@ namespace arg3
             auto pos = response_.find("\r\n");
 
             if (pos == string::npos)
+            {
+                payload_ = response_;
                 return;
+            }
 
             string line = response_.substr(0, pos);
 
@@ -186,7 +189,10 @@ namespace arg3
             char version[http::MAX_URL_LEN + 1] = {0};
 
             if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, version, &responseCode_, buf) != 3)
+            {
+                payload_ = response_;
                 return;
+            }
 
             version_ = version;
 
@@ -331,6 +337,8 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
 
+            curl_easy_setopt(curl_, CURLOPT_HEADER, 1L);
+
 #ifdef DEBUG
             curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1L);
 #endif
@@ -369,7 +377,7 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.payload_);
+            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.response_);
 
             CURLcode res = curl_easy_perform(curl_);
 
