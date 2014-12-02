@@ -403,6 +403,7 @@ namespace arg3
             {
                 string hostname = host().substr(0, pos);
                 int port = stoi(host().substr(pos + 1));
+
                 if (!sock.connect(hostname, port))
                     throw socket_exception("unable to connect to " + host());
             }

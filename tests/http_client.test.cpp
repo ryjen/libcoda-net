@@ -94,7 +94,7 @@ go_bandit([]()
             }
             catch (const exception &e)
             {
-                std::cerr << e.what() << std::endl;
+                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
             }
         });
 
@@ -113,12 +113,12 @@ go_bandit([]()
             {
                 client.get("test");
 
-                Assert::That(client.response().full_response(), Equals("GET: Hello, World!"));
+                Assert::That(client.response().payload(), Equals("GET: Hello, World!"));
             }
             catch (const exception &e)
             {
-                std::cerr << e.what() << std::endl;
-                //throw e;
+                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
+                throw e;
             }
         });
 #if defined(HAVE_LIBSSL)
@@ -142,11 +142,12 @@ go_bandit([]()
             try
             {
                 client.post("test");
-                Assert::That(client.response().full_response(), Equals("POST: Hello, World!"));
+
+                Assert::That(client.response().payload(), Equals("POST: Hello, World!"));
             }
             catch (const exception &e)
             {
-                std::cerr << e.what() << std::endl;
+                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
                 throw e;
             }
         });
@@ -161,14 +162,14 @@ go_bandit([]()
 
                 auto response = client.response();
 
-                Assert::That(response.full_response().empty(), Equals(false));
+                Assert::That(response.payload().empty(), Equals(false));
 
                 Assert::That(response.payload().find("<!DOCTYPE html>"), !Equals(string::npos));
 
             }
             catch (const exception &e)
             {
-                std::cerr << e.what() << std::endl;
+                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
                 throw e;
             }
         });
