@@ -107,7 +107,7 @@ namespace arg3
 
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (const auto & listener : listeners_)
+            for (const auto &listener : listeners_)
             {
                 listener->on_poll(this);
             }
@@ -119,7 +119,7 @@ namespace arg3
 
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (const auto & listener : listeners_)
+            for (const auto &listener : listeners_)
             {
                 listener->on_start(this);
             }
@@ -131,7 +131,7 @@ namespace arg3
 
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (const auto & listener : listeners_)
+            for (const auto &listener : listeners_)
             {
                 listener->on_stop(this);
             }
@@ -142,7 +142,9 @@ namespace arg3
             bool success = socket::listen(port, backlogSize);
 
             if (success)
+            {
                 notify_start();
+            }
 
             return success;
         }
@@ -160,6 +162,8 @@ namespace arg3
                 throw socket_exception("unable to listen on port");
             }
 
+            set_non_blocking(true);
+
             backgroundThread_ = make_shared<thread>(&socket_server::run, this);
         }
 
@@ -174,6 +178,8 @@ namespace arg3
             {
                 throw socket_exception("unable to listen on port");
             }
+
+            set_non_blocking(true);
 
             run();
         }
@@ -194,7 +200,6 @@ namespace arg3
             std::lock_guard<std::mutex> lock(sockets_mutex_);
 
             sockets_.erase(std::remove_if(std::begin(sockets_), std::end(sockets_), delegate), std::end(sockets_));
-
         }
 
         void socket_server::poll()
@@ -245,6 +250,7 @@ namespace arg3
                 sock->notify_connect();
 
                 std::lock_guard<std::mutex> lock(sockets_mutex_);
+
                 sockets_.push_back(sock);
             }
 
