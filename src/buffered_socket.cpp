@@ -72,7 +72,7 @@ namespace arg3
 
             bool success = status == 0 || errno == EWOULDBLOCK;
 
-            if (success && size > 0)
+            if (size > 0 || inBuffer_.size() > 0)
                 notify_did_read();
 
             return success;
