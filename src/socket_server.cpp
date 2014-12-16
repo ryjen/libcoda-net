@@ -239,7 +239,7 @@ namespace arg3
             }
 
             // check for new connection
-            if (is_valid() && FD_ISSET(sock_, &in_set))
+            if (FD_ISSET(sock_, &in_set))
             {
                 sockaddr_storage addr;
 
@@ -257,7 +257,7 @@ namespace arg3
             /* check for freaky connections */
             check_connections([&](const std::shared_ptr<buffered_socket> &c)
             {
-                if (!c || !c->is_valid()) return true;
+                if (!c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &err_set))
                 {
@@ -265,6 +265,7 @@ namespace arg3
                     FD_CLR(c->sock_, &out_set);
 
                     c->close();
+
                     return true;
                 }
                 return false;
@@ -273,7 +274,7 @@ namespace arg3
             /* read from all readable connections, removing failed sockets */
             check_connections([&](const std::shared_ptr<buffered_socket> &c)
             {
-                if (!c || !c->is_valid()) return true;
+                if (!c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &in_set))
                 {
@@ -295,7 +296,7 @@ namespace arg3
             /* write to all writable connections, removing failed sockets */
             check_connections([&](const std::shared_ptr<buffered_socket> &c)
             {
-                if (!c || !c->is_valid()) return true;
+                if (!c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &out_set))
                 {
