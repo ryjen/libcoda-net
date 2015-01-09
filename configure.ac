@@ -5,7 +5,10 @@ AC_PREREQ([2.58])
 AC_INIT([arg3net], [0.2], [c0der78@gmail.com])
 AC_CONFIG_SRCDIR([src/socket.cpp])
 AC_CONFIG_HEADERS([src/config.h])
+
 AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE([enable])
+
 LT_INIT
 
 : ${CXXFLAGS=""}
