@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.58])
-AC_INIT([arg3net], [0.2], [c0der78@gmail.com])
+AC_INIT([arg3net], [0.2.0], [c0der78@gmail.com])
 AC_CONFIG_SRCDIR([src/socket.cpp])
 AC_CONFIG_HEADERS([src/config.h])
 
@@ -71,5 +71,5 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostbyname gettimeofday inet_ntoa memset select socket strerror])
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+AC_CONFIG_FILES([arg3net.pc Makefile src/Makefile tests/Makefile])
 AC_OUTPUT

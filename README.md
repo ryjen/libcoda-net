@@ -7,6 +7,8 @@ useful code for network related activities
 
 [View Testing Code Coverage](http://htmlpreview.github.com/?https://github.com/c0der78/arg3net/blob/master/coverage/index.html)
 
+A good working example is [Yahtsee](http://github.com/c0der78/yahtsee).
+
 Building
 ========
 

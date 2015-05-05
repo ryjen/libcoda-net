@@ -28,3 +28,4 @@ arg3net_test
 *~
 *.gcno
 coverage.info
+arg3net.pc

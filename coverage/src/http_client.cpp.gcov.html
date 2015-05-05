@@ -31,18 +31,18 @@
             <td class="headerValue">Code Coverage</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">46</td>
-            <td class="headerCovTableEntry">90</td>
-            <td class="headerCovTableEntryLo">51.1 %</td>
+            <td class="headerCovTableEntry">95</td>
+            <td class="headerCovTableEntry">176</td>
+            <td class="headerCovTableEntryLo">54.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2014-10-18 13:58:12</td>
+            <td class="headerValue">2015-05-04 23:12:43</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntry">12</td>
-            <td class="headerCovTableEntry">30</td>
-            <td class="headerCovTableEntryLo">40.0 %</td>
+            <td class="headerCovTableEntry">25</td>
+            <td class="headerCovTableEntry">64</td>
+            <td class="headerCovTableEntryLo">39.1 %</td>
           </tr>
           <tr>
             <td class="headerItem">Legend:</td>
@@ -70,312 +70,539 @@
 <pre class="source">
 <a name="1"><span class="lineNum">       1 </span>            : #include &quot;config.h&quot;</a>
 <span class="lineNum">       2 </span>            : 
-<span class="lineNum">       3 </span>            : #include &quot;http_client.h&quot;
-<span class="lineNum">       4 </span>            : #include &quot;exception.h&quot;
-<span class="lineNum">       5 </span>            : #include &lt;cinttypes&gt;
-<span class="lineNum">       6 </span>            : #ifndef HAVE_LIBCURL
-<span class="lineNum">       7 </span>            : #include &quot;buffered_socket.h&quot;
-<span class="lineNum">       8 </span>            : #endif
-<span class="lineNum">       9 </span>            : 
-<span class="lineNum">      10 </span>            : namespace arg3
-<span class="lineNum">      11 </span>            : {
-<span class="lineNum">      12 </span>            :     namespace net
-<span class="lineNum">      13 </span>            :     {
+<span class="lineNum">       3 </span>            : #include &lt;algorithm&gt;
+<span class="lineNum">       4 </span>            : #include &lt;functional&gt;
+<span class="lineNum">       5 </span>            : 
+<span class="lineNum">       6 </span>            : #include &quot;http_client.h&quot;
+<span class="lineNum">       7 </span>            : #include &quot;exception.h&quot;
+<span class="lineNum">       8 </span>            : #include &lt;cinttypes&gt;
+<span class="lineNum">       9 </span>            : #ifndef HAVE_LIBCURL
+<span class="lineNum">      10 </span>            : #include &quot;buffered_socket.h&quot;
+<span class="lineNum">      11 </span>            : #else
+<span class="lineNum">      12 </span>            : #include &lt;cstring&gt;
+<span class="lineNum">      13 </span>            : #endif
 <span class="lineNum">      14 </span>            : 
-<a name="15"><span class="lineNum">      15 </span>            : #ifdef HAVE_LIBCURL</a>
-<span class="lineNum">      16 </span>            : 
-<span class="lineNum">      17 </span>            :         size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
-<span class="lineNum">      18 </span>            :         {
-<span class="lineNum">      19 </span><span class="lineCov">          4 :             if (s == NULL) return 0;</span>
+<span class="lineNum">      15 </span>            : namespace arg3
+<span class="lineNum">      16 </span>            : {
+<span class="lineNum">      17 </span>            :     namespace net
+<span class="lineNum">      18 </span>            :     {
+<span class="lineNum">      19 </span>            : #define THIS_USER_AGENT &quot;libarg3net&quot;
 <span class="lineNum">      20 </span>            : 
-<span class="lineNum">      21 </span><span class="lineCov">          4 :             const size_t new_len = size * nmemb;</span>
+<a name="21"><span class="lineNum">      21 </span>            : #ifdef HAVE_LIBCURL</a>
 <span class="lineNum">      22 </span>            : 
-<span class="lineNum">      23 </span><span class="lineCov">          4 :             char buf[new_len + 1];</span>
-<span class="lineNum">      24 </span>            : 
-<span class="lineNum">      25 </span><span class="lineCov">          4 :             memcpy(buf, ptr, size * nmemb);</span>
+<span class="lineNum">      23 </span>            :         size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
+<span class="lineNum">      24 </span>            :         {
+<span class="lineNum">      25 </span><span class="lineCov">         24 :             if (s == NULL) return 0;</span>
 <span class="lineNum">      26 </span>            : 
-<span class="lineNum">      27 </span><span class="lineCov">          4 :             buf[new_len] = '\0';</span>
+<span class="lineNum">      27 </span><span class="lineCov">         24 :             const size_t new_len = size * nmemb;</span>
 <span class="lineNum">      28 </span>            : 
-<span class="lineNum">      29 </span><span class="lineCov">          4 :             s-&gt;append(buf);</span>
+<span class="lineNum">      29 </span><span class="lineCov">         24 :             char buf[new_len + 1];</span>
 <span class="lineNum">      30 </span>            : 
-<span class="lineNum">      31 </span><span class="lineCov">          4 :             return new_len;</span>
-<span class="lineNum">      32 </span><span class="lineCov">          8 :         }</span>
-<a name="33"><span class="lineNum">      33 </span>            : #endif</a>
+<span class="lineNum">      31 </span><span class="lineCov">         24 :             memcpy(buf, ptr, size * nmemb);</span>
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span><span class="lineCov">         24 :             buf[new_len] = '\0';</span>
 <span class="lineNum">      34 </span>            : 
-<span class="lineNum">      35 </span>            :         http_client::http_client(const string &amp;host) : scheme_(http::SCHEME), host_(host)
-<span class="lineNum">      36 </span><span class="lineCov">          6 :         {</span>
-<span class="lineNum">      37 </span><span class="lineCov">         12 :             add_header(&quot;User-Agent&quot;, &quot;libarg3net&quot;);</span>
-<a name="38"><span class="lineNum">      38 </span><span class="lineCov">          6 :         }</span></a>
-<span class="lineNum">      39 </span>            : 
-<span class="lineNum">      40 </span>            :         http_client::http_client()
-<span class="lineNum">      41 </span><span class="lineNoCov">          0 :         {</span>
-<span class="lineNum">      42 </span><span class="lineNoCov">          0 :             add_header(&quot;User-Agent&quot;, &quot;libarg3net&quot;);</span>
-<a name="43"><span class="lineNum">      43 </span><span class="lineNoCov">          0 :         }</span></a>
-<span class="lineNum">      44 </span>            : 
-<span class="lineNum">      45 </span>            :         http_client::~http_client()
-<span class="lineNum">      46 </span><span class="lineCov">          6 :         {</span>
-<a name="47"><span class="lineNum">      47 </span><span class="lineCov">          6 :         }</span></a>
+<span class="lineNum">      35 </span><span class="lineCov">         24 :             s-&gt;append(buf);</span>
+<span class="lineNum">      36 </span>            : 
+<span class="lineNum">      37 </span><span class="lineCov">         24 :             return new_len;</span>
+<span class="lineNum">      38 </span><span class="lineCov">         48 :         }</span>
+<a name="39"><span class="lineNum">      39 </span>            : #endif</a>
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            :         size_t skip_newline(const string &amp;s, size_t pos)
+<span class="lineNum">      42 </span>            :         {
+<span class="lineNum">      43 </span><span class="lineCov">         72 :             for (int i = 0; i &lt; 2; i++, pos++)</span>
+<span class="lineNum">      44 </span>            :             {
+<span class="lineNum">      45 </span><span class="lineCov">         36 :                 if (s[pos] != '\r' &amp;&amp; s[pos] != '\n')</span>
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :                     break;</span>
+<span class="lineNum">      47 </span><span class="lineCov">         24 :             }</span>
 <span class="lineNum">      48 </span>            : 
-<span class="lineNum">      49 </span>            :         http_client::http_client(const http_client &amp;other) : scheme_(other.scheme_), host_(other.host_),
-<span class="lineNum">      50 </span>            :             payload_(other.payload_), responseCode_(other.responseCode_),
-<span class="lineNum">      51 </span>            :             response_(other.response_), headers_(other.headers_)
-<span class="lineNum">      52 </span><span class="lineNoCov">          0 :         {</span>
-<a name="53"><span class="lineNum">      53 </span><span class="lineNoCov">          0 :         }</span></a>
-<span class="lineNum">      54 </span>            : 
-<span class="lineNum">      55 </span><span class="lineNoCov">          0 :         http_client::http_client(http_client &amp;&amp;other) : scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),</span>
-<span class="lineNum">      56 </span><span class="lineNoCov">          0 :             payload_(std::move(other.payload_)), responseCode_(other.responseCode_),</span>
-<span class="lineNum">      57 </span><span class="lineNoCov">          0 :             response_(std::move(other.response_)), headers_(std::move(other.headers_))</span>
-<span class="lineNum">      58 </span><span class="lineNoCov">          0 :         {</span>
-<a name="59"><span class="lineNum">      59 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">      49 </span><span class="lineCov">         12 :             return pos;</span>
+<a name="50"><span class="lineNum">      50 </span>            :         }</a>
+<span class="lineNum">      51 </span>            : 
+<a name="52"><span class="lineNum">      52 </span><span class="lineCov">         12 :         http_transfer::http_transfer() : version_(http::VERSION_1_1) {}</span></a>
+<span class="lineNum">      53 </span>            : 
+<span class="lineNum">      54 </span>            :         http_transfer::http_transfer(const http_transfer &amp;other) : payload_(other.payload_), headers_(other.headers_), version_(other.version_)
+<a name="55"><span class="lineNum">      55 </span><span class="lineCov">          9 :         {}</span></a>
+<span class="lineNum">      56 </span>            : 
+<span class="lineNum">      57 </span><span class="lineNoCov">          0 :         http_transfer::http_transfer(http_transfer &amp;&amp;other) : payload_(std::move(other.payload_)),</span>
+<span class="lineNum">      58 </span><span class="lineNoCov">          0 :             headers_(std::move(other.headers_)), version_(std::move(other.version_))</span>
+<a name="59"><span class="lineNum">      59 </span><span class="lineNoCov">          0 :         {}</span></a>
 <span class="lineNum">      60 </span>            : 
-<span class="lineNum">      61 </span>            :         http_client &amp;http_client::operator=(const http_client &amp;other)
-<span class="lineNum">      62 </span>            :         {
-<span class="lineNum">      63 </span><span class="lineNoCov">          0 :             scheme_ = other.scheme_;</span>
-<span class="lineNum">      64 </span><span class="lineNoCov">          0 :             host_ = other.host_;</span>
+<a name="61"><span class="lineNum">      61 </span><span class="lineCov">          9 :         http_transfer::~http_transfer() {}</span></a>
+<span class="lineNum">      62 </span>            : 
+<span class="lineNum">      63 </span>            :         http_transfer &amp;http_transfer::operator=(const http_transfer &amp;other)
+<span class="lineNum">      64 </span>            :         {
 <span class="lineNum">      65 </span><span class="lineNoCov">          0 :             payload_ = other.payload_;</span>
-<span class="lineNum">      66 </span><span class="lineNoCov">          0 :             responseCode_ = other.responseCode_;</span>
-<span class="lineNum">      67 </span><span class="lineNoCov">          0 :             response_ = other.response_;</span>
-<span class="lineNum">      68 </span><span class="lineNoCov">          0 :             headers_ = other.headers_;</span>
-<span class="lineNum">      69 </span><span class="lineNoCov">          0 :             return *this;</span>
-<a name="70"><span class="lineNum">      70 </span>            :         }</a>
-<span class="lineNum">      71 </span>            : 
-<span class="lineNum">      72 </span>            :         http_client &amp;http_client::operator=(http_client &amp;&amp; other)
-<span class="lineNum">      73 </span>            :         {
-<span class="lineNum">      74 </span><span class="lineNoCov">          0 :             scheme_ = std::move(other.scheme_);</span>
-<span class="lineNum">      75 </span><span class="lineNoCov">          0 :             host_ = std::move(other.host_);</span>
-<span class="lineNum">      76 </span><span class="lineNoCov">          0 :             payload_ = std::move(other.payload_);</span>
-<span class="lineNum">      77 </span><span class="lineNoCov">          0 :             responseCode_ = std::move(other.responseCode_);</span>
-<span class="lineNum">      78 </span><span class="lineNoCov">          0 :             response_ = std::move(other.response_);</span>
-<span class="lineNum">      79 </span><span class="lineNoCov">          0 :             headers_ = std::move(other.headers_);</span>
-<span class="lineNum">      80 </span><span class="lineNoCov">          0 :             return *this;</span>
-<a name="81"><span class="lineNum">      81 </span>            :         }</a>
-<span class="lineNum">      82 </span>            : 
-<span class="lineNum">      83 </span>            :         void http_client::add_header(const string &amp;key, const string &amp;value)
-<span class="lineNum">      84 </span>            :         {
-<span class="lineNum">      85 </span><span class="lineCov">          3 :             headers_[key] = value;</span>
-<a name="86"><span class="lineNum">      86 </span><span class="lineCov">          3 :         }</span></a>
-<span class="lineNum">      87 </span>            : 
-<span class="lineNum">      88 </span>            :         void http_client::remove_header(const string &amp;key)
-<span class="lineNum">      89 </span>            :         {
-<span class="lineNum">      90 </span><span class="lineNoCov">          0 :             headers_.erase(key);</span>
-<a name="91"><span class="lineNum">      91 </span><span class="lineNoCov">          0 :         }</span></a>
-<span class="lineNum">      92 </span>            : 
-<span class="lineNum">      93 </span>            :         string http_client::header(const string &amp;key)
-<span class="lineNum">      94 </span>            :         {
-<span class="lineNum">      95 </span><span class="lineNoCov">          0 :             return headers_[key];</span>
-<a name="96"><span class="lineNum">      96 </span>            :         }</a>
-<span class="lineNum">      97 </span>            : 
-<span class="lineNum">      98 </span>            :         string http_client::host() const
-<span class="lineNum">      99 </span>            :         {
-<span class="lineNum">     100 </span><span class="lineNoCov">          0 :             return host_;</span>
-<a name="101"><span class="lineNum">     101 </span>            :         }</a>
-<span class="lineNum">     102 </span>            : 
-<span class="lineNum">     103 </span>            :         int http_client::response_code() const
-<span class="lineNum">     104 </span>            :         {
-<span class="lineNum">     105 </span><span class="lineNoCov">          0 :             return responseCode_;</span>
-<a name="106"><span class="lineNum">     106 </span>            :         }</a>
-<span class="lineNum">     107 </span>            : 
-<span class="lineNum">     108 </span>            :         string http_client::payload() const
-<span class="lineNum">     109 </span>            :         {
-<span class="lineNum">     110 </span><span class="lineNoCov">          0 :             return payload_;</span>
-<a name="111"><span class="lineNum">     111 </span>            :         }</a>
-<span class="lineNum">     112 </span>            : 
-<span class="lineNum">     113 </span>            :         string http_client::response() const
-<span class="lineNum">     114 </span>            :         {
-<span class="lineNum">     115 </span><span class="lineCov">          3 :             return response_;</span>
-<a name="116"><span class="lineNum">     116 </span>            :         }</a>
-<span class="lineNum">     117 </span>            : 
-<span class="lineNum">     118 </span>            :         bool http_client::is_secure() const
-<span class="lineNum">     119 </span>            :         {
-<span class="lineNum">     120 </span><span class="lineNoCov">          0 :             return scheme_ == http::SECURE_SCHEME;</span>
-<a name="121"><span class="lineNum">     121 </span>            :         }</a>
-<span class="lineNum">     122 </span>            : 
-<span class="lineNum">     123 </span>            :         void http_client::set_host(const string &amp;host)
-<span class="lineNum">     124 </span>            :         {
-<span class="lineNum">     125 </span><span class="lineNoCov">          0 :             host_ = host;</span>
-<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">      66 </span><span class="lineNoCov">          0 :             headers_ = other.headers_;</span>
+<span class="lineNum">      67 </span><span class="lineNoCov">          0 :             version_ = other.version_;</span>
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="69"><span class="lineNum">      69 </span>            :         }</a>
+<span class="lineNum">      70 </span>            : 
+<span class="lineNum">      71 </span>            :         http_transfer &amp;http_transfer::operator=(http_transfer &amp;&amp; other)
+<span class="lineNum">      72 </span>            :         {
+<span class="lineNum">      73 </span><span class="lineNoCov">          0 :             payload_ = std::move(other.payload_);</span>
+<span class="lineNum">      74 </span><span class="lineNoCov">          0 :             headers_ = std::move(other.headers_);</span>
+<span class="lineNum">      75 </span><span class="lineNoCov">          0 :             version_ = std::move(other.version_);</span>
+<span class="lineNum">      76 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="77"><span class="lineNum">      77 </span>            :         }</a>
+<span class="lineNum">      78 </span>            : 
+<span class="lineNum">      79 </span>            :         string http_transfer::header(const string &amp;key)
+<span class="lineNum">      80 </span>            :         {
+<span class="lineNum">      81 </span><span class="lineNoCov">          0 :             return headers_[key];</span>
+<a name="82"><span class="lineNum">      82 </span>            :         }</a>
+<span class="lineNum">      83 </span>            : 
+<span class="lineNum">      84 </span>            :         const map&lt;string, string&gt; http_transfer::headers() const
+<span class="lineNum">      85 </span>            :         {
+<span class="lineNum">      86 </span><span class="lineNoCov">          0 :             return headers_;</span>
+<a name="87"><span class="lineNum">      87 </span>            :         }</a>
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span>            :         string http_transfer::payload() const
+<span class="lineNum">      90 </span>            :         {
+<span class="lineNum">      91 </span><span class="lineCov">          4 :             return payload_;</span>
+<a name="92"><span class="lineNum">      92 </span>            :         }</a>
+<span class="lineNum">      93 </span>            : 
+<span class="lineNum">      94 </span>            :         string http_transfer::version() const
+<span class="lineNum">      95 </span>            :         {
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :             return version_;</span>
+<a name="97"><span class="lineNum">      97 </span>            :         }</a>
+<span class="lineNum">      98 </span>            : 
+<span class="lineNum">      99 </span>            :         void http_transfer::set_version(const string &amp;value)
+<span class="lineNum">     100 </span>            :         {
+<span class="lineNum">     101 </span><span class="lineNoCov">          0 :             version_ = value;</span>
+<a name="102"><span class="lineNum">     102 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     103 </span>            : 
+<span class="lineNum">     104 </span>            :         http_response::http_response() : responseCode_(0)
+<a name="105"><span class="lineNum">     105 </span><span class="lineCov">          6 :         {}</span></a>
+<span class="lineNum">     106 </span>            : 
+<span class="lineNum">     107 </span>            :         http_response::http_response(const string &amp;fullResponse) : response_(fullResponse), responseCode_(0)
+<span class="lineNum">     108 </span><span class="lineNoCov">          0 :         {</span>
+<span class="lineNum">     109 </span><span class="lineNoCov">          0 :             parse();</span>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     111 </span>            : 
+<span class="lineNum">     112 </span>            :         http_response::http_response(const http_response &amp;other) : http_transfer(other), response_(other.response_),
+<span class="lineNum">     113 </span>            :             responseCode_(other.responseCode_)
+<a name="114"><span class="lineNum">     114 </span><span class="lineCov">          9 :         {}</span></a>
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span><span class="lineNoCov">          0 :         http_response::http_response(http_response &amp;&amp;other) : http_transfer(std::move(other)), response_(std::move(other.response_)),</span>
+<span class="lineNum">     117 </span><span class="lineNoCov">          0 :             responseCode_(std::move(other.responseCode_))</span>
+<a name="118"><span class="lineNum">     118 </span><span class="lineNoCov">          0 :         {}</span></a>
+<span class="lineNum">     119 </span>            : 
+<a name="120"><span class="lineNum">     120 </span><span class="lineCov">         12 :         http_response::~http_response() {}</span></a>
+<span class="lineNum">     121 </span>            : 
+<span class="lineNum">     122 </span>            :         http_response &amp;http_response::operator=(const http_response &amp;other)
+<span class="lineNum">     123 </span>            :         {
+<span class="lineNum">     124 </span><span class="lineNoCov">          0 :             http_transfer::operator=(other);</span>
+<span class="lineNum">     125 </span>            : 
+<span class="lineNum">     126 </span><span class="lineNoCov">          0 :             response_ = other.response_;</span>
 <span class="lineNum">     127 </span>            : 
-<span class="lineNum">     128 </span>            :         void http_client::set_secure(bool value)
-<span class="lineNum">     129 </span>            :         {
-<span class="lineNum">     130 </span><span class="lineCov">          1 :             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;</span>
-<a name="131"><span class="lineNum">     131 </span><span class="lineCov">          1 :         }</span></a>
+<span class="lineNum">     128 </span><span class="lineNoCov">          0 :             responseCode_ = other.responseCode_;</span>
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="131"><span class="lineNum">     131 </span>            :         }</a>
 <span class="lineNum">     132 </span>            : 
-<span class="lineNum">     133 </span>            :         http_client &amp;http_client::set_payload(const string &amp;payload)
+<span class="lineNum">     133 </span>            :         http_response &amp;http_response::operator=(http_response &amp;&amp; other)
 <span class="lineNum">     134 </span>            :         {
-<span class="lineNum">     135 </span><span class="lineCov">          1 :             payload_ = payload;</span>
-<span class="lineNum">     136 </span><span class="lineCov">          1 :             return *this;</span>
-<a name="137"><span class="lineNum">     137 </span>            :         }</a>
+<span class="lineNum">     135 </span><span class="lineNoCov">          0 :             http_transfer::operator=(std::move(other));</span>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :             response_ = std::move(other.response_);</span>
 <span class="lineNum">     138 </span>            : 
-<span class="lineNum">     139 </span>            :         http_client &amp;http_client::request(http::method method, const string &amp;path)
-<span class="lineNum">     140 </span>            :         {
-<span class="lineNum">     141 </span>            :             char buf[http::MAX_URL_LEN + 1];
-<span class="lineNum">     142 </span>            : 
-<span class="lineNum">     143 </span>            : #ifdef HAVE_LIBCURL
-<span class="lineNum">     144 </span><span class="lineCov">          3 :             struct curl_slist *headers = NULL;</span>
-<span class="lineNum">     145 </span>            : 
-<span class="lineNum">     146 </span><span class="lineCov">          3 :             CURL *curl_ = curl_easy_init();</span>
-<span class="lineNum">     147 </span>            : 
-<span class="lineNum">     148 </span><span class="lineCov">          3 :             if (curl_ == NULL)</span>
-<span class="lineNum">     149 </span>            :             {
-<span class="lineNum">     150 </span><span class="lineNoCov">          0 :                 throw rest_exception(&quot;unable to initialize request&quot;);</span>
-<span class="lineNum">     151 </span>            :             }
-<span class="lineNum">     152 </span>            : 
-<span class="lineNum">     153 </span><span class="lineCov">          6 :             snprintf(buf, http::MAX_URL_LEN, &quot;%s://%s/%s&quot;, scheme_.c_str(), host_.c_str(), path.c_str());</span>
-<span class="lineNum">     154 </span>            : 
-<span class="lineNum">     155 </span><span class="lineCov">          6 :             curl_easy_setopt(curl_, CURLOPT_URL, buf);</span>
-<span class="lineNum">     156 </span>            : 
-<span class="lineNum">     157 </span><span class="lineCov">          6 :             curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);</span>
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :             responseCode_ = std::move(other.responseCode_);</span>
+<span class="lineNum">     140 </span>            : 
+<span class="lineNum">     141 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="142"><span class="lineNum">     142 </span>            :         }</a>
+<span class="lineNum">     143 </span>            : 
+<span class="lineNum">     144 </span>            :         string http_response::full_response() const
+<span class="lineNum">     145 </span>            :         {
+<span class="lineNum">     146 </span><span class="lineNoCov">          0 :             return response_;</span>
+<a name="147"><span class="lineNum">     147 </span>            :         }</a>
+<span class="lineNum">     148 </span>            : 
+<span class="lineNum">     149 </span>            :         http_response::operator string() const
+<span class="lineNum">     150 </span>            :         {
+<span class="lineNum">     151 </span><span class="lineNoCov">          0 :             return payload_;</span>
+<a name="152"><span class="lineNum">     152 </span>            :         }</a>
+<span class="lineNum">     153 </span>            : 
+<span class="lineNum">     154 </span>            :         int http_response::code() const
+<span class="lineNum">     155 </span>            :         {
+<span class="lineNum">     156 </span><span class="lineNoCov">          0 :             return responseCode_;</span>
+<a name="157"><span class="lineNum">     157 </span>            :         }</a>
 <span class="lineNum">     158 </span>            : 
-<span class="lineNum">     159 </span><span class="lineCov">          6 :             switch (method)</span>
-<span class="lineNum">     160 </span>            :             {
-<span class="lineNum">     161 </span>            :             case http::GET:
-<span class="lineNum">     162 </span><span class="lineCov">          2 :                 curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);</span>
-<span class="lineNum">     163 </span><span class="lineCov">          2 :                 break;</span>
-<span class="lineNum">     164 </span>            :             case http::POST:
-<span class="lineNum">     165 </span><span class="lineCov">          1 :                 curl_easy_setopt(curl_, CURLOPT_POST, 1L);</span>
-<span class="lineNum">     166 </span><span class="lineCov">          1 :                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());</span>
-<span class="lineNum">     167 </span><span class="lineCov">          1 :                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());</span>
-<span class="lineNum">     168 </span><span class="lineCov">          1 :                 break;</span>
-<span class="lineNum">     169 </span>            :             case http::PUT:
-<span class="lineNum">     170 </span><span class="lineNoCov">          0 :                 curl_easy_setopt(curl_, CURLOPT_PUT, 1L);</span>
-<span class="lineNum">     171 </span><span class="lineNoCov">          0 :                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());</span>
-<span class="lineNum">     172 </span><span class="lineNoCov">          0 :                 curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());</span>
-<span class="lineNum">     173 </span>            :             case http::DELETE:
-<span class="lineNum">     174 </span><span class="lineNoCov">          0 :                 curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);</span>
-<span class="lineNum">     175 </span><span class="lineNoCov">          0 :                 break;</span>
-<span class="lineNum">     176 </span>            :             }
-<span class="lineNum">     177 </span>            : 
-<span class="lineNum">     178 </span><span class="lineCov">         15 :             for (auto &amp; h : headers_)</span>
-<span class="lineNum">     179 </span>            :             {
-<span class="lineNum">     180 </span><span class="lineCov">          3 :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: %s&quot;, h.first.c_str(), h.second.c_str());</span>
-<span class="lineNum">     181 </span>            : 
-<span class="lineNum">     182 </span><span class="lineCov">          3 :                 headers = curl_slist_append(headers, buf);</span>
-<span class="lineNum">     183 </span><span class="lineCov">          3 :             }</span>
+<span class="lineNum">     159 </span>            :         void http_response::parse(const string &amp;value)
+<span class="lineNum">     160 </span>            :         {
+<span class="lineNum">     161 </span><span class="lineNoCov">          0 :             response_ = value;</span>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span><span class="lineNoCov">          0 :             parse();</span>
+<a name="164"><span class="lineNum">     164 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     165 </span>            : 
+<span class="lineNum">     166 </span>            :         void http_response::clear()
+<span class="lineNum">     167 </span>            :         {
+<span class="lineNum">     168 </span><span class="lineCov">          3 :             response_.clear();</span>
+<span class="lineNum">     169 </span><span class="lineCov">          3 :             responseCode_ = 0;</span>
+<span class="lineNum">     170 </span><span class="lineCov">          3 :             headers_.clear();</span>
+<span class="lineNum">     171 </span><span class="lineCov">          3 :             payload_.clear();</span>
+<span class="lineNum">     172 </span>            : 
+<a name="173"><span class="lineNum">     173 </span><span class="lineCov">          3 :         }</span></a>
+<span class="lineNum">     174 </span>            : 
+<span class="lineNum">     175 </span>            :         void http_response::parse()
+<span class="lineNum">     176 </span>            :         {
+<span class="lineNum">     177 </span><span class="lineCov">          3 :             auto pos = response_.find(&quot;\r\n&quot;);</span>
+<span class="lineNum">     178 </span>            : 
+<span class="lineNum">     179 </span><span class="lineCov">          3 :             if (pos == string::npos)</span>
+<span class="lineNum">     180 </span>            :             {
+<span class="lineNum">     181 </span><span class="lineCov">          2 :                 payload_ = response_;</span>
+<span class="lineNum">     182 </span><span class="lineCov">          2 :                 return;</span>
+<span class="lineNum">     183 </span>            :             }
 <span class="lineNum">     184 </span>            : 
-<span class="lineNum">     185 </span><span class="lineCov">          3 :             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);</span>
+<span class="lineNum">     185 </span><span class="lineCov">          1 :             string line = response_.substr(0, pos);</span>
 <span class="lineNum">     186 </span>            : 
-<span class="lineNum">     187 </span><span class="lineCov">          3 :             curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &amp;response_);</span>
+<span class="lineNum">     187 </span><span class="lineCov">          1 :             char buf[http::MAX_URL_LEN + 1] = {0};</span>
 <span class="lineNum">     188 </span>            : 
-<span class="lineNum">     189 </span><span class="lineCov">          3 :             CURLcode res = curl_easy_perform(curl_);</span>
+<span class="lineNum">     189 </span><span class="lineCov">          1 :             char version[http::MAX_URL_LEN + 1] = {0};</span>
 <span class="lineNum">     190 </span>            : 
-<span class="lineNum">     191 </span><span class="lineCov">          3 :             if (res != CURLE_OK)</span>
+<span class="lineNum">     191 </span><span class="lineCov">          2 :             if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, version, &amp;responseCode_, buf) != 3)</span>
 <span class="lineNum">     192 </span>            :             {
-<span class="lineNum">     193 </span><span class="lineNoCov">          0 :                 curl_easy_cleanup(curl_);</span>
-<span class="lineNum">     194 </span>            : 
-<span class="lineNum">     195 </span><span class="lineNoCov">          0 :                 throw rest_exception(curl_easy_strerror(res));</span>
-<span class="lineNum">     196 </span>            :             }
-<span class="lineNum">     197 </span>            : 
-<span class="lineNum">     198 </span><span class="lineCov">          3 :             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &amp;responseCode_);</span>
-<span class="lineNum">     199 </span>            : 
-<span class="lineNum">     200 </span><span class="lineCov">          3 :             curl_easy_cleanup(curl_);</span>
-<span class="lineNum">     201 </span>            : #else
-<span class="lineNum">     202 </span>            :             buffered_socket sock;
-<span class="lineNum">     203 </span>            : 
-<span class="lineNum">     204 </span>            :             // create the socket based on hostname and port
-<span class="lineNum">     205 </span>            :             auto pos = host().find(':');
+<span class="lineNum">     193 </span><span class="lineNoCov">          0 :                 payload_ = response_;</span>
+<span class="lineNum">     194 </span><span class="lineNoCov">          0 :                 return;</span>
+<span class="lineNum">     195 </span>            :             }
+<span class="lineNum">     196 </span>            : 
+<span class="lineNum">     197 </span><span class="lineCov">          1 :             version_ = version;</span>
+<span class="lineNum">     198 </span>            : 
+<span class="lineNum">     199 </span><span class="lineCov">          2 :             pos = skip_newline(response_, pos);</span>
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span><span class="lineCov">         24 :             while (!line.empty())</span>
+<span class="lineNum">     202 </span>            :             {
+<span class="lineNum">     203 </span><span class="lineCov">         11 :                 auto next = response_.find(&quot;\r\n&quot;, pos);</span>
+<span class="lineNum">     204 </span>            : 
+<span class="lineNum">     205 </span><span class="lineCov">         11 :                 if (next == string::npos) break;</span>
 <span class="lineNum">     206 </span>            : 
-<span class="lineNum">     207 </span>            :             if (is_secure())
-<span class="lineNum">     208 </span>            :                 sock.set_secure(true);
-<span class="lineNum">     209 </span>            : 
-<span class="lineNum">     210 </span>            :             if (pos != string::npos)
-<span class="lineNum">     211 </span>            :             {
-<span class="lineNum">     212 </span>            :                 string hostname = host().substr(0, pos);
-<span class="lineNum">     213 </span>            :                 int port = stoi(host().substr(pos + 1));
-<span class="lineNum">     214 </span>            :                 sock.connect(hostname, port);
-<span class="lineNum">     215 </span>            :             }
-<span class="lineNum">     216 </span>            :             else
-<span class="lineNum">     217 </span>            :             {
-<span class="lineNum">     218 </span>            :                 sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT);
-<span class="lineNum">     219 </span>            :             }
-<span class="lineNum">     220 </span>            : 
-<span class="lineNum">     221 </span>            :             // send the method and path
-<span class="lineNum">     222 </span>            :             snprintf(buf, http::MAX_URL_LEN, http::REQUEST_HEADER, http::method_names[method], path.c_str());
-<span class="lineNum">     223 </span>            : 
-<span class="lineNum">     224 </span>            :             sock.writeln(buf);
-<span class="lineNum">     225 </span>            : 
-<span class="lineNum">     226 </span>            :             // specify the host
-<span class="lineNum">     227 </span>            :             snprintf(buf, http::MAX_URL_LEN, &quot;Host: %s&quot;, host().c_str());
-<span class="lineNum">     228 </span>            : 
-<span class="lineNum">     229 </span>            :             sock.writeln(buf);
-<span class="lineNum">     230 </span>            : 
-<span class="lineNum">     231 </span>            :             // add the headers
-<span class="lineNum">     232 </span>            :             for (auto &amp; h : headers_)
-<span class="lineNum">     233 </span>            :             {
-<span class="lineNum">     234 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: %s&quot;, h.first.c_str(), h.second.c_str());
-<span class="lineNum">     235 </span>            : 
-<span class="lineNum">     236 </span>            :                 sock.writeln(buf);
-<span class="lineNum">     237 </span>            :             }
-<span class="lineNum">     238 </span>            : 
-<span class="lineNum">     239 </span>            :             // if we have a payload, add the size
-<span class="lineNum">     240 </span>            :             if (!payload_.empty())
-<span class="lineNum">     241 </span>            :             {
-<span class="lineNum">     242 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;Content-Size: %&quot; PRId32, payload_.size());
-<span class="lineNum">     243 </span>            : 
-<span class="lineNum">     244 </span>            :                 sock.writeln(buf);
-<span class="lineNum">     245 </span>            :             }
+<span class="lineNum">     207 </span><span class="lineCov">         22 :                 line = response_.substr(pos, next - pos);</span>
+<span class="lineNum">     208 </span>            : 
+<span class="lineNum">     209 </span><span class="lineCov">         11 :                 auto sep = line.find(':');</span>
+<span class="lineNum">     210 </span>            : 
+<span class="lineNum">     211 </span><span class="lineCov">         11 :                 if (sep != string::npos)</span>
+<span class="lineNum">     212 </span>            :                 {
+<span class="lineNum">     213 </span><span class="lineCov">         10 :                     auto key = line.substr(0, sep);</span>
+<span class="lineNum">     214 </span>            : 
+<span class="lineNum">     215 </span><span class="lineCov">         10 :                     auto value = line.substr(sep + 2);</span>
+<span class="lineNum">     216 </span>            : 
+<span class="lineNum">     217 </span><span class="lineCov">         20 :                     headers_[key] = value;</span>
+<span class="lineNum">     218 </span><span class="lineCov">         10 :                 }</span>
+<span class="lineNum">     219 </span>            : 
+<span class="lineNum">     220 </span><span class="lineCov">         22 :                 pos = skip_newline(response_, next);</span>
+<span class="lineNum">     221 </span>            :             }
+<span class="lineNum">     222 </span>            : 
+<span class="lineNum">     223 </span><span class="lineCov">          1 :             if (pos != string::npos)</span>
+<span class="lineNum">     224 </span><span class="lineCov">          2 :                 payload_ = response_.substr(pos);</span>
+<span class="lineNum">     225 </span><span class="lineCov">          5 :         }</span>
+<a name="226"><span class="lineNum">     226 </span>            : </a>
+<span class="lineNum">     227 </span>            : 
+<span class="lineNum">     228 </span>            :         http_client::http_client(const string &amp;host) : scheme_(http::SCHEME), host_(host)
+<span class="lineNum">     229 </span><span class="lineCov">          9 :         {</span>
+<span class="lineNum">     230 </span><span class="lineCov">         12 :             add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);</span>
+<a name="231"><span class="lineNum">     231 </span><span class="lineCov">          6 :         }</span></a>
+<span class="lineNum">     232 </span>            : 
+<span class="lineNum">     233 </span>            :         http_client::http_client()
+<span class="lineNum">     234 </span><span class="lineNoCov">          0 :         {</span>
+<span class="lineNum">     235 </span><span class="lineNoCov">          0 :             add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);</span>
+<a name="236"><span class="lineNum">     236 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     237 </span>            : 
+<span class="lineNum">     238 </span>            :         http_client::~http_client()
+<span class="lineNum">     239 </span><span class="lineCov">          6 :         {</span>
+<a name="240"><span class="lineNum">     240 </span><span class="lineCov">          6 :         }</span></a>
+<span class="lineNum">     241 </span>            : 
+<span class="lineNum">     242 </span>            :         http_client::http_client(const http_client &amp;other) : http_transfer(other), scheme_(other.scheme_), host_(other.host_),
+<span class="lineNum">     243 </span>            :             response_(other.response_)
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :         {</span>
+<a name="245"><span class="lineNum">     245 </span><span class="lineNoCov">          0 :         }</span></a>
 <span class="lineNum">     246 </span>            : 
-<span class="lineNum">     247 </span>            :             // finish header
-<span class="lineNum">     248 </span>            :             sock.writeln();
-<span class="lineNum">     249 </span>            : 
-<span class="lineNum">     250 </span>            :             // add the payload
-<span class="lineNum">     251 </span>            :             if (payload_.empty())
-<span class="lineNum">     252 </span>            :             {
-<span class="lineNum">     253 </span>            :                 sock.writeln(payload_);
-<span class="lineNum">     254 </span>            :             }
-<span class="lineNum">     255 </span>            : 
-<span class="lineNum">     256 </span>            :             sock.write_from_buffer();
-<span class="lineNum">     257 </span>            : 
-<span class="lineNum">     258 </span>            :             sock.read_to_buffer();
-<span class="lineNum">     259 </span>            : 
-<span class="lineNum">     260 </span>            :             string line = sock.readln();
-<span class="lineNum">     261 </span>            : 
-<span class="lineNum">     262 </span>            :             if (sscanf(line.c_str(), http::RESPONSE_HEADER, &amp;responseCode_, buf) == 2)
-<span class="lineNum">     263 </span>            :             {
-<span class="lineNum">     264 </span>            :                 // parse out the rest of the header
-<span class="lineNum">     265 </span>            :                 while (!line.empty())
-<span class="lineNum">     266 </span>            :                 {
-<span class="lineNum">     267 </span>            :                     line = sock.readln();
-<span class="lineNum">     268 </span>            :                     response_ += line;
-<span class="lineNum">     269 </span>            :                 }
-<span class="lineNum">     270 </span>            :                 response_.clear();
-<span class="lineNum">     271 </span>            :             }
-<span class="lineNum">     272 </span>            :             else
-<span class="lineNum">     273 </span>            :             {
-<span class="lineNum">     274 </span>            :                 // could be plain text
-<span class="lineNum">     275 </span>            :                 response_ = line;
-<span class="lineNum">     276 </span>            :             }
-<span class="lineNum">     277 </span>            : 
-<span class="lineNum">     278 </span>            :             auto input = sock.input();
-<span class="lineNum">     279 </span>            : 
-<span class="lineNum">     280 </span>            :             if (!input.empty())
-<span class="lineNum">     281 </span>            :                 response_.append(input.begin(), input.end());
-<span class="lineNum">     282 </span>            : 
-<span class="lineNum">     283 </span>            :             sock.close();
-<span class="lineNum">     284 </span>            : #endif
-<span class="lineNum">     285 </span><span class="lineCov">          3 :             return *this;</span>
-<a name="286"><span class="lineNum">     286 </span><span class="lineNoCov">          0 :         }</span></a>
-<span class="lineNum">     287 </span>            : 
-<span class="lineNum">     288 </span>            :         http_client &amp;http_client::get(const string &amp;path)
-<span class="lineNum">     289 </span>            :         {
-<span class="lineNum">     290 </span><span class="lineCov">          2 :             return request(http::GET, path);</span>
-<a name="291"><span class="lineNum">     291 </span>            :         }</a>
-<span class="lineNum">     292 </span>            : 
-<span class="lineNum">     293 </span>            :         http_client &amp;http_client::post(const string &amp;path)
-<span class="lineNum">     294 </span>            :         {
-<span class="lineNum">     295 </span><span class="lineCov">          1 :             return request(http::POST, path);</span>
-<a name="296"><span class="lineNum">     296 </span>            :         }</a>
-<span class="lineNum">     297 </span>            : 
-<span class="lineNum">     298 </span>            :         http_client &amp;http_client::put(const string &amp;path)
-<span class="lineNum">     299 </span>            :         {
-<span class="lineNum">     300 </span><span class="lineNoCov">          0 :             return request(http::PUT, path);</span>
-<a name="301"><span class="lineNum">     301 </span>            :         }</a>
-<span class="lineNum">     302 </span>            : 
-<span class="lineNum">     303 </span>            :         http_client &amp;http_client::de1ete(const string &amp;path)
-<span class="lineNum">     304 </span>            :         {
-<span class="lineNum">     305 </span><span class="lineNoCov">          0 :             return request(http::DELETE, path);</span>
-<span class="lineNum">     306 </span>            :         }
-<span class="lineNum">     307 </span>            :     }
-<span class="lineNum">     308 </span>            : }
+<span class="lineNum">     247 </span><span class="lineNoCov">          0 :         http_client::http_client(http_client &amp;&amp;other) : http_transfer(std::move(other)), scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),</span>
+<span class="lineNum">     248 </span><span class="lineNoCov">          0 :             response_(std::move(other.response_))</span>
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 :         {</span>
+<a name="250"><span class="lineNum">     250 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     251 </span>            : 
+<span class="lineNum">     252 </span>            :         http_client &amp;http_client::operator=(const http_client &amp;other)
+<span class="lineNum">     253 </span>            :         {
+<span class="lineNum">     254 </span><span class="lineNoCov">          0 :             http_transfer::operator=(other);</span>
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 :             scheme_ = other.scheme_;</span>
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :             host_ = other.host_;</span>
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :             headers_ = other.headers_;</span>
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="259"><span class="lineNum">     259 </span>            :         }</a>
+<span class="lineNum">     260 </span>            : 
+<span class="lineNum">     261 </span>            :         http_client &amp;http_client::operator=(http_client &amp;&amp; other)
+<span class="lineNum">     262 </span>            :         {
+<span class="lineNum">     263 </span><span class="lineNoCov">          0 :             http_transfer::operator=(std::move(other));</span>
+<span class="lineNum">     264 </span><span class="lineNoCov">          0 :             scheme_ = std::move(other.scheme_);</span>
+<span class="lineNum">     265 </span><span class="lineNoCov">          0 :             host_ = std::move(other.host_);</span>
+<span class="lineNum">     266 </span><span class="lineNoCov">          0 :             response_ = std::move(other.response_);</span>
+<span class="lineNum">     267 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="268"><span class="lineNum">     268 </span>            :         }</a>
+<span class="lineNum">     269 </span>            : 
+<span class="lineNum">     270 </span>            :         http_client &amp;http_client::add_header(const string &amp;key, const string &amp;value)
+<span class="lineNum">     271 </span>            :         {
+<span class="lineNum">     272 </span><span class="lineCov">          3 :             headers_[key] = value;</span>
+<span class="lineNum">     273 </span><span class="lineCov">          3 :             return *this;</span>
+<a name="274"><span class="lineNum">     274 </span>            :         }</a>
+<span class="lineNum">     275 </span>            : 
+<span class="lineNum">     276 </span>            :         void http_client::remove_header(const string &amp;key)
+<span class="lineNum">     277 </span>            :         {
+<span class="lineNum">     278 </span><span class="lineNoCov">          0 :             headers_.erase(key);</span>
+<a name="279"><span class="lineNum">     279 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     280 </span>            : 
+<span class="lineNum">     281 </span>            :         string http_client::host() const
+<span class="lineNum">     282 </span>            :         {
+<span class="lineNum">     283 </span><span class="lineNoCov">          0 :             return host_;</span>
+<a name="284"><span class="lineNum">     284 </span>            :         }</a>
+<span class="lineNum">     285 </span>            : 
+<span class="lineNum">     286 </span>            :         http_response http_client::response() const
+<span class="lineNum">     287 </span>            :         {
+<span class="lineNum">     288 </span><span class="lineCov">          3 :             return response_;</span>
+<a name="289"><span class="lineNum">     289 </span>            :         }</a>
+<span class="lineNum">     290 </span>            : 
+<span class="lineNum">     291 </span>            :         bool http_client::is_secure() const
+<span class="lineNum">     292 </span>            :         {
+<span class="lineNum">     293 </span><span class="lineNoCov">          0 :             return scheme_ == http::SECURE_SCHEME;</span>
+<a name="294"><span class="lineNum">     294 </span>            :         }</a>
+<span class="lineNum">     295 </span>            : 
+<span class="lineNum">     296 </span>            :         http_client &amp;http_client::set_host(const string &amp;host)
+<span class="lineNum">     297 </span>            :         {
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :             host_ = host;</span>
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="300"><span class="lineNum">     300 </span>            :         }</a>
+<span class="lineNum">     301 </span>            : 
+<span class="lineNum">     302 </span>            :         http_client &amp;http_client::set_secure(bool value)
+<span class="lineNum">     303 </span>            :         {
+<span class="lineNum">     304 </span><span class="lineNoCov">          0 :             scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;</span>
+<span class="lineNum">     305 </span><span class="lineNoCov">          0 :             return *this;</span>
+<a name="306"><span class="lineNum">     306 </span>            :         }</a>
+<span class="lineNum">     307 </span>            : 
+<span class="lineNum">     308 </span>            :         http_client &amp;http_client::set_payload(const string &amp;payload)
+<span class="lineNum">     309 </span>            :         {
+<span class="lineNum">     310 </span><span class="lineCov">          1 :             payload_ = payload;</span>
+<span class="lineNum">     311 </span><span class="lineCov">          1 :             return *this;</span>
+<span class="lineNum">     312 </span>            :         }
+<a name="313"><span class="lineNum">     313 </span>            : </a>
+<span class="lineNum">     314 </span>            : #ifdef HAVE_LIBCURL
+<span class="lineNum">     315 </span>            :         void http_client::request_curl(http::method method, const string &amp;path)
+<span class="lineNum">     316 </span>            :         {
+<span class="lineNum">     317 </span>            : 
+<span class="lineNum">     318 </span><span class="lineCov">          3 :             char buf[http::MAX_URL_LEN + 1] = {0};</span>
+<span class="lineNum">     319 </span>            : 
+<span class="lineNum">     320 </span><span class="lineCov">          3 :             struct curl_slist *headers = NULL;</span>
+<span class="lineNum">     321 </span>            : 
+<span class="lineNum">     322 </span><span class="lineCov">          3 :             CURL *curl_ = curl_easy_init();</span>
+<span class="lineNum">     323 </span>            : 
+<span class="lineNum">     324 </span><span class="lineCov">          3 :             if (curl_ == NULL)</span>
+<span class="lineNum">     325 </span>            :             {
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :                 throw rest_exception(&quot;unable to initialize request&quot;);</span>
+<span class="lineNum">     327 </span>            :             }
+<span class="lineNum">     328 </span>            : 
+<span class="lineNum">     329 </span><span class="lineCov">          3 :             if (path.empty())</span>
+<span class="lineNum">     330 </span><span class="lineNoCov">          0 :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s://%s&quot;, scheme_.c_str(), host_.c_str());</span>
+<span class="lineNum">     331 </span><span class="lineCov">          3 :             else if (path[0] == '/')</span>
+<span class="lineNum">     332 </span><span class="lineCov">          1 :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s://%s%s&quot;, scheme_.c_str(), host_.c_str(), path.c_str());</span>
+<span class="lineNum">     333 </span>            :             else
+<span class="lineNum">     334 </span><span class="lineCov">          2 :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s://%s/%s&quot;, scheme_.c_str(), host_.c_str(), path.c_str());</span>
+<span class="lineNum">     335 </span>            : 
+<span class="lineNum">     336 </span><span class="lineCov">          6 :             curl_easy_setopt(curl_, CURLOPT_URL, buf);</span>
+<span class="lineNum">     337 </span>            : 
+<span class="lineNum">     338 </span><span class="lineCov">          6 :             curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);</span>
+<span class="lineNum">     339 </span>            : 
+<span class="lineNum">     340 </span><span class="lineCov">          6 :             curl_easy_setopt(curl_, CURLOPT_HEADER, 1L);</span>
+<span class="lineNum">     341 </span>            : 
+<span class="lineNum">     342 </span>            : #ifdef DEBUG
+<span class="lineNum">     343 </span>            :             curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1L);
+<span class="lineNum">     344 </span>            : #endif
+<span class="lineNum">     345 </span>            : 
+<span class="lineNum">     346 </span><span class="lineCov">          6 :             switch (method)</span>
+<span class="lineNum">     347 </span>            :             {
+<span class="lineNum">     348 </span>            :             case http::GET:
+<span class="lineNum">     349 </span><span class="lineCov">          2 :                 curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);</span>
+<span class="lineNum">     350 </span><span class="lineCov">          2 :                 break;</span>
+<span class="lineNum">     351 </span>            :             case http::POST:
+<span class="lineNum">     352 </span><span class="lineCov">          1 :                 curl_easy_setopt(curl_, CURLOPT_POST, 1L);</span>
+<span class="lineNum">     353 </span><span class="lineCov">          1 :                 if (!payload_.empty())</span>
+<span class="lineNum">     354 </span>            :                 {
+<span class="lineNum">     355 </span><span class="lineCov">          1 :                     curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());</span>
+<span class="lineNum">     356 </span><span class="lineCov">          1 :                     curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());</span>
+<span class="lineNum">     357 </span><span class="lineCov">          1 :                 }</span>
+<span class="lineNum">     358 </span><span class="lineCov">          1 :                 break;</span>
+<span class="lineNum">     359 </span>            :             case http::PUT:
+<span class="lineNum">     360 </span><span class="lineNoCov">          0 :                 curl_easy_setopt(curl_, CURLOPT_PUT, 1L);</span>
+<span class="lineNum">     361 </span><span class="lineNoCov">          0 :                 if (!payload_.empty())</span>
+<span class="lineNum">     362 </span>            :                 {
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :                     curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());</span>
+<span class="lineNum">     364 </span><span class="lineNoCov">          0 :                     curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());</span>
+<span class="lineNum">     365 </span><span class="lineNoCov">          0 :                 }</span>
+<span class="lineNum">     366 </span>            :             case http::DELETE:
+<span class="lineNum">     367 </span><span class="lineNoCov">          0 :                 curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);</span>
+<span class="lineNum">     368 </span><span class="lineNoCov">          0 :                 break;</span>
+<span class="lineNum">     369 </span>            :             }
+<span class="lineNum">     370 </span>            : 
+<span class="lineNum">     371 </span><span class="lineCov">         18 :             for (auto &amp;h : headers_)</span>
+<span class="lineNum">     372 </span>            :             {
+<span class="lineNum">     373 </span><span class="lineCov">          3 :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: %s&quot;, h.first.c_str(), h.second.c_str());</span>
+<span class="lineNum">     374 </span>            : 
+<span class="lineNum">     375 </span><span class="lineCov">          3 :                 headers = curl_slist_append(headers, buf);</span>
+<span class="lineNum">     376 </span>            :             }
+<span class="lineNum">     377 </span>            : 
+<span class="lineNum">     378 </span><span class="lineCov">          3 :             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);</span>
+<span class="lineNum">     379 </span>            : 
+<span class="lineNum">     380 </span><span class="lineCov">          3 :             curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &amp;response_.response_);</span>
+<span class="lineNum">     381 </span>            : 
+<span class="lineNum">     382 </span><span class="lineCov">          3 :             CURLcode res = curl_easy_perform(curl_);</span>
+<span class="lineNum">     383 </span>            : 
+<span class="lineNum">     384 </span><span class="lineCov">          3 :             if (res != CURLE_OK)</span>
+<span class="lineNum">     385 </span>            :             {
+<span class="lineNum">     386 </span><span class="lineNoCov">          0 :                 curl_easy_cleanup(curl_);</span>
+<span class="lineNum">     387 </span>            : 
+<span class="lineNum">     388 </span><span class="lineNoCov">          0 :                 throw rest_exception(curl_easy_strerror(res));</span>
+<span class="lineNum">     389 </span>            :             }
+<span class="lineNum">     390 </span>            : 
+<span class="lineNum">     391 </span><span class="lineCov">          3 :             curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &amp;response_.responseCode_);</span>
+<span class="lineNum">     392 </span>            : 
+<span class="lineNum">     393 </span><span class="lineCov">          3 :             curl_easy_cleanup(curl_);</span>
+<span class="lineNum">     394 </span>            : 
+<span class="lineNum">     395 </span><span class="lineCov">          3 :             response_.parse();</span>
+<span class="lineNum">     396 </span><span class="lineCov">          3 :         }</span>
+<span class="lineNum">     397 </span>            : #else
+<span class="lineNum">     398 </span>            :         void http_client::request_socket(http::method method, const string &amp;path)
+<span class="lineNum">     399 </span>            :         {
+<span class="lineNum">     400 </span>            :             char buf[http::MAX_URL_LEN + 1] = {0};
+<span class="lineNum">     401 </span>            : 
+<span class="lineNum">     402 </span>            :             buffered_socket sock;
+<span class="lineNum">     403 </span>            : 
+<span class="lineNum">     404 </span>            :             // create the socket based on hostname and port
+<span class="lineNum">     405 </span>            :             auto pos = host().find(':');
+<span class="lineNum">     406 </span>            : 
+<span class="lineNum">     407 </span>            :             if (is_secure())
+<span class="lineNum">     408 </span>            :                 sock.set_secure(true);
+<span class="lineNum">     409 </span>            : 
+<span class="lineNum">     410 </span>            :             if (pos != string::npos)
+<span class="lineNum">     411 </span>            :             {
+<span class="lineNum">     412 </span>            :                 string hostname = host().substr(0, pos);
+<span class="lineNum">     413 </span>            :                 int port = stoi(host().substr(pos + 1));
+<span class="lineNum">     414 </span>            : 
+<span class="lineNum">     415 </span>            :                 if (!sock.connect(hostname, port))
+<span class="lineNum">     416 </span>            :                     throw socket_exception(&quot;unable to connect to &quot; + host());
+<span class="lineNum">     417 </span>            :             }
+<span class="lineNum">     418 </span>            :             else
+<span class="lineNum">     419 </span>            :             {
+<span class="lineNum">     420 </span>            :                 if (!sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT))
+<span class="lineNum">     421 </span>            :                     throw socket_exception(&quot;unable to connect to &quot; + host());
+<span class="lineNum">     422 </span>            :             }
+<span class="lineNum">     423 </span>            : 
+<span class="lineNum">     424 </span>            :             // send the method and path
+<span class="lineNum">     425 </span>            : 
+<span class="lineNum">     426 </span>            :             if (path.empty())
+<span class="lineNum">     427 </span>            :                 snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], &quot;/&quot;, version_.c_str());
+<span class="lineNum">     428 </span>            :             else if (path[0] == '/')
+<span class="lineNum">     429 </span>            :                 snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], path.c_str(), version_.c_str());
+<span class="lineNum">     430 </span>            :             else
+<span class="lineNum">     431 </span>            :                 snprintf(buf, http::MAX_URL_LEN, http::REQUEST_PREAMBLE, http::method_names[method], (&quot;/&quot; + path).c_str(), version_.c_str());
+<span class="lineNum">     432 </span>            : 
+<span class="lineNum">     433 </span>            :             sock.writeln(buf);
+<span class="lineNum">     434 </span>            : 
+<span class="lineNum">     435 </span>            :             bool chunked = headers_.count(http::HEADER_TRANSFER_ENCODING) != 0 &amp;&amp; !strcasecmp(headers_[http::HEADER_TRANSFER_ENCODING].c_str(), &quot;chunked&quot;);
+<span class="lineNum">     436 </span>            : 
+<span class="lineNum">     437 </span>            :             // specify the host
+<span class="lineNum">     438 </span>            :             if (headers_.count(http::HEADER_HOST) == 0)
+<span class="lineNum">     439 </span>            :             {
+<span class="lineNum">     440 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: %s&quot;, http::HEADER_HOST, host().c_str());
+<span class="lineNum">     441 </span>            :                 sock.writeln(buf);
+<span class="lineNum">     442 </span>            :             }
+<span class="lineNum">     443 </span>            : 
+<span class="lineNum">     444 </span>            :             if (headers_.count(http::HEADER_ACCEPT) == 0)
+<span class="lineNum">     445 </span>            :             {
+<span class="lineNum">     446 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: */*&quot;, http::HEADER_ACCEPT);
+<span class="lineNum">     447 </span>            :                 sock.writeln(buf);
+<span class="lineNum">     448 </span>            :             }
+<span class="lineNum">     449 </span>            : 
+<span class="lineNum">     450 </span>            :             if (headers_.count(http::HEADER_CONNECTION) == 0)
+<span class="lineNum">     451 </span>            :             {
+<span class="lineNum">     452 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: close&quot;, http::HEADER_CONNECTION);
+<span class="lineNum">     453 </span>            :                 sock.writeln(buf);
+<span class="lineNum">     454 </span>            :             }
+<span class="lineNum">     455 </span>            : 
+<span class="lineNum">     456 </span>            :             // add the headers
+<span class="lineNum">     457 </span>            :             for (auto &amp;h : headers_)
+<span class="lineNum">     458 </span>            :             {
+<span class="lineNum">     459 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: %s&quot;, h.first.c_str(), h.second.c_str());
+<span class="lineNum">     460 </span>            : 
+<span class="lineNum">     461 </span>            :                 sock.writeln(buf);
+<span class="lineNum">     462 </span>            :             }
+<span class="lineNum">     463 </span>            : 
+<span class="lineNum">     464 </span>            :             // if we have a payload, add the size
+<span class="lineNum">     465 </span>            :             if (!chunked &amp;&amp; !payload_.empty())
+<span class="lineNum">     466 </span>            :             {
+<span class="lineNum">     467 </span>            :                 snprintf(buf, http::MAX_URL_LEN, &quot;%s: %zu&quot;, http::HEADER_CONTENT_SIZE, payload_.size());
+<span class="lineNum">     468 </span>            : 
+<span class="lineNum">     469 </span>            :                 sock.writeln(buf);
+<span class="lineNum">     470 </span>            :             }
+<span class="lineNum">     471 </span>            : 
+<span class="lineNum">     472 </span>            :             // finish header
+<span class="lineNum">     473 </span>            :             sock.writeln();
+<span class="lineNum">     474 </span>            : 
+<span class="lineNum">     475 </span>            :             // add the payload
+<span class="lineNum">     476 </span>            :             if (!payload_.empty())
+<span class="lineNum">     477 </span>            :             {
+<span class="lineNum">     478 </span>            :                 sock.write(payload_);
+<span class="lineNum">     479 </span>            :             }
+<span class="lineNum">     480 </span>            : 
+<span class="lineNum">     481 </span>            : #ifdef DEBUG
+<span class="lineNum">     482 </span>            :             cout &lt;&lt; string(sock.output().begin(), sock.output().end());
+<span class="lineNum">     483 </span>            : #endif
+<span class="lineNum">     484 </span>            : 
+<span class="lineNum">     485 </span>            :             if (!sock.write_from_buffer())
+<span class="lineNum">     486 </span>            :                 throw socket_exception(&quot;unable to write to socket&quot;);
+<span class="lineNum">     487 </span>            : 
+<span class="lineNum">     488 </span>            :             if (!sock.read_to_buffer())
+<span class="lineNum">     489 </span>            :                 throw socket_exception(&quot;unable to read from socket&quot;);
+<span class="lineNum">     490 </span>            : 
+<span class="lineNum">     491 </span>            :             auto input = sock.input();
+<span class="lineNum">     492 </span>            : 
+<span class="lineNum">     493 </span>            :             response_.parse(string(input.begin(), input.end()));
+<span class="lineNum">     494 </span>            : 
+<span class="lineNum">     495 </span>            :             //sock.close();
+<span class="lineNum">     496 </span>            :         }
+<a name="497"><span class="lineNum">     497 </span>            : #endif</a>
+<span class="lineNum">     498 </span>            : 
+<span class="lineNum">     499 </span>            :         http_client &amp;http_client::request(http::method method, const string &amp;path)
+<span class="lineNum">     500 </span>            :         {
+<span class="lineNum">     501 </span><span class="lineCov">          3 :             response_.clear();</span>
+<span class="lineNum">     502 </span>            : 
+<span class="lineNum">     503 </span><span class="lineCov">          3 :             if (host_.empty())</span>
+<span class="lineNum">     504 </span><span class="lineNoCov">          0 :                 throw socket_exception(&quot;no host&quot;);</span>
+<span class="lineNum">     505 </span>            : 
+<span class="lineNum">     506 </span>            : #ifdef HAVE_LIBCURL
+<span class="lineNum">     507 </span><span class="lineCov">          3 :             request_curl(method, path);</span>
+<span class="lineNum">     508 </span>            : #else
+<span class="lineNum">     509 </span>            :             request_socket(method, path);
+<span class="lineNum">     510 </span>            : #endif
+<span class="lineNum">     511 </span>            : 
+<span class="lineNum">     512 </span><span class="lineCov">          3 :             return *this;</span>
+<a name="513"><span class="lineNum">     513 </span><span class="lineNoCov">          0 :         }</span></a>
+<span class="lineNum">     514 </span>            : 
+<span class="lineNum">     515 </span>            :         http_client &amp;http_client::get(const string &amp;path)
+<span class="lineNum">     516 </span>            :         {
+<span class="lineNum">     517 </span><span class="lineCov">          2 :             return request(http::GET, path);</span>
+<a name="518"><span class="lineNum">     518 </span>            :         }</a>
+<span class="lineNum">     519 </span>            : 
+<span class="lineNum">     520 </span>            :         http_client &amp;http_client::post(const string &amp;path)
+<span class="lineNum">     521 </span>            :         {
+<span class="lineNum">     522 </span><span class="lineCov">          1 :             return request(http::POST, path);</span>
+<a name="523"><span class="lineNum">     523 </span>            :         }</a>
+<span class="lineNum">     524 </span>            : 
+<span class="lineNum">     525 </span>            :         http_client &amp;http_client::put(const string &amp;path)
+<span class="lineNum">     526 </span>            :         {
+<span class="lineNum">     527 </span><span class="lineNoCov">          0 :             return request(http::PUT, path);</span>
+<a name="528"><span class="lineNum">     528 </span>            :         }</a>
+<span class="lineNum">     529 </span>            : 
+<span class="lineNum">     530 </span>            :         http_client &amp;http_client::de1ete(const string &amp;path)
+<span class="lineNum">     531 </span>            :         {
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 :             return request(http::DELETE, path);</span>
+<span class="lineNum">     533 </span>            :         }
+<span class="lineNum">     534 </span>            :     }
+<span class="lineNum">     535 </span>            : }
 </pre>
       </td>
     </tr>
