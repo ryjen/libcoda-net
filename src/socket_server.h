@@ -140,6 +140,8 @@ namespace arg3
              */
             void check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate);
 
+            void wait_for_poll(struct timeval *);
+            
             void notify_poll();
 
             void notify_start();

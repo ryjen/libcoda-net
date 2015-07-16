@@ -112,6 +112,7 @@ namespace arg3
             if (!is_valid()) return INVALID;
 
             if (s.empty()) return 0;
+            
 #ifdef HAVE_LIBSSL
             if (sslHandle_ != NULL)
                 return SSL_write(sslHandle_, s.data(), s.size() );
@@ -156,7 +157,8 @@ namespace arg3
 
                 return inet_ntoa(addr4->sin_addr);
             }
-            else
+            
+            if (addr_.ss_family == AF_INET6)
             {
                 static char straddr[INET6_ADDRSTRLEN] = {0};
 
@@ -164,6 +166,8 @@ namespace arg3
 
                 return inet_ntop(AF_INET6, &addr6->sin6_addr, straddr, sizeof(straddr) - 1);
             }
+
+            return "unknown";
         }
 
         int socket::port() const
@@ -308,8 +312,9 @@ namespace arg3
 
             if (r != 0)
             {
-                for (int i = 0; i < 5 && r != 0; i++)
+                for (int i = 0; i < 5 && r != 0; i++) {
                     r = getaddrinfo(NULL, servnam, &hints, &result);
+                }
 
                 if (r != 0)
                     throw socket_exception( gai_strerror(r));
@@ -415,12 +420,8 @@ namespace arg3
                     SSL_free (sslHandle_);
                     sslHandle_ = NULL;
                 }
-                // automatically freed above?
-                // if (sslContext_)
-                // {
-                //     SSL_CTX_free (sslContext_);
-                //     sslContext_ = NULL;
-                // }
+
+                sslContext_ = NULL;
 
                 return;
             }
@@ -429,8 +430,9 @@ namespace arg3
             if (sslHandle_)
                 return;
 
-            if (is_valid())
+            if (is_valid()) {
                 throw socket_exception("socket already initalized");
+            }
 
             static bool initialized = false;
 
@@ -454,8 +456,9 @@ namespace arg3
             // Create an SSL struct for the connection
             sslHandle_ = SSL_new (sslContext_);
 
-            if (sslHandle_ == NULL)
+            if (sslHandle_ == NULL) {
                 throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
+            }
 #endif
         }
     }

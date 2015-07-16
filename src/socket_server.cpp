@@ -19,6 +19,7 @@ namespace arg3
               backgroundThread_(std::move(other.backgroundThread_)), sockets_(std::move(other.sockets_)),
               listeners_(std::move(other.listeners_))
         {
+            // invalidate the moved instance
             other.sock_ = INVALID;
             other.factory_ = NULL;
             other.backgroundThread_ = nullptr;
@@ -43,6 +44,7 @@ namespace arg3
 
             listeners_ = std::move(other.listeners_);
 
+            // invalidate moved instance
             other.sock_ = INVALID;
             other.factory_ = NULL;
             other.backgroundThread_ = nullptr;
@@ -52,8 +54,9 @@ namespace arg3
 
         bool socket_server::operator==(const socket_server &other)
         {
-            if (!is_valid() || !other.is_valid())
+            if (!is_valid() || !other.is_valid()) {
                 return false;
+            }
 
             return port() == other.port();
         }
@@ -92,8 +95,10 @@ namespace arg3
         {
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            if (find(listeners_.begin(), listeners_.end(), listener) == listeners_.end())
+            if (listener != NULL && 
+                find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
+            }
         }
 
         void socket_server::set_socket_factory(socket_factory *factory)
@@ -314,6 +319,50 @@ namespace arg3
             });
         }
 
+        void socket_server::wait_for_poll(struct timeval *last_time) {
+            struct timeval now_time;
+            long secDelta;
+            long usecDelta;
+
+            if (last_time == NULL) {
+                return;
+            }
+
+            gettimeofday(&now_time, NULL);
+
+            usecDelta = ((int) last_time->tv_usec) - ((int) now_time.tv_usec) + 1000000 / pollFrequency_;
+            secDelta = ((int) last_time->tv_sec) - ((int) now_time.tv_sec);
+
+            while (usecDelta < 0)
+            {
+                usecDelta += 1000000;
+                secDelta -= 1;
+            }
+
+            while (usecDelta >= 1000000)
+            {
+                usecDelta -= 1000000;
+                secDelta += 1;
+            }
+
+            // check if server should stall for a moment based on poll frequency
+            if (secDelta > 0 || (secDelta == 0 && usecDelta > 0))
+            {
+                struct timeval stall_time;
+
+                stall_time.tv_usec = usecDelta;
+                stall_time.tv_sec = secDelta;
+
+                if (select(0, NULL, NULL, NULL, &stall_time) == -1)
+                {
+                    throw socket_exception(strerror(errno));
+                }
+
+            }
+
+            gettimeofday(last_time, NULL);
+        }
+
         void socket_server::run()
         {
             struct timeval last_time;
@@ -324,46 +373,9 @@ namespace arg3
 
             while (is_valid())
             {
-                struct timeval now_time;
-                long secDelta;
-                long usecDelta;
-
-                gettimeofday(&now_time, NULL);
-
-                usecDelta = ((int) last_time.tv_usec) - ((int) now_time.tv_usec) + 1000000 / pollFrequency_;
-                secDelta = ((int) last_time.tv_sec) - ((int) now_time.tv_sec);
-
-                while (usecDelta < 0)
-                {
-                    usecDelta += 1000000;
-                    secDelta -= 1;
+                if (pollFrequency_ > 0) {
+                    wait_for_poll(&last_time);
                 }
-
-                while (usecDelta >= 1000000)
-                {
-                    usecDelta -= 1000000;
-                    secDelta += 1;
-                }
-
-                // check if server should stall for a moment based on poll frequency
-                if (secDelta > 0 || (secDelta == 0 && usecDelta > 0))
-                {
-                    struct timeval stall_time;
-
-                    stall_time.tv_usec = usecDelta;
-                    stall_time.tv_sec = secDelta;
-
-                    if (select(0, NULL, NULL, NULL, &stall_time) == -1)
-                    {
-                        throw socket_exception(strerror(errno));
-                    }
-
-                    // check still valid after wait
-                    if (!is_valid())
-                        break;
-                }
-
-                gettimeofday(&last_time, NULL);
 
                 poll();
             }

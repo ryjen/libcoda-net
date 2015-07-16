@@ -10,7 +10,8 @@ namespace arg3
         static const socket::data_buffer NEWLINE = { '\r', '\n' };
 
         buffered_socket::buffered_socket() : socket()
-        {}
+        {
+        }
 
         buffered_socket::buffered_socket(SOCKET sock, const sockaddr_storage &addr) : socket(sock, addr)
         {
@@ -41,6 +42,13 @@ namespace arg3
             return *this;
         }
 
+        //! for client connections, this will connect the socket to a host/port
+        /*!
+         * \param   host    the hostname to connect to
+         * \param   port    the port to connect to
+         *
+         * \returns     true if successful
+         */
         bool buffered_socket::connect(const string &host, const int port)
         {
             if (socket::connect(host, port))
@@ -51,15 +59,23 @@ namespace arg3
             return false;
         }
 
+        //! reads from the socket into an internal input buffer
+        /*
+         * \returns     true if successful
+         */
         bool buffered_socket::read_to_buffer()
         {
             data_buffer chunk;
+            int status = 0;
+            size_t size = 0;
 
             notify_will_read();
 
-            int status = socket::recv(chunk);
+            status = socket::recv(chunk);
 
-            size_t size = chunk.size();
+            // the internal buffer may have content already, so
+            // keep track of the size of this read
+            size = chunk.size();
 
             while (status > 0)
             {
@@ -70,19 +86,21 @@ namespace arg3
                 size += chunk.size();
             }
 
-            bool success = status == 0 || errno == EWOULDBLOCK;
-
             if (size > 0 || inBuffer_.size() > 0)
                 notify_did_read();
 
-            return success;
+            return status == 0 || errno == EWOULDBLOCK;
         }
 
+        //! Reads a line from the internal input buffer
+        /*!
+         * \returns a line from the buffer
+         */
         string buffered_socket::readln()
         {
             if (inBuffer_.empty()) return string();
 
-            /* find a new line character */
+            /* find a new line  */
             auto pos = find_first_of(inBuffer_.begin(), inBuffer_.end(), NEWLINE.begin(), NEWLINE.end());
 
             if (pos == inBuffer_.end())
@@ -107,26 +125,31 @@ namespace arg3
             return temp;
         }
 
+        //! tests if the internal input buffer has content
         bool buffered_socket::has_input() const
         {
             return !inBuffer_.empty();
         }
 
+        //! gets the internal data buffer
         const socket::data_buffer &buffered_socket::input() const
         {
             return inBuffer_;
         }
 
+        //! tests internal output buffer for content
         bool buffered_socket::has_output() const
         {
             return !outBuffer_.empty();
         }
 
+        //! the internal output buffer
         const socket::data_buffer &buffered_socket::output() const
         {
             return outBuffer_;
         }
 
+        //! writes a string to the output buffer and an appending new line
         buffered_socket &buffered_socket::writeln(const string &value)
         {
             outBuffer_.insert(outBuffer_.end(), value.begin(), value.end());
@@ -134,29 +157,27 @@ namespace arg3
             return *this;
         }
 
+        //! writes a new line to the output buffer
         buffered_socket &buffered_socket::writeln()
         {
             outBuffer_.insert(outBuffer_.end(), NEWLINE.begin(), NEWLINE.end());
             return *this;
         }
 
-        buffered_socket &buffered_socket::write(void *pbuf, size_t sz)
-        {
-            socket::send(pbuf, sz);
-            return *this;
-        }
-
+        //! 
         buffered_socket &buffered_socket::write(const string &value)
         {
             outBuffer_.insert(outBuffer_.end(), value.begin(), value.end());
             return *this;
         }
 
+        //!  append to the output buffer operator
         buffered_socket &buffered_socket::operator << ( const string &s )
         {
             return write(s);
         }
 
+        //! read from the input buffer operator
         buffered_socket &buffered_socket::operator >> ( string &s )
         {
             s.append(inBuffer_.begin(), inBuffer_.end());
@@ -164,11 +185,16 @@ namespace arg3
             return *this;
         }
 
+        //! flush the output buffer
         void buffered_socket::flush()
         {
             write_from_buffer();
         }
 
+        //! close the socket
+        /*!
+         * Will update listeners, flush the output, and close if valid
+         */
         void buffered_socket::close()
         {
             if (is_valid())
@@ -181,6 +207,7 @@ namespace arg3
             }
         }
 
+        //! will write the output buffer to the socket
         bool buffered_socket::write_from_buffer()
         {
             if (!is_valid()) return false;
@@ -212,17 +239,20 @@ namespace arg3
         void buffered_socket::on_did_write() {}
 
 
+        //! add a listener to the socket
         void buffered_socket::add_listener(buffered_socket_listener *listener)
         {
-            if (listener != NULL)
+            if (listener != NULL && 
+                find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
+            }
         }
 
         void buffered_socket::notify_connect()
         {
             on_connect();
 
-            for (auto &l : listeners_)
+            for (const auto &l : listeners_)
             {
                 l->on_connect(this);
             }
@@ -232,7 +262,7 @@ namespace arg3
         {
             on_will_read();
 
-            for (auto &l : listeners_)
+            for (const auto &l : listeners_)
             {
                 l->on_will_read(this);
             }
@@ -242,7 +272,7 @@ namespace arg3
         {
             on_did_read();
 
-            for (auto &l : listeners_)
+            for (const auto &l : listeners_)
             {
                 l->on_did_read(this);
             }
@@ -252,7 +282,7 @@ namespace arg3
         {
             on_will_write();
 
-            for (auto &l : listeners_)
+            for (const auto &l : listeners_)
             {
                 l->on_will_write(this);
             }
@@ -262,7 +292,7 @@ namespace arg3
         {
             on_did_write();
 
-            for (auto &l : listeners_)
+            for (const auto &l : listeners_)
             {
                 l->on_did_write(this);
             }
@@ -272,7 +302,7 @@ namespace arg3
         {
             on_close();
 
-            for (auto l : listeners_)
+            for (const auto &l : listeners_)
             {
                 l->on_close(this);
             }

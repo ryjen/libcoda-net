@@ -454,7 +454,7 @@ namespace arg3
             }
 
             // add the headers
-            for (auto &h : headers_)
+            for (const auto &h : headers_)
             {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
