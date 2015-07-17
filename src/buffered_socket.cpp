@@ -44,10 +44,10 @@ namespace arg3
 
         //! for client connections, this will connect the socket to a host/port
         /*!
-         * \param   host    the hostname to connect to
-         * \param   port    the port to connect to
+         * @param   host    the hostname to connect to
+         * @param   port    the port to connect to
          *
-         * \returns     true if successful
+         * @returns     true if successful
          */
         bool buffered_socket::connect(const string &host, const int port)
         {
@@ -61,7 +61,7 @@ namespace arg3
 
         //! reads from the socket into an internal input buffer
         /*
-         * \returns     true if successful
+         * @returns     true if successful
          */
         bool buffered_socket::read_to_buffer()
         {
@@ -94,7 +94,7 @@ namespace arg3
 
         //! Reads a line from the internal input buffer
         /*!
-         * \returns a line from the buffer
+         * @returns a line from the buffer
          */
         string buffered_socket::readln()
         {

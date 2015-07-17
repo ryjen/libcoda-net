@@ -93,12 +93,7 @@ namespace arg3
                 SSL_free (sslHandle_);
                 sslHandle_ = NULL;
             }
-            // automatically freed above?
-            // if (sslContext_ != NULL)
-            // {
-            //     SSL_CTX_free (sslContext_);
-            //     sslContext_ = NULL;
-            // }
+            sslContext_ = NULL;
 #endif
             if (sock_ != INVALID)
             {
@@ -394,7 +389,7 @@ namespace arg3
 
             fcntl ( sock_, F_SETFL, opts );
 #else
-            ioctlsocket( sock_, FIONBIO, 0 );
+            ioctlsocket( sock_, FIONBIO, b ? 1 : 0 );
 #endif
         }
 
