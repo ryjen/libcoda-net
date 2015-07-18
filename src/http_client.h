@@ -42,7 +42,6 @@ namespace arg3
 
             const map<string, string> headers() const;
 
-
         protected:
             string payload_;
             map<string, string> headers_;
