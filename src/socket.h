@@ -20,14 +20,6 @@
 #include <exception>
 #include <vector>
 
-#include "config.h"
-
-#ifdef HAVE_LIBSSL
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#endif
-
 namespace arg3
 {
     namespace net
@@ -39,6 +31,8 @@ namespace arg3
         typedef int SOCKET;
         int closesocket(SOCKET socket);
 #endif
+
+        struct ssl_socket;
 
         /*!
          * A wrapper for a raw socket.  Includes both client and server functionality
@@ -193,10 +187,7 @@ namespace arg3
             // the socket address
             struct sockaddr_storage addr_;
 
-#ifdef HAVE_LIBSSL
-            SSL *sslHandle_;
-            SSL_CTX *sslContext_;
-#endif
+            struct ssl_socket *ssl_;
 
             friend class socket_server;
         };
