@@ -81,7 +81,7 @@ namespace arg3
               throw socket_exception(strerror(errno));
           }
 
-          return true;
+          return status > 0;
 
         }
 
