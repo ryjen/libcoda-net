@@ -8,6 +8,12 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_LIBSSL
+#include <openssl/rand.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#endif
+
 using namespace std;
 
 namespace arg3
@@ -15,6 +21,14 @@ namespace arg3
 
     namespace net
     {
+
+        struct ssl_socket
+        {
+#ifdef HAVE_LIBSSL
+            SSL *handle_;
+            SSL_CTX *context_;
+#endif
+        };
 
 #ifndef _WIN32
 
@@ -25,42 +39,25 @@ namespace arg3
 #endif
 
         socket::socket() :
-            sock_ ( INVALID )
-#ifdef HAVE_LIBSSL
-            , sslHandle_(NULL), sslContext_(NULL)
-#endif
-            , non_blocking_(false)
+            sock_ ( INVALID ), ssl_(NULL), non_blocking_(false)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
 
-        socket::socket(SOCKET sock, const sockaddr_storage &addr) : sock_(sock), addr_(addr)
-#ifdef HAVE_LIBSSL
-            , sslHandle_(NULL), sslContext_(NULL)
-#endif
-            , non_blocking_(false)
+
+        socket::socket(SOCKET sock, const sockaddr_storage &addr) : sock_(sock), addr_(addr), ssl_(NULL), non_blocking_(false)
         {
 
         }
 
-        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_))
-#ifdef HAVE_LIBSSL
-            , sslHandle_(other.sslHandle_), sslContext_(other.sslContext_)
-#endif
-            , non_blocking_(false)
+        socket::socket(socket &&other) : sock_(other.sock_), addr_(std::move(other.addr_)), ssl_(std::move(other.ssl_)),
+            non_blocking_(other.non_blocking_)
         {
             other.sock_ = INVALID;
-#ifdef HAVE_LIBSSL
-            other.sslHandle_ = NULL;
-            other.sslContext_ = NULL;
-#endif
+            other.ssl_ = NULL;
         }
 
-        socket::socket(const std::string &host, const int port) : sock_(INVALID)
-#ifdef HAVE_LIBSSL
-            , sslHandle_(NULL), sslContext_(NULL)
-#endif
-            , non_blocking_(false)
+        socket::socket(const std::string &host, const int port) : sock_(INVALID), ssl_(NULL), non_blocking_(false)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
 
@@ -72,12 +69,8 @@ namespace arg3
             sock_ = other.sock_;
             addr_ = std::move(other.addr_);
             non_blocking_ = other.non_blocking_;
-#ifdef HAVE_LIBSSL
-            sslHandle_ = other.sslHandle_;
-            sslContext_ = other.sslContext_;
-            other.sslHandle_ = NULL;
-            other.sslContext_ = NULL;
-#endif
+            ssl_ = std::move(other.ssl_);
+            other.ssl_ = NULL;
             other.sock_ = INVALID;
 
             return *this;
@@ -91,15 +84,19 @@ namespace arg3
         void socket::close()
         {
 
+            if (ssl_ != NULL) {
+
 #ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
-            {
-                SSL_shutdown (sslHandle_);
-                SSL_free (sslHandle_);
-                sslHandle_ = NULL;
-            }
-            sslContext_ = NULL;
+                if (ssl_->handle != NULL)
+                {
+                    SSL_shutdown (ssl_->handle);
+                    SSL_free (ssl_->handle);
+                    ssl_->handle = NULL;
+                }
+                ssl_->.context = NULL;
 #endif
+                free(ssl_);
+            }
             if (sock_ != INVALID)
             {
                 closesocket(sock_);
@@ -108,28 +105,30 @@ namespace arg3
             non_blocking_ = false;
         }
 
-        int socket::send ( const data_buffer &s, int flags )
+        int socket::send ( const data_buffer & s, int flags )
         {
-            if (!is_valid()) return INVALID;
+            if (!is_valid()) { return INVALID; }
 
-            if (s.empty()) return 0;
+            if (s.empty()) { return 0; }
 
 #ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
-                return SSL_write(sslHandle_, s.data(), s.size() );
+            if (ssl_ != NULL && ssl_->handle != NULL) {
+                return SSL_write(ssl_->handle, s.data(), s.size() );
+            }
 #endif
             return ::send ( sock_, s.data(), s.size(), flags );
         }
 
         int socket::send( void *s, size_t len, int flags)
         {
-            if (!is_valid()) return INVALID;
+            if (!is_valid()) { return INVALID; }
 
-            if (len == 0) return 0;
+            if (len == 0) { return 0; }
 
 #ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
-                return SSL_write(sslHandle_, s, len );
+            if (ssl_ != NULL && ssl_->handle != NULL) {
+                return SSL_write(ssl_->handle, s, len );
+            }
 #endif
 
             return ::send(sock_, s, len, flags);
@@ -147,7 +146,7 @@ namespace arg3
 
         const char *socket::ip() const
         {
-            if (!is_valid()) return "invalid";
+            if (!is_valid()) { return "invalid"; }
 
             if (addr_.ss_family == AF_INET)
             {
@@ -170,7 +169,7 @@ namespace arg3
 
         int socket::port() const
         {
-            if (!is_valid()) return INVALID;
+            if (!is_valid()) { return INVALID; }
 
             if (addr_.ss_family == AF_INET)
             {
@@ -184,9 +183,9 @@ namespace arg3
             }
         }
 
-        int socket::recv(data_buffer &s)
+        int socket::recv(data_buffer & s)
         {
-            if (!is_valid()) return INVALID;
+            if (!is_valid()) { return INVALID; }
 
             unsigned char buf [ MAXRECV + 1 ] = {0};
 
@@ -195,8 +194,9 @@ namespace arg3
             s.clear();
 
 #ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
-                status = SSL_read( sslHandle_, buf, MAXRECV );
+            if (ssl_ != NULL && ssl_->handle != NULL) {
+                status = SSL_read( ssl_->handle, buf, MAXRECV );
+            }
             else
 #endif
                 status = ::recv ( sock_, buf, MAXRECV, 0 );
@@ -211,9 +211,9 @@ namespace arg3
             return status;
         }
 
-        void socket::on_recv(data_buffer &s) {}
+        void socket::on_recv(data_buffer & s) {}
 
-        socket &socket::operator << ( const data_buffer &s )
+        socket &socket::operator << ( const data_buffer & s )
         {
             if ( send ( s ) < 0)
             {
@@ -224,7 +224,7 @@ namespace arg3
 
         }
 
-        socket &socket::operator >> ( data_buffer &s )
+        socket &socket::operator >> ( data_buffer & s )
         {
             if ( recv(s) < 0)
             {
@@ -234,7 +234,7 @@ namespace arg3
             return *this;
         }
 
-        bool socket::connect ( const string &host, const int port )
+        bool socket::connect ( const string & host, const int port )
         {
 
             struct addrinfo hints, *result, *p;
@@ -246,8 +246,9 @@ namespace arg3
             char servnam[101] = {0};
             snprintf(servnam, 100, "%d", port);
 
-            if (getaddrinfo(host.c_str(), servnam, &hints, &result) != 0)
+            if (getaddrinfo(host.c_str(), servnam, &hints, &result) != 0) {
                 return false;
+            }
 
             if (is_valid())
             {
@@ -258,10 +259,11 @@ namespace arg3
             {
                 sock_ = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
-                if (sock_ == INVALID) continue;
+                if (sock_ == INVALID) { continue; }
 
-                if (::connect ( sock_, p->ai_addr, p->ai_addrlen ) != INVALID)
+                if (::connect ( sock_, p->ai_addr, p->ai_addrlen ) != INVALID) {
                     break;
+                }
 
                 closesocket(sock_);
                 sock_ = INVALID;
@@ -278,15 +280,17 @@ namespace arg3
             freeaddrinfo(result);
 
 #ifdef HAVE_LIBSSL
-            if (sslHandle_ != NULL)
+            if (ssl_ != NULL && ssl_->handle != NULL)
             {
                 // Connect the SSL struct to our connection
-                if (!SSL_set_fd (sslHandle_, sock_))
+                if (!SSL_set_fd (ssl_->handle, sock_)) {
                     throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
+                }
 
                 // Initiate SSL handshake
-                if (SSL_connect (sslHandle_) != 1)
+                if (SSL_connect (ssl_->handle_) != 1) {
                     throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
+                }
             }
 #endif
             return true;
@@ -314,8 +318,9 @@ namespace arg3
                     r = getaddrinfo(NULL, servnam, &hints, &result);
                 }
 
-                if (r != 0)
+                if (r != 0) {
                     throw socket_exception( gai_strerror(r));
+                }
             }
 
             if (result == NULL)
@@ -327,14 +332,17 @@ namespace arg3
             {
                 sock_ = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
-                if ( sock_ == INVALID )
+                if ( sock_ == INVALID ) {
                     continue;
+                }
 
-                if ( setsockopt ( sock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof ( on ) ) == -1 )
+                if ( setsockopt ( sock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof ( on ) ) == -1 ) {
                     continue;
+                }
 
-                if ( ::bind(sock_, p->ai_addr, p->ai_addrlen) == 0 )
+                if ( ::bind(sock_, p->ai_addr, p->ai_addrlen) == 0 ) {
                     break;
+                }
 
                 closesocket(sock_);
                 sock_ = INVALID;
@@ -360,7 +368,7 @@ namespace arg3
             return true;
         }
 
-        SOCKET socket::accept ( sockaddr_storage &addr) const
+        SOCKET socket::accept ( sockaddr_storage & addr) const
         {
             socklen_t addr_length = sizeof(addr);
 
@@ -402,7 +410,7 @@ namespace arg3
         bool socket::is_secure() const
         {
 #ifdef HAVE_LIBSSL
-            return sslHandle_ != NULL && sslContext_ != NULL;
+            return ssl_ != NULL && ssl_->handle != NULL && ssl_->context != NULL;
 #else
             return false;
 #endif
@@ -414,22 +422,29 @@ namespace arg3
 #else
             if (!b)
             {
-                // check if we need to free
-                if (sslHandle_)
-                {
-                    SSL_shutdown (sslHandle_);
-                    SSL_free (sslHandle_);
-                    sslHandle_ = NULL;
+                if (ssl_ != NULL) {
+                    // check if we need to free
+                    if (ssl_->handle_ != NULL)
+                    {
+                        SSL_shutdown (ssl_->handle_);
+                        SSL_free (ssl_->handle_);
+                        ssl_->handle_ = NULL;
+                    }
+
+                    ssl_->context_ = NULL;
+
+                    free(ssl_);
+                    ssl_ = NULL;
                 }
 
-                sslContext_ = NULL;
 
                 return;
             }
 
             // check we're already initialized
-            if (sslHandle_)
+            if (ssl_ && ssl_->handle) {
                 return;
+            }
 
             if (is_valid()) {
                 throw socket_exception("socket already initalized");
@@ -447,17 +462,19 @@ namespace arg3
                 initialized = true;
             }
 
+            ssl_ = malloc(sizoef(struct ssl_socket));
+
             // New context saying we are a client, and using SSL 2 or 3
-            sslContext_ = SSL_CTX_new (SSLv23_client_method ());
-            if (sslContext_ == NULL)
+            ssl_->context = SSL_CTX_new (SSLv23_client_method ());
+            if (ssl_->context == NULL)
             {
                 throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
             }
 
             // Create an SSL struct for the connection
-            sslHandle_ = SSL_new (sslContext_);
+            ssl_->handle = SSL_new (ssl_->context);
 
-            if (sslHandle_ == NULL) {
+            if (ssl_->handle == NULL) {
                 throw socket_exception (ERR_error_string(ERR_get_error(), NULL));
             }
 #endif
