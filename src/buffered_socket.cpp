@@ -2,6 +2,7 @@
 #include "buffered_socket.h"
 #include <algorithm>
 #include "exception.h"
+#include <cstring>
 
 namespace arg3
 {
