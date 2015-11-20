@@ -1,6 +1,7 @@
 #include "config.h"
 #include "buffered_socket.h"
 #include <algorithm>
+#include "exception.h"
 
 namespace arg3
 {
@@ -59,6 +60,31 @@ namespace arg3
             return false;
         }
 
+
+        bool buffered_socket::read_chunk(data_buffer &chunk) {
+
+          int status = socket::recv(chunk);
+
+          if (status < 0) {
+              if (errno == EINTR) {
+                  return false; /* perfectly normal */
+              }
+
+              if (errno == EAGAIN) {
+                  return false;
+              }
+
+              if (errno == EWOULDBLOCK) {
+                return false;
+              }
+
+              throw socket_exception(strerror(errno));
+          }
+
+          return true;
+
+        }
+
         //! reads from the socket into an internal input buffer
         /*
          * @returns     true if successful
@@ -66,30 +92,28 @@ namespace arg3
         bool buffered_socket::read_to_buffer()
         {
             data_buffer chunk;
-            int status = 0;
-            size_t size = 0;
 
             notify_will_read();
 
-            status = socket::recv(chunk);
+            try {
+              if (!read_chunk(chunk)) {
+                return true;
+              }
 
-            // the internal buffer may have content already, so
-            // keep track of the size of this read
-            size = chunk.size();
+              // while not an error or the peer connection was closed
+              do
+              {
+                  inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
 
-            while (status > 0)
-            {
-                inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
+              } while(read_chunk(chunk));
 
-                status = socket::recv(chunk);
-
-                size += chunk.size();
+              notify_did_read();
+            }
+            catch(const socket_exception &e) {
+              return false;
             }
 
-            if (size > 0 || inBuffer_.size() > 0)
-                notify_did_read();
-
-            return status == 0 || errno == EWOULDBLOCK;
+            return true;
         }
 
         //! Reads a line from the internal input buffer
@@ -164,7 +188,7 @@ namespace arg3
             return *this;
         }
 
-        //! 
+        //!
         buffered_socket &buffered_socket::write(const string &value)
         {
             outBuffer_.insert(outBuffer_.end(), value.begin(), value.end());
@@ -242,7 +266,7 @@ namespace arg3
         //! add a listener to the socket
         void buffered_socket::add_listener(buffered_socket_listener *listener)
         {
-            if (listener != NULL && 
+            if (listener != NULL &&
                 find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
             }

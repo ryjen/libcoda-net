@@ -29,6 +29,7 @@ namespace arg3
 #ifdef HAVE_LIBSSL
             , sslHandle_(NULL), sslContext_(NULL)
 #endif
+            , non_blocking_(false)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
         }
@@ -37,6 +38,7 @@ namespace arg3
 #ifdef HAVE_LIBSSL
             , sslHandle_(NULL), sslContext_(NULL)
 #endif
+            , non_blocking_(false)
         {
 
         }
@@ -45,6 +47,7 @@ namespace arg3
 #ifdef HAVE_LIBSSL
             , sslHandle_(other.sslHandle_), sslContext_(other.sslContext_)
 #endif
+            , non_blocking_(false)
         {
             other.sock_ = INVALID;
 #ifdef HAVE_LIBSSL
@@ -57,6 +60,7 @@ namespace arg3
 #ifdef HAVE_LIBSSL
             , sslHandle_(NULL), sslContext_(NULL)
 #endif
+            , non_blocking_(false)
         {
             memset ( &addr_, 0, sizeof ( addr_ ) );
 
@@ -67,6 +71,7 @@ namespace arg3
         {
             sock_ = other.sock_;
             addr_ = std::move(other.addr_);
+            non_blocking_ = other.non_blocking_;
 #ifdef HAVE_LIBSSL
             sslHandle_ = other.sslHandle_;
             sslContext_ = other.sslContext_;
@@ -100,6 +105,7 @@ namespace arg3
                 closesocket(sock_);
                 sock_ = INVALID;
             }
+            non_blocking_ = false;
         }
 
         int socket::send ( const data_buffer &s, int flags )
@@ -107,7 +113,7 @@ namespace arg3
             if (!is_valid()) return INVALID;
 
             if (s.empty()) return 0;
-            
+
 #ifdef HAVE_LIBSSL
             if (sslHandle_ != NULL)
                 return SSL_write(sslHandle_, s.data(), s.size() );
@@ -125,11 +131,8 @@ namespace arg3
             if (sslHandle_ != NULL)
                 return SSL_write(sslHandle_, s, len );
 #endif
-#ifdef _WIN32
-            return ::send(sock_, reinterpret_cast<const char *>(s), len, flags);
-#else
+
             return ::send(sock_, s, len, flags);
-#endif
         }
 
         bool socket::is_valid() const
@@ -152,7 +155,7 @@ namespace arg3
 
                 return inet_ntoa(addr4->sin_addr);
             }
-            
+
             if (addr_.ss_family == AF_INET6)
             {
                 static char straddr[INET6_ADDRSTRLEN] = {0};
@@ -382,15 +385,18 @@ namespace arg3
                 return;
             }
 
-            if ( b )
+            if ( b ) {
                 opts = ( opts | O_NONBLOCK );
-            else
+            } else {
                 opts = ( opts & ~O_NONBLOCK );
+            }
 
             fcntl ( sock_, F_SETFL, opts );
 #else
             ioctlsocket( sock_, FIONBIO, b ? 1 : 0 );
 #endif
+
+            non_blocking_ = b;
         }
 
         bool socket::is_secure() const

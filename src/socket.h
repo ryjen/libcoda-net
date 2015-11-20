@@ -174,6 +174,8 @@ namespace arg3
              */
             void set_non_blocking ( const bool );
 
+            bool is_non_blocking() const;
+
             void set_secure(const bool);
 
             bool is_secure() const;
@@ -198,10 +200,13 @@ namespace arg3
             SSL_CTX *sslContext_;
 #endif
 
+        private:
+          
+            bool non_blocking_;
+
             friend class socket_server;
         };
     }
 }
 
 #endif
-

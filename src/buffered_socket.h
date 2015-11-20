@@ -209,6 +209,8 @@ namespace arg3
 
             void notify_close();
 
+            bool read_chunk(data_buffer &chunk);
+
             vector<buffered_socket_listener *> listeners_;
         };
     }
