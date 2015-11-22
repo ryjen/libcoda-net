@@ -1,4 +1,6 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #undef VERSION
 
@@ -19,11 +21,10 @@ using namespace std;
 
 class test_socket_factory : public socket_factory, public buffered_socket_listener
 {
-
-private:
+   private:
     string response_;
 
-public:
+   public:
     std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_storage &addr)
     {
         auto socket = make_shared<buffered_socket>(sock, addr);
@@ -40,22 +41,22 @@ public:
 
     void on_connect(buffered_socket *sock)
     {
-        //log::trace(format("{0} connected", sock->getIP()));
+        // log::trace(format("{0} connected", sock->getIP()));
     }
 
     void on_close(buffered_socket *sock)
     {
-        //log::trace(format("{0} closed", sock->getIP()));
+        // log::trace(format("{0} closed", sock->getIP()));
     }
 
     void on_will_read(buffered_socket *sock)
     {
-        //log::trace(format("{0} will read", sock->getIP()));
+        // log::trace(format("{0} will read", sock->getIP()));
     }
 
     void on_did_read(buffered_socket *sock)
     {
-        //log::trace(format("{0} did read", sock->getIP()));
+        // log::trace(format("{0} did read", sock->getIP()));
 
         string line = sock->readln();
 
@@ -66,64 +67,50 @@ public:
 
     void on_will_write(buffered_socket *sock)
     {
-        //log::trace(format("{0} will write", sock->getIP()));
+        // log::trace(format("{0} will write", sock->getIP()));
     }
 
     void on_did_write(buffered_socket *sock)
     {
-        //log::trace(format("{0} did write", sock->getIP()));
+        // log::trace(format("{0} did write", sock->getIP()));
 
         sock->close();
     }
 };
 
-go_bandit([]()
-{
+go_bandit([]() {
 
     test_socket_factory testFactory;
 
     socket_server testServer(&testFactory);
 
-    describe("an http client", [&]()
-    {
-        before_each([&]()
-        {
-            try
-            {
+    describe("an http client", [&]() {
+        before_each([&]() {
+            try {
                 testServer.start_in_background(9876);
-            }
-            catch (const exception &e)
-            {
+            } catch (const exception &e) {
                 std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
             }
         });
 
-        after_each([&]()
-        {
-            testServer.stop();
-        });
+        after_each([&]() { testServer.stop(); });
 
-        it("can get", [&]()
-        {
+        it("can get", [&]() {
             http_client client("localhost:9876");
 
             testFactory.set_response("Hello, World!");
 
-            try
-            {
+            try {
                 client.get("test");
 
                 Assert::That(client.response().payload(), Equals("GET: Hello, World!"));
-            }
-            catch (const exception &e)
-            {
+            } catch (const exception &e) {
                 std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
                 throw e;
             }
         });
 #if defined(HAVE_LIBSSL)
-        it("is secure", []()
-        {
+        it("is secure", []() {
             http_client client("google.com");
 
             client.set_secure(true);
@@ -133,31 +120,25 @@ go_bandit([]()
             Assert::That(client.response().payload().empty(), Equals(false));
         });
 #endif
-        it("can post", []()
-        {
+        it("can post", []() {
             http_client client("localhost:9876");
 
             client.set_payload("Hello, World!");
 
-            try
-            {
+            try {
                 client.post("test");
 
                 Assert::That(client.response().payload(), Equals("POST: Hello, World!"));
-            }
-            catch (const exception &e)
-            {
+            } catch (const exception &e) {
                 std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
                 throw e;
             }
         });
 
-        it("can read http response", []()
-        {
+        it("can read http response", []() {
             http_client client("www.arg3.com");
 
-            try
-            {
+            try {
                 client.get("/");
 
                 auto response = client.response();
@@ -166,9 +147,7 @@ go_bandit([]()
 
                 Assert::That(response.payload().find("<!DOCTYPE html>"), !Equals(string::npos));
 
-            }
-            catch (const exception &e)
-            {
+            } catch (const exception &e) {
                 std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
                 throw e;
             }
@@ -176,4 +155,3 @@ go_bandit([]()
     });
 
 });
-

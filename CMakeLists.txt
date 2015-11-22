@@ -6,7 +6,7 @@ option(CODE_COVERAGE "Enable code coverage testing." OFF)
 option(MEMORY_CHECK "Enable testing for memory leaks." OFF)
 
 option(WITH_CURL "Compile http_client using libcurl." OFF)
-option(WITH_SSL "Enable secure socket layers on sockets." ON)
+option(WITH_SSL "Enable secure socket layers on sockets." OFF)
 
 # define project name
 project (arg3net VERSION 0.3.0)
