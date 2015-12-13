@@ -8,8 +8,9 @@
 #include <cinttypes>
 #ifndef HAVE_LIBCURL
 #include "buffered_socket.h"
+#include <cstrings>
 #else
-#include <strings.h>
+#include <cstrings>
 #endif
 
 namespace arg3
