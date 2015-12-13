@@ -6,6 +6,8 @@ before_script:
   - export CC=`which gcc-4.9`
   - mkdir build
   - gem install coveralls-lcov
+  - wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.12.orig.tar.gz
+  - tar xf lcov_1.12.orig.tar.gz
 addons:
   apt:
     sources:
@@ -19,6 +21,7 @@ addons:
       - lcov
       - liburiparser-dev
 script:
+  - make -C lcov-1.12/ install
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DMEMORY_CHECK=ON -DWITH_CURL=ON -DWITH_SSL=ON ..
   - make
