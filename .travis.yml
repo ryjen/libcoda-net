@@ -2,17 +2,27 @@ sudo: false
 language: cpp
 before_script: 
   - git submodule update --init --recursive
-  - autoreconf -if
+  - export CXX=`which g++-4.8`
+  - export CC=`which gcc-4.8`
+  - mkdir build
+  - gem install coveralls-lcov
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports
     packages:
-      - g++-4.8
+      - g++-4.8      
       - valgrind
+      - cmake-data
+      - cmake
+      - lcov
       - liburiparser-dev
 script:
-  - CXX=g++-4.8 ./configure
-  - make test
-  - valgrind --leak-check=full --error-exitcode=5 ./tests/arg3net_test
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DMEMORY_CHECK=ON ..
+  - make
+  - make arg3net-coverage-info
+after_success:
+  - coveralls-lcov coverage.info
  

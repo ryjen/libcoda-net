@@ -24,6 +24,13 @@ if (WITH_SSL)
 	find_package(OpenSSL)
 endif ()
 
+# add target for code coverage
+if(CODE_COVERAGE)
+	include(CodeCoverage)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_COVERAGE}")
+	setup_target_for_coverage(${PROJECT_NAME}-coverage ${CMAKE_BINARY_DIR}/tests/${PROJECT_NAME}_test ${PROJECT_SOURCE_DIR}/coverage)
+endif()
+
 # create package config
 include(CreatePackage)
 create_package("a c++ networking library")
@@ -45,11 +52,3 @@ if (MEMORY_CHECK)
 else ()
 	add_test(${PROJECT_NAME}-test ${PROJECT_BINARY_DIR}/tests/${PROJECT_NAME}_test)
 endif()
-
-# add target for code coverage
-if(CODE_COVERAGE)
-	include(CodeCoverage)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_COVERAGE}")
-	setup_target_for_coverage(${PROJECT_NAME}-coverage ${CMAKE_BINARY_DIR}/tests/${PROJECT_NAME}_test ${PROJECT_SOURCE_DIR}/coverage)
-endif()
-

@@ -1,0 +1,295 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - coverage.info - src/buffered_socket.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">src</a> - buffered_socket.h<span style="font-size: 80%;"> (source / <a href="buffered_socket.h.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2015-12-12 22:20:09</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #ifndef ARG3_NET_BUFFERED_SOCKET_H_</a>
+<span class="lineNum">       2 </span>            : #define ARG3_NET_BUFFERED_SOCKET_H_
+<span class="lineNum">       3 </span>            : 
+<span class="lineNum">       4 </span>            : #include &quot;socket.h&quot;
+<span class="lineNum">       5 </span>            : #include &lt;string&gt;
+<span class="lineNum">       6 </span>            : #include &lt;vector&gt;
+<span class="lineNum">       7 </span>            : 
+<span class="lineNum">       8 </span>            : using namespace std;
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : namespace arg3
+<span class="lineNum">      11 </span>            : {
+<span class="lineNum">      12 </span>            : 
+<span class="lineNum">      13 </span>            :     namespace net
+<span class="lineNum">      14 </span>            :     {
+<span class="lineNum">      15 </span>            :         class buffered_socket;
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            :         /*!
+<a name="18"><span class="lineNum">      18 </span>            :          * An interface to listen to a buffered socket</a>
+<span class="lineNum">      19 </span>            :          */
+<span class="lineNum">      20 </span><span class="lineCov">          2 :         class buffered_socket_listener</span>
+<span class="lineNum">      21 </span>            :         {
+<span class="lineNum">      22 </span>            :         public:
+<span class="lineNum">      23 </span>            :             /*!
+<span class="lineNum">      24 </span>            :              * Runs just before a read
+<span class="lineNum">      25 </span>            :              */
+<span class="lineNum">      26 </span>            :             virtual void on_will_read(buffered_socket *sock) = 0;
+<span class="lineNum">      27 </span>            : 
+<span class="lineNum">      28 </span>            :             /*!
+<span class="lineNum">      29 </span>            :              * Runs just after a read
+<span class="lineNum">      30 </span>            :              */
+<span class="lineNum">      31 </span>            :             virtual void on_did_read(buffered_socket *sock) = 0;
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            :             /*!
+<span class="lineNum">      34 </span>            :              * Runs just before a write
+<span class="lineNum">      35 </span>            :              */
+<span class="lineNum">      36 </span>            :             virtual void on_will_write(buffered_socket *sock) = 0;
+<span class="lineNum">      37 </span>            : 
+<span class="lineNum">      38 </span>            :             /*!
+<span class="lineNum">      39 </span>            :              * Runs just after a write
+<span class="lineNum">      40 </span>            :              */
+<span class="lineNum">      41 </span>            :             virtual void on_did_write(buffered_socket *sock) = 0;
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            :             /*!
+<span class="lineNum">      44 </span>            :              * Runs when connected
+<span class="lineNum">      45 </span>            :              */
+<span class="lineNum">      46 </span>            :             virtual void on_connect(buffered_socket *sock) = 0;
+<span class="lineNum">      47 </span>            : 
+<span class="lineNum">      48 </span>            :             /*!
+<span class="lineNum">      49 </span>            :              * Runs when closed
+<span class="lineNum">      50 </span>            :              */
+<span class="lineNum">      51 </span>            :             virtual void on_close(buffered_socket *sock) = 0;
+<span class="lineNum">      52 </span>            :         };
+<span class="lineNum">      53 </span>            : 
+<span class="lineNum">      54 </span>            :         /*!
+<span class="lineNum">      55 </span>            :          * A socket that buffers its input and output.
+<span class="lineNum">      56 </span>            :          */
+<span class="lineNum">      57 </span>            :         class buffered_socket : public socket
+<span class="lineNum">      58 </span>            :         {
+<span class="lineNum">      59 </span>            :         public:
+<span class="lineNum">      60 </span>            :             /*!
+<span class="lineNum">      61 </span>            :              * Default constructor accepts a raw socket and its address
+<span class="lineNum">      62 </span>            :              */
+<span class="lineNum">      63 </span>            :             buffered_socket(SOCKET sock, const sockaddr_storage &amp;addr);
+<span class="lineNum">      64 </span>            : 
+<span class="lineNum">      65 </span>            :             buffered_socket(const std::string &amp;host, const int port);
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span>            :             buffered_socket();
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            :             /*!
+<span class="lineNum">      70 </span>            :             * Non copyable
+<span class="lineNum">      71 </span>            :             */
+<span class="lineNum">      72 </span>            :             buffered_socket(const buffered_socket &amp;) = delete;
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span>            :             /*!
+<span class="lineNum">      75 </span>            :              * Move constructor
+<span class="lineNum">      76 </span>            :              */
+<span class="lineNum">      77 </span>            :             buffered_socket(buffered_socket &amp;&amp;other);
+<span class="lineNum">      78 </span>            : 
+<span class="lineNum">      79 </span>            :             /*!
+<span class="lineNum">      80 </span>            :             * Destructor
+<span class="lineNum">      81 </span>            :             */
+<span class="lineNum">      82 </span>            :             virtual ~buffered_socket();
+<span class="lineNum">      83 </span>            : 
+<span class="lineNum">      84 </span>            :             /*!
+<span class="lineNum">      85 </span>            :              * Non copy-assignable
+<span class="lineNum">      86 </span>            :              */
+<span class="lineNum">      87 </span>            :             buffered_socket &amp;operator=(const buffered_socket &amp;other) = delete;
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span>            :             /*!
+<span class="lineNum">      90 </span>            :              * Move assigment
+<span class="lineNum">      91 </span>            :              */
+<span class="lineNum">      92 </span>            :             buffered_socket &amp;operator=(buffered_socket &amp;&amp; other);
+<span class="lineNum">      93 </span>            : 
+<span class="lineNum">      94 </span>            :             /*!
+<span class="lineNum">      95 </span>            :              * Will close the raw socket
+<span class="lineNum">      96 </span>            :              */
+<span class="lineNum">      97 </span>            :             void close();
+<span class="lineNum">      98 </span>            : 
+<span class="lineNum">      99 </span>            :             /*!
+<span class="lineNum">     100 </span>            :              * Client initialization, connects to a host and port
+<span class="lineNum">     101 </span>            :              */
+<span class="lineNum">     102 </span>            :             virtual bool connect ( const std::string &amp;host, const int port );
+<span class="lineNum">     103 </span>            : 
+<span class="lineNum">     104 </span>            :             /*!
+<span class="lineNum">     105 </span>            :              * Reads data from the socket into the read buffer
+<span class="lineNum">     106 </span>            :              * @returns true if no errors occured
+<span class="lineNum">     107 </span>            :              */
+<span class="lineNum">     108 </span>            :             bool read_to_buffer();
+<span class="lineNum">     109 </span>            : 
+<span class="lineNum">     110 </span>            :             /*!
+<span class="lineNum">     111 </span>            :              * Reads a line from the read buffer
+<span class="lineNum">     112 </span>            :              */
+<span class="lineNum">     113 </span>            :             string readln();
+<span class="lineNum">     114 </span>            : 
+<span class="lineNum">     115 </span>            :             /*!
+<span class="lineNum">     116 </span>            :              * Appends some data to the write buffer with a new line.
+<span class="lineNum">     117 </span>            :              */
+<span class="lineNum">     118 </span>            :             buffered_socket &amp;writeln(const string &amp;value);
+<span class="lineNum">     119 </span>            : 
+<span class="lineNum">     120 </span>            :             /*!
+<span class="lineNum">     121 </span>            :             * Appends a new line to the write buffer
+<span class="lineNum">     122 </span>            :             */
+<span class="lineNum">     123 </span>            :             buffered_socket &amp;writeln();
+<span class="lineNum">     124 </span>            : 
+<span class="lineNum">     125 </span>            :             /*!
+<span class="lineNum">     126 </span>            :              * Appends some data to the write buffer.
+<span class="lineNum">     127 </span>            :              */
+<span class="lineNum">     128 </span>            :             buffered_socket &amp;write(const string &amp;value);
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span>            :             /*!
+<span class="lineNum">     131 </span>            :              * Appends some bytes to the write buffer
+<span class="lineNum">     132 </span>            :              */
+<span class="lineNum">     133 </span>            :             buffered_socket &amp;write(void *pbuf, size_t sz);
+<span class="lineNum">     134 </span>            : 
+<span class="lineNum">     135 </span>            :             /*!
+<span class="lineNum">     136 </span>            :              * @returns the read buffer
+<span class="lineNum">     137 </span>            :              */
+<span class="lineNum">     138 </span>            :             const data_buffer &amp;input() const;
+<span class="lineNum">     139 </span>            : 
+<span class="lineNum">     140 </span>            :             /*!
+<span class="lineNum">     141 </span>            :              * @returns true if the read buffer contains data
+<span class="lineNum">     142 </span>            :              */
+<span class="lineNum">     143 </span>            :             bool has_input() const;
+<span class="lineNum">     144 </span>            : 
+<span class="lineNum">     145 </span>            :             /*!
+<span class="lineNum">     146 </span>            :              * @returns the write buffer
+<span class="lineNum">     147 </span>            :              */
+<span class="lineNum">     148 </span>            :             const data_buffer &amp;output() const;
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span>            :             /*!
+<span class="lineNum">     151 </span>            :              * @returns true if the write buffer contains data
+<span class="lineNum">     152 </span>            :              */
+<span class="lineNum">     153 </span>            :             bool has_output() const;
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span>            :             /*!
+<span class="lineNum">     156 </span>            :              * Will write the buffer to the actual socket
+<span class="lineNum">     157 </span>            :              * @returns true if no errors occured
+<span class="lineNum">     158 </span>            :              */
+<span class="lineNum">     159 </span>            :             bool write_from_buffer();
+<span class="lineNum">     160 </span>            : 
+<span class="lineNum">     161 </span>            :             /*!
+<span class="lineNum">     162 </span>            :              * Appends some data to the write buffer
+<span class="lineNum">     163 </span>            :              */
+<span class="lineNum">     164 </span>            :             buffered_socket &amp;operator &lt;&lt; ( const std::string &amp;);
+<span class="lineNum">     165 </span>            : 
+<span class="lineNum">     166 </span>            :             /*!
+<span class="lineNum">     167 </span>            :              * Appends the read buffer to a string
+<span class="lineNum">     168 </span>            :              */
+<span class="lineNum">     169 </span>            :             buffered_socket &amp;operator &gt;&gt; ( std::string &amp;);
+<span class="lineNum">     170 </span>            : 
+<span class="lineNum">     171 </span>            :             /*!
+<span class="lineNum">     172 </span>            :              * Adds a listener to this socket
+<span class="lineNum">     173 </span>            :              */
+<span class="lineNum">     174 </span>            :             void add_listener(buffered_socket_listener *listener);
+<span class="lineNum">     175 </span>            : 
+<span class="lineNum">     176 </span>            :             /*!
+<span class="lineNum">     177 </span>            :              * Notifies listeners of a connection.  This must be called after
+<span class="lineNum">     178 </span>            :              * any listeners have been added.
+<span class="lineNum">     179 </span>            :              */
+<span class="lineNum">     180 </span>            :             void notify_connect();
+<span class="lineNum">     181 </span>            : 
+<span class="lineNum">     182 </span>            :         protected:
+<span class="lineNum">     183 </span>            : 
+<span class="lineNum">     184 </span>            :             /* These can be overrided, instead of adding a listener*/
+<span class="lineNum">     185 </span>            :             virtual void on_will_read();
+<span class="lineNum">     186 </span>            :             virtual void on_did_read();
+<span class="lineNum">     187 </span>            :             virtual void on_will_write();
+<span class="lineNum">     188 </span>            :             virtual void on_did_write();
+<span class="lineNum">     189 </span>            :             virtual void on_connect();
+<span class="lineNum">     190 </span>            :             virtual void on_close();
+<span class="lineNum">     191 </span>            : 
+<span class="lineNum">     192 </span>            :             /* the actual buffers */
+<span class="lineNum">     193 </span>            :             data_buffer inBuffer_;
+<span class="lineNum">     194 </span>            :             data_buffer outBuffer_;
+<span class="lineNum">     195 </span>            :         private:
+<span class="lineNum">     196 </span>            : 
+<span class="lineNum">     197 </span>            :             /*!
+<span class="lineNum">     198 </span>            :              * Sends the write buffer to the socket
+<span class="lineNum">     199 </span>            :              */
+<span class="lineNum">     200 </span>            :             void flush();
+<span class="lineNum">     201 </span>            : 
+<span class="lineNum">     202 </span>            :             void notify_will_read();
+<span class="lineNum">     203 </span>            : 
+<span class="lineNum">     204 </span>            :             void notify_did_read();
+<span class="lineNum">     205 </span>            : 
+<span class="lineNum">     206 </span>            :             void notify_will_write();
+<span class="lineNum">     207 </span>            : 
+<span class="lineNum">     208 </span>            :             void notify_did_write();
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            :             void notify_close();
+<span class="lineNum">     211 </span>            : 
+<span class="lineNum">     212 </span>            :             bool read_chunk(data_buffer &amp;chunk);
+<span class="lineNum">     213 </span>            : 
+<span class="lineNum">     214 </span>            :             vector&lt;buffered_socket_listener *&gt; listeners_;
+<span class="lineNum">     215 </span>            :         };
+<span class="lineNum">     216 </span>            :     }
+<span class="lineNum">     217 </span>            : }
+<span class="lineNum">     218 </span>            : 
+<span class="lineNum">     219 </span>            : #endif
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.12</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

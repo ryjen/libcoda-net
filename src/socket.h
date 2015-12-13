@@ -24,8 +24,7 @@ namespace arg3
 {
     namespace net
     {
-
-#ifdef WIN32
+#ifdef _WIN32
         typedef int socklen_t;
 #else
         typedef int SOCKET;
@@ -39,7 +38,7 @@ namespace arg3
          */
         class socket
         {
-        public:
+           public:
             /*!
              * the base data type for sockets
              */
@@ -73,7 +72,7 @@ namespace arg3
             /*!
              * move constructor
              */
-            socket (socket &&other);
+            socket(socket &&other);
 
             /*!
              * destructor will close the socket RAII style
@@ -88,7 +87,7 @@ namespace arg3
             /*!
              * Move assignment operator
              */
-            socket &operator=(socket && );
+            socket &operator=(socket &&);
 
             // Data Transimission
 
@@ -96,13 +95,13 @@ namespace arg3
              * Will write a block of data to the socket
              * @return the number of bytes written
              */
-            virtual int send ( const data_buffer &, int flags = 0 );
+            virtual int send(const data_buffer &, int flags = 0);
 
             /*!
              * Will write a block of data to the socket
              * @return the number of bytes written
              */
-            virtual int send ( void *, size_t, int flags = 0);
+            virtual int send(void *, size_t, int flags = 0);
 
             /*!
              * Recieves a block of input
@@ -118,12 +117,12 @@ namespace arg3
             /*!
              * Writes a data buffer to the socket
              */
-            socket &operator << ( const data_buffer &);
+            socket &operator<<(const data_buffer &);
 
             /*!
              * Reads data from the socket into a data buffer
              */
-            socket &operator >> ( data_buffer &);
+            socket &operator>>(data_buffer &);
 
             /*!
              * @returns the raw socket
@@ -149,7 +148,7 @@ namespace arg3
             /*!
              * Client initialization, connects to a host and port
              */
-            virtual bool connect ( const std::string &host, const int port );
+            virtual bool connect(const std::string &host, const int port);
 
             /*!
              * Accepts a socket
@@ -166,7 +165,7 @@ namespace arg3
             /*!
              * sets the socket in blocking or non blocking mode
              */
-            void set_non_blocking ( const bool );
+            void set_non_blocking(const bool);
 
             bool is_non_blocking() const;
 
@@ -174,8 +173,7 @@ namespace arg3
 
             bool is_secure() const;
 
-        protected:
-
+           protected:
             static const int MAXHOSTNAME = 200;
             static const int MAXRECV = 500;
             static const int INVALID = -1;
@@ -191,8 +189,7 @@ namespace arg3
 
             struct ssl_socket *ssl_;
 
-        private:
-
+           private:
             bool non_blocking_;
 
             friend class socket_server;

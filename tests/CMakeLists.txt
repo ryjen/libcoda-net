@@ -1,8 +1,8 @@
 
 add_executable(${PROJECT_NAME}_test arg3.test.cpp http_client.test.cpp telnet_socket.test.cpp )
 
-include_directories(SYSTEM vendor/bandit ${PROJECT_SOURCE_DIR}/src ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+include_directories(SYSTEM vendor/bandit ${PROJECT_SOURCE_DIR}/src)
 
-target_link_libraries (${PROJECT_NAME}_test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (${PROJECT_NAME}_test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
 
 
