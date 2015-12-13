@@ -8,8 +8,7 @@ namespace arg3
 {
     namespace net
     {
-
-        static const socket::data_buffer NEWLINE = { '\r', '\n' };
+        static const socket::data_buffer NEWLINE = {'\r', '\n'};
 
         buffered_socket::buffered_socket() : socket()
         {
@@ -23,8 +22,11 @@ namespace arg3
         {
         }
 
-        buffered_socket::buffered_socket(buffered_socket &&other) : socket(std::move(other)), inBuffer_(std::move(other.inBuffer_)),
-            outBuffer_(std::move(other.outBuffer_)), listeners_(std::move(other.listeners_))
+        buffered_socket::buffered_socket(buffered_socket &&other)
+            : socket(std::move(other)),
+              inBuffer_(std::move(other.inBuffer_)),
+              outBuffer_(std::move(other.outBuffer_)),
+              listeners_(std::move(other.listeners_))
         {
         }
 
@@ -32,7 +34,7 @@ namespace arg3
         {
         }
 
-        buffered_socket &buffered_socket::operator=(buffered_socket && other)
+        buffered_socket &buffered_socket::operator=(buffered_socket &&other)
         {
             socket::operator=(std::move(other));
 
@@ -53,8 +55,7 @@ namespace arg3
          */
         bool buffered_socket::connect(const string &host, const int port)
         {
-            if (socket::connect(host, port))
-            {
+            if (socket::connect(host, port)) {
                 notify_connect();
                 return true;
             }
@@ -62,28 +63,27 @@ namespace arg3
         }
 
 
-        bool buffered_socket::read_chunk(data_buffer &chunk) {
+        bool buffered_socket::read_chunk(data_buffer &chunk)
+        {
+            int status = socket::recv(chunk);
 
-          int status = socket::recv(chunk);
+            if (status < 0) {
+                if (errno == EINTR) {
+                    return false; /* perfectly normal */
+                }
 
-          if (status < 0) {
-              if (errno == EINTR) {
-                  return false; /* perfectly normal */
-              }
+                if (errno == EAGAIN) {
+                    return false;
+                }
 
-              if (errno == EAGAIN) {
-                  return false;
-              }
+                if (errno == EWOULDBLOCK) {
+                    return false;
+                }
 
-              if (errno == EWOULDBLOCK) {
-                return false;
-              }
+                throw socket_exception(strerror(errno));
+            }
 
-              throw socket_exception(strerror(errno));
-          }
-
-          return status > 0;
-
+            return status > 0;
         }
 
         //! reads from the socket into an internal input buffer
@@ -97,21 +97,19 @@ namespace arg3
             notify_will_read();
 
             try {
-              if (!read_chunk(chunk)) {
-                return true;
-              }
+                if (!read_chunk(chunk)) {
+                    return true;
+                }
 
-              // while not an error or the peer connection was closed
-              do
-              {
-                  inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
+                // while not an error or the peer connection was closed
+                do {
+                    inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
 
-              } while(read_chunk(chunk));
+                } while (read_chunk(chunk));
 
-              notify_did_read();
-            }
-            catch(const socket_exception &e) {
-              return false;
+                notify_did_read();
+            } catch (const socket_exception &e) {
+                return false;
             }
 
             return true;
@@ -128,8 +126,7 @@ namespace arg3
             /* find a new line  */
             auto pos = find_first_of(inBuffer_.begin(), inBuffer_.end(), NEWLINE.begin(), NEWLINE.end());
 
-            if (pos == inBuffer_.end())
-            {
+            if (pos == inBuffer_.end()) {
                 string temp(inBuffer_.begin(), inBuffer_.end());
 
                 inBuffer_.clear();
@@ -140,8 +137,7 @@ namespace arg3
             string temp(inBuffer_.begin(), pos);
 
             /* Skip all new line characters, squelching blank lines */
-            while (pos != inBuffer_.end() && find(NEWLINE.begin(), NEWLINE.end(), *pos) != NEWLINE.end())
-            {
+            while (pos != inBuffer_.end() && find(NEWLINE.begin(), NEWLINE.end(), *pos) != NEWLINE.end()) {
                 pos++;
             }
 
@@ -197,13 +193,13 @@ namespace arg3
         }
 
         //!  append to the output buffer operator
-        buffered_socket &buffered_socket::operator << ( const string &s )
+        buffered_socket &buffered_socket::operator<<(const string &s)
         {
             return write(s);
         }
 
         //! read from the input buffer operator
-        buffered_socket &buffered_socket::operator >> ( string &s )
+        buffered_socket &buffered_socket::operator>>(string &s)
         {
             s.append(inBuffer_.begin(), inBuffer_.end());
 
@@ -222,8 +218,7 @@ namespace arg3
          */
         void buffered_socket::close()
         {
-            if (is_valid())
-            {
+            if (is_valid()) {
                 notify_close();
 
                 flush();
@@ -241,8 +236,7 @@ namespace arg3
 
             notify_will_write();
 
-            if (send(outBuffer_) != static_cast<int>(outBuffer_.size()))
-            {
+            if (send(outBuffer_) != static_cast<int>(outBuffer_.size())) {
                 return false;
             }
 
@@ -256,19 +250,30 @@ namespace arg3
         /*!
          * default implementations do nothing
          */
-        void buffered_socket::on_connect() {}
-        void buffered_socket::on_close() {}
-        void buffered_socket::on_will_read() {}
-        void buffered_socket::on_did_read() {}
-        void buffered_socket::on_will_write() {}
-        void buffered_socket::on_did_write() {}
+        void buffered_socket::on_connect()
+        {
+        }
+        void buffered_socket::on_close()
+        {
+        }
+        void buffered_socket::on_will_read()
+        {
+        }
+        void buffered_socket::on_did_read()
+        {
+        }
+        void buffered_socket::on_will_write()
+        {
+        }
+        void buffered_socket::on_did_write()
+        {
+        }
 
 
         //! add a listener to the socket
         void buffered_socket::add_listener(buffered_socket_listener *listener)
         {
-            if (listener != NULL &&
-                find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
+            if (listener != NULL && find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
             }
         }
@@ -277,8 +282,7 @@ namespace arg3
         {
             on_connect();
 
-            for (const auto &l : listeners_)
-            {
+            for (const auto &l : listeners_) {
                 l->on_connect(this);
             }
         }
@@ -287,8 +291,7 @@ namespace arg3
         {
             on_will_read();
 
-            for (const auto &l : listeners_)
-            {
+            for (const auto &l : listeners_) {
                 l->on_will_read(this);
             }
         }
@@ -297,8 +300,7 @@ namespace arg3
         {
             on_did_read();
 
-            for (const auto &l : listeners_)
-            {
+            for (const auto &l : listeners_) {
                 l->on_did_read(this);
             }
         }
@@ -307,8 +309,7 @@ namespace arg3
         {
             on_will_write();
 
-            for (const auto &l : listeners_)
-            {
+            for (const auto &l : listeners_) {
                 l->on_will_write(this);
             }
         }
@@ -317,8 +318,7 @@ namespace arg3
         {
             on_did_write();
 
-            for (const auto &l : listeners_)
-            {
+            for (const auto &l : listeners_) {
                 l->on_did_write(this);
             }
         }
@@ -327,11 +327,9 @@ namespace arg3
         {
             on_close();
 
-            for (const auto &l : listeners_)
-            {
+            for (const auto &l : listeners_) {
                 l->on_close(this);
             }
         }
-
     }
 }

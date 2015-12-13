@@ -9,7 +9,6 @@ using namespace std;
 
 namespace arg3
 {
-
     namespace net
     {
         class buffered_socket;
@@ -19,7 +18,7 @@ namespace arg3
          */
         class buffered_socket_listener
         {
-        public:
+           public:
             /*!
              * Runs just before a read
              */
@@ -56,7 +55,7 @@ namespace arg3
          */
         class buffered_socket : public socket
         {
-        public:
+           public:
             /*!
              * Default constructor accepts a raw socket and its address
              */
@@ -89,7 +88,7 @@ namespace arg3
             /*!
              * Move assigment
              */
-            buffered_socket &operator=(buffered_socket && other);
+            buffered_socket &operator=(buffered_socket &&other);
 
             /*!
              * Will close the raw socket
@@ -99,7 +98,7 @@ namespace arg3
             /*!
              * Client initialization, connects to a host and port
              */
-            virtual bool connect ( const std::string &host, const int port );
+            virtual bool connect(const std::string &host, const int port);
 
             /*!
              * Reads data from the socket into the read buffer
@@ -161,12 +160,12 @@ namespace arg3
             /*!
              * Appends some data to the write buffer
              */
-            buffered_socket &operator << ( const std::string &);
+            buffered_socket &operator<<(const std::string &);
 
             /*!
              * Appends the read buffer to a string
              */
-            buffered_socket &operator >> ( std::string &);
+            buffered_socket &operator>>(std::string &);
 
             /*!
              * Adds a listener to this socket
@@ -179,8 +178,7 @@ namespace arg3
              */
             void notify_connect();
 
-        protected:
-
+           protected:
             /* These can be overrided, instead of adding a listener*/
             virtual void on_will_read();
             virtual void on_did_read();
@@ -192,8 +190,8 @@ namespace arg3
             /* the actual buffers */
             data_buffer inBuffer_;
             data_buffer outBuffer_;
-        private:
 
+           private:
             /*!
              * Sends the write buffer to the socket
              */

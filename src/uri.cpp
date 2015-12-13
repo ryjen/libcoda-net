@@ -5,14 +5,12 @@ namespace arg3
 {
     namespace net
     {
-
-        uri::uri(std::string uri)
-            : uri_(uri)
+        uri::uri(std::string uri) : uri_(uri)
         {
 #ifdef HAVE_LIBURIPARSER
             UriParserStateA state_;
             state_.uri = &uriParse_;
-            isValid_   = uriParseUriA(&state_, uri_.c_str()) == URI_SUCCESS;
+            isValid_ = uriParseUriA(&state_, uri_.c_str()) == URI_SUCCESS;
 #else
             isValid_ = false;
             throw std::runtime_error("uriparser library not enabled.");
@@ -31,7 +29,7 @@ namespace arg3
             return isValid_;
         }
 
-        std::string uri::scheme()   const
+        std::string uri::scheme() const
         {
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.scheme);
@@ -39,7 +37,7 @@ namespace arg3
             throw std::runtime_error("uriparser library not enabled.");
 #endif
         }
-        std::string uri::host()     const
+        std::string uri::host() const
         {
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.hostText);
@@ -47,7 +45,7 @@ namespace arg3
             throw std::runtime_error("uriparser library not enabled.");
 #endif
         }
-        std::string uri::port()     const
+        std::string uri::port() const
         {
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.portText);
@@ -55,7 +53,7 @@ namespace arg3
             throw std::runtime_error("uriparser library not enabled.");
 #endif
         }
-        std::string uri::path()     const
+        std::string uri::path() const
         {
 #ifdef HAVE_LIBURIPARSER
             return fromList(uriParse_.pathHead, "/");
@@ -63,7 +61,7 @@ namespace arg3
             throw std::runtime_error("uriparser library not enabled.");
 #endif
         }
-        std::string uri::query()    const
+        std::string uri::query() const
         {
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.query);
@@ -82,7 +80,6 @@ namespace arg3
 #ifdef HAVE_LIBURIPARSER
         std::string uri::fromRange(const UriTextRangeA &rng) const
         {
-
             return std::string(rng.first, rng.afterLast);
         }
 
@@ -91,8 +88,7 @@ namespace arg3
             UriPathSegmentStructA *head(xs);
             std::string accum;
 
-            while (head)
-            {
+            while (head) {
                 accum += delim + fromRange(head->text);
                 head = head->next;
             }

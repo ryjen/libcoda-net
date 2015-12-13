@@ -15,8 +15,11 @@ namespace arg3
         }
 
         socket_server::socket_server(socket_server &&other)
-            : socket(std::move(other)), pollFrequency_(other.pollFrequency_), factory_(other.factory_),
-              backgroundThread_(std::move(other.backgroundThread_)), sockets_(std::move(other.sockets_)),
+            : socket(std::move(other)),
+              pollFrequency_(other.pollFrequency_),
+              factory_(other.factory_),
+              backgroundThread_(std::move(other.backgroundThread_)),
+              sockets_(std::move(other.sockets_)),
               listeners_(std::move(other.listeners_))
         {
             // invalidate the moved instance
@@ -30,7 +33,7 @@ namespace arg3
             stop();
         }
 
-        socket_server &socket_server::operator=(socket_server && other)
+        socket_server &socket_server::operator=(socket_server &&other)
         {
             socket::operator=(std::move(other));
 
@@ -82,10 +85,8 @@ namespace arg3
                 sockets_.clear();
             }
 
-            if (backgroundThread_ != nullptr)
-            {
-                if (backgroundThread_->joinable())
-                    backgroundThread_->join();
+            if (backgroundThread_ != nullptr) {
+                if (backgroundThread_->joinable()) backgroundThread_->join();
 
                 backgroundThread_ = nullptr;
             }
@@ -95,8 +96,7 @@ namespace arg3
         {
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            if (listener != NULL && 
-                find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
+            if (listener != NULL && find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
             }
         }
@@ -112,8 +112,7 @@ namespace arg3
 
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (const auto &listener : listeners_)
-            {
+            for (const auto &listener : listeners_) {
                 listener->on_poll(this);
             }
         }
@@ -124,8 +123,7 @@ namespace arg3
 
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (const auto &listener : listeners_)
-            {
+            for (const auto &listener : listeners_) {
                 listener->on_start(this);
             }
         }
@@ -136,8 +134,7 @@ namespace arg3
 
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
-            for (const auto &listener : listeners_)
-            {
+            for (const auto &listener : listeners_) {
                 listener->on_stop(this);
             }
         }
@@ -146,8 +143,7 @@ namespace arg3
         {
             bool success = socket::listen(port, backlogSize);
 
-            if (success)
-            {
+            if (success) {
                 notify_start();
             }
 
@@ -156,14 +152,11 @@ namespace arg3
 
         void socket_server::start_in_background(int port, int backlogSize)
         {
-
-            if (is_valid())
-            {
+            if (is_valid()) {
                 throw socket_exception("server already started");
             }
 
-            if (!listen(port, backlogSize))
-            {
+            if (!listen(port, backlogSize)) {
                 throw socket_exception("unable to listen on port");
             }
 
@@ -174,13 +167,11 @@ namespace arg3
 
         void socket_server::start(int port, int backlogSize)
         {
-            if (is_valid())
-            {
+            if (is_valid()) {
                 throw socket_exception("server already started");
             }
 
-            if (!listen(port, backlogSize))
-            {
+            if (!listen(port, backlogSize)) {
                 throw socket_exception("unable to listen on port");
             }
 
@@ -190,13 +181,16 @@ namespace arg3
         }
 
         void socket_server::on_poll()
-        {}
+        {
+        }
 
         void socket_server::on_start()
-        {}
+        {
+        }
 
         void socket_server::on_stop()
-        {}
+        {
+        }
 
         void socket_server::check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate)
         {
@@ -214,8 +208,7 @@ namespace arg3
             fd_set in_set, out_set, err_set;
             int maxdesc = sock_;
 
-            if (!is_valid())
-                return;
+            if (!is_valid()) return;
 
             FD_ZERO(&in_set);
             FD_ZERO(&out_set);
@@ -223,8 +216,7 @@ namespace arg3
             FD_SET(sock_, &in_set);
 
             // prepare for sockets for polling
-            check_connections([&](const std::shared_ptr<buffered_socket> &c)
-            {
+            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
                 if (!c || !c->is_valid()) return true;
 
                 maxdesc = std::max(maxdesc, c->sock_);
@@ -235,17 +227,14 @@ namespace arg3
             });
 
             // poll
-            if (select(maxdesc + 1, &in_set, &out_set, &err_set, &null_time) < 0)
-            {
-                if (errno != EINTR)
-                {
+            if (select(maxdesc + 1, &in_set, &out_set, &err_set, &null_time) < 0) {
+                if (errno != EINTR) {
                     throw socket_exception(strerror(errno));
                 }
             }
 
             // check for new connection
-            if (FD_ISSET(sock_, &in_set))
-            {
+            if (FD_ISSET(sock_, &in_set)) {
                 sockaddr_storage addr;
 
                 auto sock = factory_->create_socket(this, accept(addr), addr);
@@ -260,12 +249,10 @@ namespace arg3
             }
 
             /* check for freaky connections */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c)
-            {
+            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
                 if (!c->is_valid()) return true;
 
-                if (FD_ISSET(c->sock_, &err_set))
-                {
+                if (FD_ISSET(c->sock_, &err_set)) {
                     FD_CLR(c->sock_, &in_set);
                     FD_CLR(c->sock_, &out_set);
 
@@ -277,14 +264,11 @@ namespace arg3
             });
 
             /* read from all readable connections, removing failed sockets */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c)
-            {
+            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
                 if (!c->is_valid()) return true;
 
-                if (FD_ISSET(c->sock_, &in_set))
-                {
-                    if (!c->read_to_buffer())
-                    {
+                if (FD_ISSET(c->sock_, &in_set)) {
+                    if (!c->read_to_buffer()) {
                         FD_CLR(c->sock_, &out_set);
 
                         c->close();
@@ -299,16 +283,12 @@ namespace arg3
             notify_poll();
 
             /* write to all writable connections, removing failed sockets */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c)
-            {
+            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
                 if (!c->is_valid()) return true;
 
-                if (FD_ISSET(c->sock_, &out_set))
-                {
-                    if (c->has_output())
-                    {
-                        if (!c->write_from_buffer())
-                        {
+                if (FD_ISSET(c->sock_, &out_set)) {
+                    if (c->has_output()) {
+                        if (!c->write_from_buffer()) {
                             c->close();
 
                             return true;
@@ -319,7 +299,8 @@ namespace arg3
             });
         }
 
-        void socket_server::wait_for_poll(struct timeval *last_time) {
+        void socket_server::wait_for_poll(struct timeval *last_time)
+        {
             struct timeval now_time;
             long secDelta;
             long usecDelta;
@@ -330,34 +311,29 @@ namespace arg3
 
             gettimeofday(&now_time, NULL);
 
-            usecDelta = ((int) last_time->tv_usec) - ((int) now_time.tv_usec) + 1000000 / pollFrequency_;
-            secDelta = ((int) last_time->tv_sec) - ((int) now_time.tv_sec);
+            usecDelta = ((int)last_time->tv_usec) - ((int)now_time.tv_usec) + 1000000 / pollFrequency_;
+            secDelta = ((int)last_time->tv_sec) - ((int)now_time.tv_sec);
 
-            while (usecDelta < 0)
-            {
+            while (usecDelta < 0) {
                 usecDelta += 1000000;
                 secDelta -= 1;
             }
 
-            while (usecDelta >= 1000000)
-            {
+            while (usecDelta >= 1000000) {
                 usecDelta -= 1000000;
                 secDelta += 1;
             }
 
             // check if server should stall for a moment based on poll frequency
-            if (secDelta > 0 || (secDelta == 0 && usecDelta > 0))
-            {
+            if (secDelta > 0 || (secDelta == 0 && usecDelta > 0)) {
                 struct timeval stall_time;
 
                 stall_time.tv_usec = usecDelta;
                 stall_time.tv_sec = secDelta;
 
-                if (select(0, NULL, NULL, NULL, &stall_time) == -1)
-                {
+                if (select(0, NULL, NULL, NULL, &stall_time) == -1) {
                     throw socket_exception(strerror(errno));
                 }
-
             }
 
             gettimeofday(last_time, NULL);
@@ -371,8 +347,7 @@ namespace arg3
 
             assert(sockets_.empty());
 
-            while (is_valid())
-            {
+            while (is_valid()) {
                 if (pollFrequency_ > 0) {
                     wait_for_poll(&last_time);
                 }
@@ -382,4 +357,3 @@ namespace arg3
         }
     }
 }
-

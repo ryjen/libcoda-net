@@ -20,8 +20,7 @@ namespace arg3
          */
         class socket_server_listener
         {
-        public:
-
+           public:
             /*!
              * called when the server has polled its connections
              */
@@ -44,7 +43,7 @@ namespace arg3
          */
         class socket_server : public socket
         {
-        public:
+           public:
             /*!
              * default constructor
              * @factory the factory to create sockets with
@@ -74,7 +73,7 @@ namespace arg3
             /*!
              * move assignment operator
              */
-            socket_server &operator=(socket_server && other);
+            socket_server &operator=(socket_server &&other);
 
             bool is_valid() const;
 
@@ -119,8 +118,7 @@ namespace arg3
 
             void set_socket_factory(socket_factory *factory);
 
-        protected:
-
+           protected:
             /*!
              * starts a syncronous loop of updating connections
              */
@@ -133,15 +131,14 @@ namespace arg3
             virtual void on_start();
             virtual void on_stop();
 
-        private:
-
+           private:
             /*!
              * Will loop each connection and if the delegate returns false, will remove the connection
              */
             void check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate);
 
             void wait_for_poll(struct timeval *);
-            
+
             void notify_poll();
 
             void notify_start();
@@ -160,10 +157,8 @@ namespace arg3
 
             mutex sockets_mutex_;
             mutex listeners_mutex_;
-
         };
     }
 }
 
 #endif
-

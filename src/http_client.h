@@ -17,14 +17,14 @@ namespace arg3
     {
         class http_transfer
         {
-        public:
+           public:
             http_transfer();
             http_transfer(const http_transfer &);
             http_transfer(http_transfer &&);
             virtual ~http_transfer();
 
             http_transfer &operator=(const http_transfer &);
-            http_transfer &operator=(http_transfer && other);
+            http_transfer &operator=(http_transfer &&other);
 
             /*!
              * the post data usually
@@ -42,7 +42,7 @@ namespace arg3
 
             const map<string, string> headers() const;
 
-        protected:
+           protected:
             string payload_;
             map<string, string> headers_;
             string version_;
@@ -50,7 +50,7 @@ namespace arg3
 
         class http_response : public http_transfer
         {
-        public:
+           public:
             http_response();
             http_response(const string &);
             http_response(const http_response &);
@@ -58,7 +58,7 @@ namespace arg3
             virtual ~http_response();
 
             http_response &operator=(const http_response &);
-            http_response &operator=(http_response && other);
+            http_response &operator=(http_response &&other);
 
             string full_response() const;
 
@@ -69,7 +69,7 @@ namespace arg3
              */
             int code() const;
 
-        private:
+           private:
             void clear();
 
             void parse();
@@ -84,14 +84,14 @@ namespace arg3
 
         class http_client : public http_transfer
         {
-        public:
+           public:
             http_client(const string &host);
             http_client();
             virtual ~http_client();
             http_client(const http_client &other);
             http_client(http_client &&other);
             http_client &operator=(const http_client &other);
-            http_client &operator=(http_client && other);
+            http_client &operator=(http_client &&other);
 
             /*!
              * adds an HTTP header to the request
@@ -158,8 +158,7 @@ namespace arg3
              */
             http_client &set_secure(bool value);
 
-        private:
-
+           private:
 #ifdef HAVE_LIBCURL
             void request_curl(http::method method, const string &path);
 #else
