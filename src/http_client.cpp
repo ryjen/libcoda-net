@@ -9,7 +9,7 @@
 #ifndef HAVE_LIBCURL
 #include "buffered_socket.h"
 #else
-#include <cstring>
+#include <strings.h>
 #endif
 
 namespace arg3
@@ -40,25 +40,29 @@ namespace arg3
 
         size_t skip_newline(const string &s, size_t pos)
         {
-            for (int i = 0; i < 2; i++, pos++)
-            {
-                if (s[pos] != '\r' && s[pos] != '\n')
-                    break;
+            for (int i = 0; i < 2; i++, pos++) {
+                if (s[pos] != '\r' && s[pos] != '\n') break;
             }
 
             return pos;
         }
 
-        http_transfer::http_transfer() : version_(http::VERSION_1_1) {}
+        http_transfer::http_transfer() : version_(http::VERSION_1_1)
+        {
+        }
 
         http_transfer::http_transfer(const http_transfer &other) : payload_(other.payload_), headers_(other.headers_), version_(other.version_)
-        {}
+        {
+        }
 
-        http_transfer::http_transfer(http_transfer &&other) : payload_(std::move(other.payload_)),
-            headers_(std::move(other.headers_)), version_(std::move(other.version_))
-        {}
+        http_transfer::http_transfer(http_transfer &&other)
+            : payload_(std::move(other.payload_)), headers_(std::move(other.headers_)), version_(std::move(other.version_))
+        {
+        }
 
-        http_transfer::~http_transfer() {}
+        http_transfer::~http_transfer()
+        {
+        }
 
         http_transfer &http_transfer::operator=(const http_transfer &other)
         {
@@ -68,7 +72,7 @@ namespace arg3
             return *this;
         }
 
-        http_transfer &http_transfer::operator=(http_transfer && other)
+        http_transfer &http_transfer::operator=(http_transfer &&other)
         {
             payload_ = std::move(other.payload_);
             headers_ = std::move(other.headers_);
@@ -102,22 +106,27 @@ namespace arg3
         }
 
         http_response::http_response() : responseCode_(0)
-        {}
+        {
+        }
 
         http_response::http_response(const string &fullResponse) : response_(fullResponse), responseCode_(0)
         {
             parse();
         }
 
-        http_response::http_response(const http_response &other) : http_transfer(other), response_(other.response_),
-            responseCode_(other.responseCode_)
-        {}
+        http_response::http_response(const http_response &other)
+            : http_transfer(other), response_(other.response_), responseCode_(other.responseCode_)
+        {
+        }
 
-        http_response::http_response(http_response &&other) : http_transfer(std::move(other)), response_(std::move(other.response_)),
-            responseCode_(std::move(other.responseCode_))
-        {}
+        http_response::http_response(http_response &&other)
+            : http_transfer(std::move(other)), response_(std::move(other.response_)), responseCode_(std::move(other.responseCode_))
+        {
+        }
 
-        http_response::~http_response() {}
+        http_response::~http_response()
+        {
+        }
 
         http_response &http_response::operator=(const http_response &other)
         {
@@ -130,7 +139,7 @@ namespace arg3
             return *this;
         }
 
-        http_response &http_response::operator=(http_response && other)
+        http_response &http_response::operator=(http_response &&other)
         {
             http_transfer::operator=(std::move(other));
 
@@ -169,15 +178,13 @@ namespace arg3
             responseCode_ = 0;
             headers_.clear();
             payload_.clear();
-
         }
 
         void http_response::parse()
         {
             auto pos = response_.find("\r\n");
 
-            if (pos == string::npos)
-            {
+            if (pos == string::npos) {
                 payload_ = response_;
                 return;
             }
@@ -188,8 +195,7 @@ namespace arg3
 
             char version[http::MAX_URL_LEN + 1] = {0};
 
-            if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, version, &responseCode_, buf) != 3)
-            {
+            if (sscanf(line.c_str(), http::RESPONSE_PREAMBLE, version, &responseCode_, buf) != 3) {
                 payload_ = response_;
                 return;
             }
@@ -198,8 +204,7 @@ namespace arg3
 
             pos = skip_newline(response_, pos);
 
-            while (!line.empty())
-            {
+            while (!line.empty()) {
                 auto next = response_.find("\r\n", pos);
 
                 if (next == string::npos) break;
@@ -208,8 +213,7 @@ namespace arg3
 
                 auto sep = line.find(':');
 
-                if (sep != string::npos)
-                {
+                if (sep != string::npos) {
                     auto key = line.substr(0, sep);
 
                     auto value = line.substr(sep + 2);
@@ -220,8 +224,7 @@ namespace arg3
                 pos = skip_newline(response_, next);
             }
 
-            if (pos != string::npos)
-                payload_ = response_.substr(pos);
+            if (pos != string::npos) payload_ = response_.substr(pos);
         }
 
 
@@ -239,13 +242,13 @@ namespace arg3
         {
         }
 
-        http_client::http_client(const http_client &other) : http_transfer(other), scheme_(other.scheme_), host_(other.host_),
-            response_(other.response_)
+        http_client::http_client(const http_client &other)
+            : http_transfer(other), scheme_(other.scheme_), host_(other.host_), response_(other.response_)
         {
         }
 
-        http_client::http_client(http_client &&other) : http_transfer(std::move(other)), scheme_(std::move(other.scheme_)), host_(std::move(other.host_)),
-            response_(std::move(other.response_))
+        http_client::http_client(http_client &&other)
+            : http_transfer(std::move(other)), scheme_(std::move(other.scheme_)), host_(std::move(other.host_)), response_(std::move(other.response_))
         {
         }
 
@@ -258,7 +261,7 @@ namespace arg3
             return *this;
         }
 
-        http_client &http_client::operator=(http_client && other)
+        http_client &http_client::operator=(http_client &&other)
         {
             http_transfer::operator=(std::move(other));
             scheme_ = std::move(other.scheme_);
@@ -314,15 +317,13 @@ namespace arg3
 #ifdef HAVE_LIBCURL
         void http_client::request_curl(http::method method, const string &path)
         {
-
             char buf[http::MAX_URL_LEN + 1] = {0};
 
             struct curl_slist *headers = NULL;
 
             CURL *curl_ = curl_easy_init();
 
-            if (curl_ == NULL)
-            {
+            if (curl_ == NULL) {
                 throw rest_exception("unable to initialize request");
             }
 
@@ -343,33 +344,29 @@ namespace arg3
             curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1L);
 #endif
 
-            switch (method)
-            {
-            case http::GET:
-                curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
-                break;
-            case http::POST:
-                curl_easy_setopt(curl_, CURLOPT_POST, 1L);
-                if (!payload_.empty())
-                {
-                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
-                }
-                break;
-            case http::PUT:
-                curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
-                if (!payload_.empty())
-                {
-                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
-                }
-            case http::DELETE:
-                curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);
-                break;
+            switch (method) {
+                case http::GET:
+                    curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
+                    break;
+                case http::POST:
+                    curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+                    if (!payload_.empty()) {
+                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                    }
+                    break;
+                case http::PUT:
+                    curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
+                    if (!payload_.empty()) {
+                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
+                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                    }
+                case http::DELETE:
+                    curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);
+                    break;
             }
 
-            for (auto &h : headers_)
-            {
+            for (auto &h : headers_) {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
                 headers = curl_slist_append(headers, buf);
@@ -381,14 +378,13 @@ namespace arg3
 
             CURLcode res = curl_easy_perform(curl_);
 
-            if (res != CURLE_OK)
-            {
+            if (res != CURLE_OK) {
                 curl_easy_cleanup(curl_);
 
                 throw rest_exception(curl_easy_strerror(res));
             }
 
-            curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &response_.responseCode_);
+            curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &response_.responseCode_);
 
             curl_easy_cleanup(curl_);
 
@@ -404,19 +400,14 @@ namespace arg3
             // create the socket based on hostname and port
             auto pos = host().find(':');
 
-            if (is_secure())
-                sock.set_secure(true);
+            if (is_secure()) sock.set_secure(true);
 
-            if (pos != string::npos)
-            {
+            if (pos != string::npos) {
                 string hostname = host().substr(0, pos);
                 int port = stoi(host().substr(pos + 1));
 
-                if (!sock.connect(hostname, port))
-                    throw socket_exception("unable to connect to " + host());
-            }
-            else
-            {
+                if (!sock.connect(hostname, port)) throw socket_exception("unable to connect to " + host());
+            } else {
                 if (!sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT))
                     throw socket_exception("unable to connect to " + host());
             }
@@ -432,38 +423,34 @@ namespace arg3
 
             sock.writeln(buf);
 
-            bool chunked = headers_.count(http::HEADER_TRANSFER_ENCODING) != 0 && !strcasecmp(headers_[http::HEADER_TRANSFER_ENCODING].c_str(), "chunked");
+            bool chunked =
+                headers_.count(http::HEADER_TRANSFER_ENCODING) != 0 && !strcasecmp(headers_[http::HEADER_TRANSFER_ENCODING].c_str(), "chunked");
 
             // specify the host
-            if (headers_.count(http::HEADER_HOST) == 0)
-            {
+            if (headers_.count(http::HEADER_HOST) == 0) {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", http::HEADER_HOST, host().c_str());
                 sock.writeln(buf);
             }
 
-            if (headers_.count(http::HEADER_ACCEPT) == 0)
-            {
+            if (headers_.count(http::HEADER_ACCEPT) == 0) {
                 snprintf(buf, http::MAX_URL_LEN, "%s: */*", http::HEADER_ACCEPT);
                 sock.writeln(buf);
             }
 
-            if (headers_.count(http::HEADER_CONNECTION) == 0)
-            {
+            if (headers_.count(http::HEADER_CONNECTION) == 0) {
                 snprintf(buf, http::MAX_URL_LEN, "%s: close", http::HEADER_CONNECTION);
                 sock.writeln(buf);
             }
 
             // add the headers
-            for (const auto &h : headers_)
-            {
+            for (const auto &h : headers_) {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %s", h.first.c_str(), h.second.c_str());
 
                 sock.writeln(buf);
             }
 
             // if we have a payload, add the size
-            if (!chunked && !payload_.empty())
-            {
+            if (!chunked && !payload_.empty()) {
                 snprintf(buf, http::MAX_URL_LEN, "%s: %zu", http::HEADER_CONTENT_SIZE, payload_.size());
 
                 sock.writeln(buf);
@@ -473,8 +460,7 @@ namespace arg3
             sock.writeln();
 
             // add the payload
-            if (!payload_.empty())
-            {
+            if (!payload_.empty()) {
                 sock.write(payload_);
             }
 
@@ -482,17 +468,15 @@ namespace arg3
             cout << string(sock.output().begin(), sock.output().end());
 #endif
 
-            if (!sock.write_from_buffer())
-                throw socket_exception("unable to write to socket");
+            if (!sock.write_from_buffer()) throw socket_exception("unable to write to socket");
 
-            if (!sock.read_to_buffer())
-                throw socket_exception("unable to read from socket");
+            if (!sock.read_to_buffer()) throw socket_exception("unable to read from socket");
 
             auto input = sock.input();
 
             response_.parse(string(input.begin(), input.end()));
 
-            //sock.close();
+            // sock.close();
         }
 #endif
 
@@ -500,8 +484,7 @@ namespace arg3
         {
             response_.clear();
 
-            if (host_.empty())
-                throw socket_exception("no host");
+            if (host_.empty()) throw socket_exception("no host");
 
 #ifdef HAVE_LIBCURL
             request_curl(method, path);
