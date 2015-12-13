@@ -2,8 +2,8 @@ sudo: false
 language: cpp
 before_script: 
   - git submodule update --init --recursive
-  - export CXX=`which g++-4.8`
-  - export CC=`which gcc-4.8`
+  - export CXX=`which g++-4.9`
+  - export CC=`which gcc-4.9`
   - mkdir build
   - gem install coveralls-lcov
 addons:
@@ -12,7 +12,7 @@ addons:
       - ubuntu-toolchain-r-test
       - george-edison55-precise-backports
     packages:
-      - g++-4.8      
+      - g++-4.9      
       - valgrind
       - cmake-data
       - cmake
