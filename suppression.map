@@ -1,6 +1,7 @@
 {
    ignore_libcrypto_conditional_jump_errors
-   Memcheck:Leak
+   Memcheck:Cond
    ...
-   obj:*/libcrypto.so.*
+   fun:ASN1_STRING_set
+   ...
 }
