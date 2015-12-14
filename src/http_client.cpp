@@ -375,6 +375,8 @@ namespace arg3
 
             curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
 
+            curl_slist_free_all(headers);
+
             curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.response_);
 
             CURLcode res = curl_easy_perform(curl_);
