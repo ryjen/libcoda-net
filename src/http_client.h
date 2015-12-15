@@ -158,6 +158,8 @@ namespace arg3
              */
             http_client &set_secure(bool value);
 
+            http_client &set_timeout(int value);
+
            private:
 #ifdef HAVE_LIBCURL
             void request_curl(http::method method, const string &path);
@@ -166,6 +168,7 @@ namespace arg3
 #endif
             string scheme_;
             string host_;
+            int timeout_;
             http_response response_;
         };
     }

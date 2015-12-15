@@ -21,21 +21,46 @@ namespace arg3
 
 #ifdef HAVE_LIBCURL
 
-        size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
+        namespace helper
         {
-            if (s == NULL) return 0;
+            size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
+            {
+                if (s == NULL) return 0;
 
-            const size_t new_len = size * nmemb;
+                const size_t new_len = size * nmemb;
 
-            char buf[new_len + 1];
+                char buf[new_len + 1];
 
-            memcpy(buf, ptr, size * nmemb);
+                memcpy(buf, ptr, size * nmemb);
 
-            buf[new_len] = '\0';
+                buf[new_len] = '\0';
 
-            s->append(buf);
+                s->append(buf);
 
-            return new_len;
+                return new_len;
+            }
+
+            void curl_set_opt_num(CURL *curl, CURLoption option, long number)
+            {
+                CURLcode code = curl_easy_setopt(curl, option, number);
+                if (code != CURLE_OK) {
+                    throw rest_exception(curl_easy_strerror(code));
+                }
+            }
+            void curl_set_opt(CURL *curl, CURLoption option, const void *value)
+            {
+                CURLcode code = curl_easy_setopt(curl, option, value);
+                if (code != CURLE_OK) {
+                    throw rest_exception(curl_easy_strerror(code));
+                }
+            }
+            void curl_set_opt_fun(CURL *curl, CURLoption option, size_t (*value)(void *, size_t, size_t, string *))
+            {
+                CURLcode code = curl_easy_setopt(curl, option, value);
+                if (code != CURLE_OK) {
+                    throw rest_exception(curl_easy_strerror(code));
+                }
+            }
         }
 #endif
 
@@ -229,12 +254,12 @@ namespace arg3
         }
 
 
-        http_client::http_client(const string &host) : scheme_(http::SCHEME), host_(host)
+        http_client::http_client(const string &host) : scheme_(http::SCHEME), host_(host), timeout_(20)
         {
             add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
         }
 
-        http_client::http_client()
+        http_client::http_client() : timeout_(20)
         {
             add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
         }
@@ -244,12 +269,16 @@ namespace arg3
         }
 
         http_client::http_client(const http_client &other)
-            : http_transfer(other), scheme_(other.scheme_), host_(other.host_), response_(other.response_)
+            : http_transfer(other), scheme_(other.scheme_), host_(other.host_), response_(other.response_), timeout_(other.timeout_)
         {
         }
 
         http_client::http_client(http_client &&other)
-            : http_transfer(std::move(other)), scheme_(std::move(other.scheme_)), host_(std::move(other.host_)), response_(std::move(other.response_))
+            : http_transfer(std::move(other)),
+              scheme_(std::move(other.scheme_)),
+              host_(std::move(other.host_)),
+              response_(std::move(other.response_)),
+              timeout_(other.timeout_)
         {
         }
 
@@ -259,6 +288,7 @@ namespace arg3
             scheme_ = other.scheme_;
             host_ = other.host_;
             headers_ = other.headers_;
+            timeout_ = other.timeout_;
             return *this;
         }
 
@@ -268,6 +298,7 @@ namespace arg3
             scheme_ = std::move(other.scheme_);
             host_ = std::move(other.host_);
             response_ = std::move(other.response_);
+            timeout_ = other.timeout_;
             return *this;
         }
 
@@ -315,16 +346,26 @@ namespace arg3
             return *this;
         }
 
+        http_client &http_client::set_timeout(int value)
+        {
+            timeout_ = value;
+            return *this;
+        }
+
 #ifdef HAVE_LIBCURL
         void http_client::request_curl(http::method method, const string &path)
         {
+            CURLcode code;
+
             char buf[http::MAX_URL_LEN + 1] = {0};
 
             struct curl_slist *headers = NULL;
 
-            CURL *curl_ = curl_easy_init();
+            CURL *curl = NULL;
 
-            if (curl_ == NULL) {
+            curl = curl_easy_init();
+
+            if (curl == NULL) {
                 throw rest_exception("unable to initialize request");
             }
 
@@ -335,35 +376,35 @@ namespace arg3
             else
                 snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", scheme_.c_str(), host_.c_str(), path.c_str());
 
-            curl_easy_setopt(curl_, CURLOPT_URL, buf);
+            helper::curl_set_opt(curl, CURLOPT_URL, buf);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curl_append_response_callback);
+            helper::curl_set_opt_fun(curl, CURLOPT_WRITEFUNCTION, helper::curl_append_response_callback);
 
-            curl_easy_setopt(curl_, CURLOPT_HEADER, 1L);
+            helper::curl_set_opt_num(curl, CURLOPT_HEADER, 1L);
 
 #ifdef DEBUG
-            curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1L);
+            helper::curl_set_opt_num(curl, CURLOPT_VERBOSE, 1L);
 #endif
 
             switch (method) {
                 case http::GET:
-                    curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
+                    helper::curl_set_opt_num(curl, CURLOPT_HTTPGET, 1L);
                     break;
                 case http::POST:
-                    curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+                    helper::curl_set_opt_num(curl, CURLOPT_POST, 1L);
                     if (!payload_.empty()) {
-                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                        helper::curl_set_opt(curl, CURLOPT_POSTFIELDS, payload_.c_str());
+                        helper::curl_set_opt_num(curl, CURLOPT_POSTFIELDSIZE, payload_.size());
                     }
                     break;
                 case http::PUT:
-                    curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
+                    helper::curl_set_opt_num(curl, CURLOPT_PUT, 1L);
                     if (!payload_.empty()) {
-                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, payload_.c_str());
-                        curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, payload_.size());
+                        helper::curl_set_opt(curl, CURLOPT_POSTFIELDS, payload_.c_str());
+                        helper::curl_set_opt_num(curl, CURLOPT_POSTFIELDSIZE, payload_.size());
                     }
                 case http::DELETE:
-                    curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);
+                    helper::curl_set_opt(curl, CURLOPT_CUSTOMREQUEST, http::method_names[http::DELETE]);
                     break;
             }
 
@@ -373,23 +414,25 @@ namespace arg3
                 headers = curl_slist_append(headers, buf);
             }
 
-            curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
+            helper::curl_set_opt(curl, CURLOPT_HTTPHEADER, headers);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_.response_);
+            helper::curl_set_opt_num(curl, CURLOPT_TIMEOUT, timeout_);
 
-            CURLcode res = curl_easy_perform(curl_);
+            helper::curl_set_opt(curl, CURLOPT_WRITEDATA, &response_.response_);
+
+            CURLcode res = curl_easy_perform(curl);
 
             curl_slist_free_all(headers);
 
             if (res != CURLE_OK) {
-                curl_easy_cleanup(curl_);
+                curl_easy_cleanup(curl);
 
                 throw rest_exception(curl_easy_strerror(res));
             }
 
-            curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &response_.responseCode_);
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_.responseCode_);
 
-            curl_easy_cleanup(curl_);
+            curl_easy_cleanup(curl);
 
             response_.parse();
         }
