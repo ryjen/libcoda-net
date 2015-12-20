@@ -4,7 +4,6 @@ libarg3net
 [![Build Status](http://img.shields.io/travis/deadcoda/arg3net.svg)](https://travis-ci.org/deadcoda/arg3net)
 [![Coverage Status](https://coveralls.io/repos/deadcoda/arg3net/badge.svg?branch=master&service=github)](https://coveralls.io/github/deadcoda/arg3net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://deadcoda.mit-license.org)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/05b15cb5df19490b9b779067cf3d648e)](https://www.codacy.com/app/c0der78/arg3net)
 
 A c++11 networking library.
 
@@ -26,7 +25,7 @@ for homebrew you can add the install prefix:
 
 ```bash
 mkdir release; cd release
-cmake $(brew diy --version=0.5.0) -DCMAKE_BUILD_TYPE=Release ..
+cmake $(cd..;brew diy --version=0.5.0) -DCMAKE_BUILD_TYPE=Release ..
 make
 make install
 brew link arg3net
