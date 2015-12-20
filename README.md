@@ -1,26 +1,43 @@
 libarg3net
 ==========
 
-[![Build Status](https://travis-ci.org/c0der78/arg3net.svg?branch=master)](https://travis-ci.org/c0der78/arg3net)
+[![Build Status](http://img.shields.io/travis/deadcoda/arg3net.svg)](https://travis-ci.org/deadcoda/arg3net)
+[![Coverage Status](https://coveralls.io/repos/deadcoda/arg3net/badge.svg?branch=master&service=github)](https://coveralls.io/github/deadcoda/arg3net?branch=master)
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://deadcoda.mit-license.org)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/05b15cb5df19490b9b779067cf3d648e)](https://www.codacy.com/app/c0der78/arg3net)
 
-useful code for network related activities
+A c++11 networking library.
 
-[View Testing Code Coverage](http://htmlpreview.github.com/?https://github.com/c0der78/arg3net/blob/master/coverage/index.html)
-
-A good working example is [Yahtsee](http://github.com/c0der78/yahtsee).
+A good working example is [Yahtsee](http://github.com/deadcoda/yahtsee).
 
 Building
 ========
 
-I use [autotools](http://en.wikipedia.org/wiki/GNU_build_system).
+You can use [cmake](https://cmake.org) to generate for the build system of your choice.
 
 ```bash
-autoreconf
-
-./configure
-
+mkdir debug; cd debug
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
+make test
 ```
+
+for homebrew you can add the install prefix:
+
+```bash
+mkdir release; cd release
+cmake $(brew diy --version=0.5.0) -DCMAKE_BUILD_TYPE=Release ..
+make
+make install
+brew link arg3net
+```
+
+options supported are:
+
+    -DCODE_COVERAGE=ON   :   enable code coverage using lcov
+    -DMEMORY_CHECK=ON    :   enable valgrind memory checking on tests
+    -DWITH_CURL=ON       :   enable curl usage for http client
+    -DWITH_SSL=ON        :   enable openssl usage for non-curl http client
 
 Examples
 ========
@@ -35,7 +52,7 @@ public:
     void on_will_read(buffered_socket *sock) 
     {
     	cout << "going to read from client socket" << endl;
-	}
+  	}
 
     void on_did_read(buffered_socket *sock) 
     {
@@ -79,10 +96,29 @@ public:
 	}
 };
 
-funky_factory funkyFactory;
+example_factory mySocketFactory;
 
-arg3::net::socket_server funky_server(1337, &funkyFactory);
+arg3::net::socket_server example_server(1337, &mySocketFactory);
 
-funky_server.start(); 
+example_server.start(); 
+```
+
+and the HTTP/Rest client looks like this:
+
+```c++
+
+http_client api("api.somehost.com");
+
+// get some resource
+api.get("version/resource/id");
+
+auto response = api.response();
+
+cout << response.code() << ": " << response << endl;
+
+// post some resource
+api.post("version/resource")
+
+// etc
 ```
 
