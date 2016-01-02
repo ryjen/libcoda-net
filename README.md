@@ -1,13 +1,13 @@
 libarg3net
 ==========
 
-[![Build Status](http://img.shields.io/travis/deadcoda/arg3net.svg)](https://travis-ci.org/deadcoda/arg3net)
-[![Coverage Status](https://coveralls.io/repos/deadcoda/arg3net/badge.svg?branch=master&service=github)](https://coveralls.io/github/deadcoda/arg3net?branch=master)
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://deadcoda.mit-license.org)
+[![Build Status](http://img.shields.io/travis/ryjen/arg3net.svg)](https://travis-ci.org/ryjen/arg3net)
+[![Coverage Status](https://coveralls.io/repos/ryjen/arg3net/badge.svg?branch=master&service=github)](https://coveralls.io/github/ryjen/arg3net?branch=master)
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
 
 A c++11 networking library.
 
-A good working example is [Yahtsee](http://github.com/deadcoda/yahtsee).
+A good working example is [Yahtsee](http://github.com/ryjen/yahtsee).
 
 Building
 ========
