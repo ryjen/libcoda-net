@@ -38,6 +38,22 @@ options supported are:
     -DWITH_CURL=ON       :   enable curl usage for http client
     -DWITH_SSL=ON        :   enable openssl usage for non-curl http client
 
+
+Servers
+=======
+
+The default **socket_server** is a blocking asynchronous server, thus client handlers should
+should run in a separate thread.
+
+***polling_socket_server*** is a non-blocking synchronous server that polls on a user defined interval.
+
+Sockets
+=======
+
+The **socket** class is a wrapper for system socket methods.  The **buffered_socket** adds a read and write buffer to the implementation.
+**telnet_socket** is an example implementation of a socket that implements [rfc 184](https://tools.ietf.org/html/rfc854).
+
+
 Examples
 ========
 
@@ -48,17 +64,17 @@ Examples
 class example_listener : public arg3::net::buffered_socket_listener
 {
 public:
-    void on_will_read(buffered_socket *sock) 
+    void on_will_read(buffered_socket *sock)
     {
     	cout << "going to read from client socket" << endl;
   	}
 
-    void on_did_read(buffered_socket *sock) 
+    void on_did_read(buffered_socket *sock)
     {
     	cout << "read from client socket" << endl;
     }
 
-    void on_will_write(buffered_socket *sock) 
+    void on_will_write(buffered_socket *sock)
     {
     	cout << "going to write to client socket" << endl;
     }
@@ -68,12 +84,12 @@ public:
     	cout << "wrote to client socket" << endl;
     }
 
-    void on_connect(buffered_socket *sock) 
+    void on_connect(buffered_socket *sock)
     {
     	cout << "client socket connected" << endl;
     }
 
-    void on_close(buffered_socket *sock) 
+    void on_close(buffered_socket *sock)
     {
     	cout << "client socket closed" << endl;
     }
@@ -85,7 +101,7 @@ private:
 	example_listener listener_;
 public:
     /* creates a client on a new connection and adds our listener */
-    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr) 
+    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr)
     {
     	auto connection = std::make_shared<buffered_socket>(sock, addr);
 
@@ -99,10 +115,13 @@ example_factory mySocketFactory;
 
 arg3::net::socket_server example_server(1337, &mySocketFactory);
 
-example_server.start(); 
+example_server.start();
 ```
 
-and the HTTP/Rest client looks like this:
+HTTP
+====
+
+**http_client** is a very basic implementation of a HTTP/Rest client:
 
 ```c++
 
@@ -120,4 +139,3 @@ api.post("version/resource")
 
 // etc
 ```
-
