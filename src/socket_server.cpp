@@ -1,8 +1,10 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include <algorithm>
+#endif
 #include <cstring>
 #include "socket_server.h"
 #include "exception.h"
+#include <algorithm>
 #include <cassert>
 
 namespace arg3
@@ -10,13 +12,12 @@ namespace arg3
     namespace net
     {
         socket_server::socket_server(socket_factory *factory)
-            : pollFrequency_(4), factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
+            : factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
         {
         }
 
         socket_server::socket_server(socket_server &&other)
             : socket(std::move(other)),
-              pollFrequency_(other.pollFrequency_),
               factory_(other.factory_),
               backgroundThread_(std::move(other.backgroundThread_)),
               sockets_(std::move(other.sockets_)),
@@ -36,8 +37,6 @@ namespace arg3
         socket_server &socket_server::operator=(socket_server &&other)
         {
             socket::operator=(std::move(other));
-
-            pollFrequency_ = other.pollFrequency_;
 
             factory_ = other.factory_;
 
@@ -106,17 +105,6 @@ namespace arg3
             factory_ = factory;
         }
 
-        void socket_server::notify_poll()
-        {
-            on_poll();
-
-            std::lock_guard<std::mutex> lock(listeners_mutex_);
-
-            for (const auto &listener : listeners_) {
-                listener->on_poll(this);
-            }
-        }
-
         void socket_server::notify_start()
         {
             on_start();
@@ -160,8 +148,6 @@ namespace arg3
                 throw socket_exception("unable to listen on port");
             }
 
-            set_non_blocking(true);
-
             backgroundThread_ = make_shared<thread>(&socket_server::run, this);
         }
 
@@ -174,8 +160,6 @@ namespace arg3
             if (!listen(port, backlogSize)) {
                 throw socket_exception("unable to listen on port");
             }
-
-            set_non_blocking(true);
 
             run();
         }
@@ -192,153 +176,6 @@ namespace arg3
         {
         }
 
-        void socket_server::check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate)
-        {
-            if (!is_valid()) return;
-
-            std::lock_guard<std::mutex> lock(sockets_mutex_);
-
-            sockets_.erase(std::remove_if(std::begin(sockets_), std::end(sockets_), delegate), std::end(sockets_));
-        }
-
-        void socket_server::poll()
-        {
-            static struct timeval null_time = {0};
-
-            fd_set in_set, out_set, err_set;
-            int maxdesc = sock_;
-
-            if (!is_valid()) return;
-
-            FD_ZERO(&in_set);
-            FD_ZERO(&out_set);
-            FD_ZERO(&err_set);
-            FD_SET(sock_, &in_set);
-
-            // prepare for sockets for polling
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
-                if (!c || !c->is_valid()) return true;
-
-                maxdesc = std::max(maxdesc, c->sock_);
-                FD_SET(c->sock_, &in_set);
-                FD_SET(c->sock_, &out_set);
-                FD_SET(c->sock_, &err_set);
-                return false;
-            });
-
-            // poll
-            if (select(maxdesc + 1, &in_set, &out_set, &err_set, &null_time) < 0) {
-                if (errno != EINTR) {
-                    throw socket_exception(strerror(errno));
-                }
-            }
-
-            // check for new connection
-            if (FD_ISSET(sock_, &in_set)) {
-                sockaddr_storage addr;
-
-                auto sock = factory_->create_socket(this, accept(addr), addr);
-
-                sock->set_non_blocking(true);
-
-                sock->notify_connect();
-
-                std::lock_guard<std::mutex> lock(sockets_mutex_);
-
-                sockets_.push_back(sock);
-            }
-
-            /* check for freaky connections */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
-                if (!c->is_valid()) return true;
-
-                if (FD_ISSET(c->sock_, &err_set)) {
-                    FD_CLR(c->sock_, &in_set);
-                    FD_CLR(c->sock_, &out_set);
-
-                    c->close();
-
-                    return true;
-                }
-                return false;
-            });
-
-            /* read from all readable connections, removing failed sockets */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
-                if (!c->is_valid()) return true;
-
-                if (FD_ISSET(c->sock_, &in_set)) {
-                    if (!c->read_to_buffer()) {
-                        FD_CLR(c->sock_, &out_set);
-
-                        c->close();
-                        return true;
-                    }
-                }
-
-                return false;
-            });
-
-            // strategically placed
-            notify_poll();
-
-            /* write to all writable connections, removing failed sockets */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
-                if (!c->is_valid()) return true;
-
-                if (FD_ISSET(c->sock_, &out_set)) {
-                    if (c->has_output()) {
-                        if (!c->write_from_buffer()) {
-                            c->close();
-
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
-        }
-
-        void socket_server::wait_for_poll(struct timeval *last_time)
-        {
-            struct timeval now_time;
-            long secDelta;
-            long usecDelta;
-
-            if (last_time == NULL) {
-                return;
-            }
-
-            gettimeofday(&now_time, NULL);
-
-            usecDelta = ((int)last_time->tv_usec) - ((int)now_time.tv_usec) + 1000000 / pollFrequency_;
-            secDelta = ((int)last_time->tv_sec) - ((int)now_time.tv_sec);
-
-            while (usecDelta < 0) {
-                usecDelta += 1000000;
-                secDelta -= 1;
-            }
-
-            while (usecDelta >= 1000000) {
-                usecDelta -= 1000000;
-                secDelta += 1;
-            }
-
-            // check if server should stall for a moment based on poll frequency
-            if (secDelta > 0 || (secDelta == 0 && usecDelta > 0)) {
-                struct timeval stall_time;
-
-                stall_time.tv_usec = usecDelta;
-                stall_time.tv_sec = secDelta;
-
-                if (select(0, NULL, NULL, NULL, &stall_time) == -1) {
-                    throw socket_exception(strerror(errno));
-                }
-            }
-
-            gettimeofday(last_time, NULL);
-        }
-
         void socket_server::run()
         {
             struct timeval last_time;
@@ -347,12 +184,16 @@ namespace arg3
 
             assert(sockets_.empty());
 
-            while (is_valid()) {
-                if (pollFrequency_ > 0) {
-                    wait_for_poll(&last_time);
-                }
+            while(is_valid()) {
+                sockaddr_storage addr;
 
-                poll();
+                auto sock = factory_->create_socket(this, accept(addr), addr);
+
+                sock->notify_connect();
+
+                std::lock_guard<std::mutex> lock(sockets_mutex_);
+
+                sockets_.push_back(sock);
             }
         }
     }

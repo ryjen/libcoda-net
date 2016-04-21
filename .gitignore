@@ -32,3 +32,4 @@ arg3net.pc
 arg3net-*.tar.gz
 build
 debug
+*.gch

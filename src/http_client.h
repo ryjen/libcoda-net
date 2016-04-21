@@ -1,5 +1,5 @@
-#ifndef ARG3_NET_http_client_H
-#define ARG3_NET_http_client_H
+#ifndef ARG3_NET_HTTP_CLIENT_H
+#define ARG3_NET_HTTP_CLIENT_H
 
 #ifdef HAVE_LIBCURL
 #include <curl/curl.h>

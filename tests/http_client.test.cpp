@@ -6,7 +6,7 @@
 
 #include <bandit/bandit.h>
 #include "http_client.h"
-#include "socket_server.h"
+#include "polling_socket_server.h"
 #include "buffered_socket.h"
 #include <string>
 #include <thread>
@@ -82,7 +82,7 @@ go_bandit([]() {
 
     test_socket_factory testFactory;
 
-    socket_server testServer(&testFactory);
+    polling_socket_server testServer(&testFactory);
 
     describe("an http client", [&]() {
         before_each([&]() {

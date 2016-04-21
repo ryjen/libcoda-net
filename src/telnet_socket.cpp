@@ -1,4 +1,6 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "telnet_socket.h"
 #include "protocol.h"
 #include <algorithm>

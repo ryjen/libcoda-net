@@ -1,5 +1,5 @@
-#ifndef ARG3_NET_SOCKETSERVER_H
-#define ARG3_NET_SOCKETSERVER_H
+#ifndef ARG3_NET_SOCKET_SERVER_H
+#define ARG3_NET_SOCKET_SERVER_H
 
 #include "socket_factory.h"
 #include <vector>
@@ -85,12 +85,6 @@ namespace arg3
             void start_in_background(int port, int backlogSize = BACKLOG_SIZE);
 
             /*!
-             * Sets the frequency of connection updates (used when looping)
-             * @param value the number of cycles per secon
-             */
-            void set_poll_frequency(unsigned cyclesPerSecond);
-
-            /*!
              * Adds a l istener to the server
              */
             void add_listener(socket_server_listener *listener);
@@ -105,13 +99,6 @@ namespace arg3
              */
             bool operator!=(const socket_server &other);
 
-            /*!
-             * updates the servers connections (performs read/writes)
-             * - will do nothing if the server is not alive
-             * - is called by the server based on the poll frequency
-             */
-            void poll();
-
             void stop();
 
             bool listen(const int port, const int backlogSize);
@@ -122,7 +109,7 @@ namespace arg3
             /*!
              * starts a syncronous loop of updating connections
              */
-            void run();
+            virtual void run();
 
             /*!
              * can override these without adding a listener
@@ -131,32 +118,20 @@ namespace arg3
             virtual void on_start();
             virtual void on_stop();
 
+            mutex sockets_mutex_;
+            mutex listeners_mutex_;
+            vector<std::shared_ptr<buffered_socket>> sockets_;
+            vector<socket_server_listener *> listeners_;
+            socket_factory *factory_;
            private:
-            /*!
-             * Will loop each connection and if the delegate returns false, will remove the connection
-             */
-            void check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate);
-
-            void wait_for_poll(struct timeval *);
-
-            void notify_poll();
 
             void notify_start();
 
             void notify_stop();
 
-            unsigned pollFrequency_;
-
-            socket_factory *factory_;
-
             shared_ptr<thread> backgroundThread_;
 
-            vector<std::shared_ptr<buffered_socket>> sockets_;
 
-            vector<socket_server_listener *> listeners_;
-
-            mutex sockets_mutex_;
-            mutex listeners_mutex_;
         };
     }
 }

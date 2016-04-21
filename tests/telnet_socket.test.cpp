@@ -1,8 +1,10 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #undef VERSION
 #include <bandit/bandit.h>
 #include "telnet_socket.h"
-#include "socket_server.h"
+#include "polling_socket_server.h"
 #include "buffered_socket.h"
 #include "protocol.h"
 #include <string>
@@ -30,6 +32,15 @@ public:
 
     }
 
+    virtual ~telnet_test_client() {
+
+        close();
+
+        if(bg_) {
+            bg_->join();
+        }
+    }
+
     void on_telopt(socket::data_type type, socket::data_type option)
     {
         char buf[100] = {0};
@@ -44,8 +55,28 @@ public:
     {
     };
 
-    arg3::net::socket::data_type telopt_type, telopt_option;
+    void run()
+    {
+        while(is_valid()) {
+            if(!read_to_buffer()) {
+                close();
+                break;
+            }
 
+
+            if (!write_from_buffer()) {
+                close();
+                break;
+            }
+        }
+    }
+
+    void start() {
+        bg_ = std::make_shared<thread>(&telnet_test_client::run, this);
+    }
+
+    arg3::net::socket::data_type telopt_type, telopt_option;
+    std::shared_ptr<std::thread> bg_;
 };
 
 const socket::data_buffer will_echo
@@ -67,6 +98,8 @@ public:
         auto socket = make_shared<telnet_test_client>(sock, addr);
 
         socket->add_listener(this);
+
+        socket->start();
 
         return socket;
     }
@@ -177,4 +210,3 @@ go_bandit([]()
 
 
 });
-

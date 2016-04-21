@@ -193,6 +193,7 @@ namespace arg3
             bool non_blocking_;
 
             friend class socket_server;
+            friend class polling_socket_server;
         };
     }
 }

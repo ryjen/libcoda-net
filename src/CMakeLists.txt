@@ -1,4 +1,4 @@
-add_library(${PROJECT_NAME} buffered_socket.cpp socket.cpp http_client.cpp socket_server.cpp socket_factory.cpp uri.cpp telnet_socket.cpp)
+add_library(${PROJECT_NAME} buffered_socket.cpp socket.cpp http_client.cpp polling_socket_server.cpp socket_server.cpp socket_factory.cpp uri.cpp telnet_socket.cpp)
 
 include_directories(${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
 
@@ -9,6 +9,7 @@ set(${PROJECT_NAME}_HEADERS
   buffered_socket.h
   exception.h
   http_client.h
+  polling_socket_server.h
   protocol.h
   socket.h
   socket_factory.h
@@ -20,5 +21,3 @@ set(${PROJECT_NAME}_HEADERS
 install(FILES ${${PROJECT_NAME}_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}")
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-
-
