@@ -42,10 +42,10 @@ options supported are:
 Servers
 =======
 
-The default **socket_server** is a blocking asynchronous server, thus client handlers should
+The default **socket_server** is a blocking asynchronous server and client handlers should
 should run in a separate thread.
 
-***polling_socket_server*** is a non-blocking synchronous server that polls on a user defined interval.
+***polling_socket_server*** is a non-blocking synchronous server that polls on a defined interval.
 
 Sockets
 =======
