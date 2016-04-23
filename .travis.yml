@@ -28,7 +28,7 @@ addons:
       - liburiparser-dev
 script:
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DMEMORY_CHECK=ON -DWITH_CURL=ON -DWITH_SSL=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DWITH_CURL=ON -DWITH_SSL=ON ..
   - make
   - make arg3net-coverage-clean
   - make test ARGS=-V
