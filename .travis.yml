@@ -1,18 +1,18 @@
 sudo: false
 language: cpp
-compiler: 
+compiler:
   - clang
   - gcc
-before_script: 
+before_script:
   - git submodule update --init --recursive
   - mkdir build
   - gem install coveralls-lcov
 install:
   - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.7"; fi
-  - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9" GCOV="gcov-4.9"; fi
+  - if [ "$CXX" == "g++" ]; then export CXX="g++-5" CC="gcc-5" GCOV="gcov-5"; fi
   - wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.12.orig.tar.gz
   - tar xf lcov_1.12.orig.tar.gz
-  - export PATH=$TRAVIS_BUILD_DIR/lcov-1.12/bin:$PATH  
+  - export PATH=$TRAVIS_BUILD_DIR/lcov-1.12/bin:$PATH
 addons:
   apt:
     sources:
@@ -20,7 +20,7 @@ addons:
       - george-edison55-precise-backports
       - llvm-toolchain-precise-3.7
     packages:
-      - g++-4.9 
+      - g++-5
       - clang-3.7
       - valgrind
       - cmake-data
@@ -35,4 +35,3 @@ script:
   - make arg3net-coverage-info
 after_success:
   - coveralls-lcov $TRAVIS_BUILD_DIR/coverage.info
- 
