@@ -5,9 +5,9 @@
 #include <curl/curl.h>
 #endif
 
-#include "protocol.h"
-#include <string>
 #include <map>
+#include <string>
+#include "protocol.h"
 
 using namespace std;
 

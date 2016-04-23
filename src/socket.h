@@ -7,17 +7,17 @@
 #ifdef _WIN32
 #include <winsock.h>
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 #endif
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <exception>
 #include <vector>
 
 namespace arg3

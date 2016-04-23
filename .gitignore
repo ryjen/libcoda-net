@@ -33,3 +33,4 @@ arg3net-*.tar.gz
 build
 debug
 *.gch
+.DS_Store

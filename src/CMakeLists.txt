@@ -1,4 +1,4 @@
-add_library(${PROJECT_NAME} buffered_socket.cpp socket.cpp http_client.cpp polling_socket_server.cpp socket_server.cpp socket_factory.cpp uri.cpp telnet_socket.cpp)
+add_library(${PROJECT_NAME} buffered_socket.cpp socket.cpp http_client.cpp polling_socket_server.cpp socket_client.cpp socket_server.cpp socket_factory.cpp uri.cpp telnet_socket.cpp)
 
 include_directories(${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
 
@@ -12,6 +12,7 @@ set(${PROJECT_NAME}_HEADERS
   polling_socket_server.h
   protocol.h
   socket.h
+  socket_client.h
   socket_factory.h
   socket_server.h
   telnet_socket.h

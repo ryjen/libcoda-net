@@ -1,22 +1,20 @@
 #include "polling_socket_server.h"
-#include "exception.h"
-#include <cstring>
 #include <algorithm>
 #include <cassert>
+#include <cstring>
+#include "exception.h"
 
 namespace arg3
 {
     namespace net
     {
-        polling_socket_server::polling_socket_server(socket_factory *factory)
-            : socket_server(factory), pollFrequency_(DEFAULT_POLL_FREQUENCY)
+        polling_socket_server::polling_socket_server(const factory_type &factory) : socket_server(factory), pollFrequency_(DEFAULT_POLL_FREQUENCY)
         {
         }
 
 
         polling_socket_server::polling_socket_server(polling_socket_server &&other)
-            : socket_server(std::move(other)),
-              pollFrequency_(other.pollFrequency_)
+            : socket_server(std::move(other)), pollFrequency_(other.pollFrequency_)
         {
         }
 
@@ -29,7 +27,8 @@ namespace arg3
             return *this;
         }
 
-        void polling_socket_server::on_start() {
+        void polling_socket_server::on_start()
+        {
             set_non_blocking(true);
         }
 
@@ -40,11 +39,15 @@ namespace arg3
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
             for (const auto &listener : listeners_) {
-                listener->on_poll(this);
+                auto poll_listener = dynamic_pointer_cast<polling_socket_server_listener>(listener);
+
+                if (poll_listener) {
+                    poll_listener->on_poll(this);
+                }
             }
         }
 
-        void polling_socket_server::check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate)
+        void polling_socket_server::check_connections(std::function<bool(const socket_type &)> delegate)
         {
             if (!is_valid()) return;
 
@@ -68,7 +71,7 @@ namespace arg3
             FD_SET(sock_, &in_set);
 
             // prepare for sockets for polling
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
+            check_connections([&](const socket_type &c) {
                 if (!c || !c->is_valid()) return true;
 
                 maxdesc = std::max(maxdesc, c->sock_);
@@ -101,7 +104,7 @@ namespace arg3
             }
 
             /* check for freaky connections */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
+            check_connections([&](const socket_type &c) {
                 if (!c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &err_set)) {
@@ -116,7 +119,7 @@ namespace arg3
             });
 
             /* read from all readable connections, removing failed sockets */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
+            check_connections([&](const socket_type &c) {
                 if (!c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &in_set)) {
@@ -135,7 +138,7 @@ namespace arg3
             notify_poll();
 
             /* write to all writable connections, removing failed sockets */
-            check_connections([&](const std::shared_ptr<buffered_socket> &c) {
+            check_connections([&](const socket_type &c) {
                 if (!c->is_valid()) return true;
 
                 if (FD_ISSET(c->sock_, &out_set)) {
@@ -206,6 +209,5 @@ namespace arg3
                 poll();
             }
         }
-
     }
 }

@@ -1,9 +1,10 @@
 #ifndef ARG3_NET_BUFFERED_SOCKET_H_
 #define ARG3_NET_BUFFERED_SOCKET_H_
 
-#include "socket.h"
+#include <memory>
 #include <string>
 #include <vector>
+#include "socket.h"
 
 using namespace std;
 
@@ -19,35 +20,37 @@ namespace arg3
         class buffered_socket_listener
         {
            public:
+            typedef buffered_socket *socket_type;
+
             /*!
              * Runs just before a read
              */
-            virtual void on_will_read(buffered_socket *sock) = 0;
+            virtual void on_will_read(const socket_type &sock) = 0;
 
             /*!
              * Runs just after a read
              */
-            virtual void on_did_read(buffered_socket *sock) = 0;
+            virtual void on_did_read(const socket_type &sock) = 0;
 
             /*!
              * Runs just before a write
              */
-            virtual void on_will_write(buffered_socket *sock) = 0;
+            virtual void on_will_write(const socket_type &sock) = 0;
 
             /*!
              * Runs just after a write
              */
-            virtual void on_did_write(buffered_socket *sock) = 0;
+            virtual void on_did_write(const socket_type &sock) = 0;
 
             /*!
              * Runs when connected
              */
-            virtual void on_connect(buffered_socket *sock) = 0;
+            virtual void on_connect(const socket_type &sock) = 0;
 
             /*!
              * Runs when closed
              */
-            virtual void on_close(buffered_socket *sock) = 0;
+            virtual void on_close(const socket_type &sock) = 0;
         };
 
         /*!
@@ -56,6 +59,8 @@ namespace arg3
         class buffered_socket : public socket
         {
            public:
+            typedef std::shared_ptr<buffered_socket_listener> listener_type;
+
             /*!
              * Default constructor accepts a raw socket and its address
              */
@@ -170,8 +175,9 @@ namespace arg3
             /*!
              * Adds a listener to this socket
              */
-            void add_listener(buffered_socket_listener *listener);
+            buffered_socket &add_listener(const listener_type &listener);
 
+            buffered_socket &remove_listener(const listener_type &listener);
             /*!
              * Notifies listeners of a connection.  This must be called after
              * any listeners have been added.
@@ -209,7 +215,7 @@ namespace arg3
 
             bool read_chunk(data_buffer &chunk);
 
-            vector<buffered_socket_listener *> listeners_;
+            vector<listener_type> listeners_;
         };
     }
 }

@@ -1,10 +1,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "buffered_socket.h"
 #include <algorithm>
-#include "exception.h"
 #include <cstring>
+#include "buffered_socket.h"
+#include "exception.h"
 
 namespace arg3
 {
@@ -232,9 +232,13 @@ namespace arg3
         //! will write the output buffer to the socket
         bool buffered_socket::write_from_buffer()
         {
-            if (!is_valid()) return false;
+            if (!is_valid()) {
+                return false;
+            }
 
-            if (outBuffer_.empty()) return true;
+            if (outBuffer_.empty()) {
+                return true;
+            }
 
             notify_will_write();
 
@@ -273,11 +277,23 @@ namespace arg3
 
 
         //! add a listener to the socket
-        void buffered_socket::add_listener(buffered_socket_listener *listener)
+        buffered_socket &buffered_socket::add_listener(const listener_type &listener)
         {
             if (listener != NULL && find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
             }
+            return *this;
+        }
+
+        buffered_socket &buffered_socket::remove_listener(const listener_type &listener)
+        {
+            if (listener == nullptr) {
+                return *this;
+            }
+
+            std::remove(listeners_.begin(), listeners_.end(), listener);
+
+            return *this;
         }
 
         void buffered_socket::notify_connect()

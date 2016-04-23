@@ -1,11 +1,11 @@
 #ifndef ARG3_NET_SOCKET_SERVER_H
 #define ARG3_NET_SOCKET_SERVER_H
 
-#include "socket_factory.h"
-#include <vector>
-#include <thread>
-#include <mutex>
 #include <sys/time.h>
+#include <mutex>
+#include <thread>
+#include <vector>
+#include "socket_factory.h"
 
 using namespace std;
 
@@ -21,20 +21,17 @@ namespace arg3
         class socket_server_listener
         {
            public:
-            /*!
-             * called when the server has polled its connections
-             */
-            virtual void on_poll(socket_server *server) = 0;
+            typedef socket_server *server_type;
 
             /*!
              * called when the server starts
              */
-            virtual void on_start(socket_server *server) = 0;
+            virtual void on_start(const server_type &server) = 0;
 
             /*!
              * called when the server stops
              */
-            virtual void on_stop(socket_server *server) = 0;
+            virtual void on_stop(const server_type &server) = 0;
         };
 
 
@@ -44,11 +41,15 @@ namespace arg3
         class socket_server : public socket
         {
            public:
+            typedef std::shared_ptr<socket_server_listener> listener_type;
+            typedef std::shared_ptr<buffered_socket> socket_type;
+            typedef std::shared_ptr<socket_factory> factory_type;
+
             /*!
              * default constructor
              * @factory the factory to create sockets with
              */
-            socket_server(socket_factory *factory = &default_socket_factory);
+            socket_server(const factory_type &factory = default_socket_factory);
 
             /*!
              * non-copyable constructor
@@ -87,7 +88,7 @@ namespace arg3
             /*!
              * Adds a l istener to the server
              */
-            void add_listener(socket_server_listener *listener);
+            socket_server &add_listener(const listener_type &listener);
 
             /*!
              * equality operator compares the port
@@ -103,7 +104,7 @@ namespace arg3
 
             bool listen(const int port, const int backlogSize);
 
-            void set_socket_factory(socket_factory *factory);
+            void set_socket_factory(const factory_type &factory);
 
            protected:
             /*!
@@ -120,18 +121,16 @@ namespace arg3
 
             mutex sockets_mutex_;
             mutex listeners_mutex_;
-            vector<std::shared_ptr<buffered_socket>> sockets_;
-            vector<socket_server_listener *> listeners_;
-            socket_factory *factory_;
-           private:
+            vector<socket_type> sockets_;
+            vector<listener_type> listeners_;
+            factory_type factory_;
 
+           private:
             void notify_start();
 
             void notify_stop();
 
             shared_ptr<thread> backgroundThread_;
-
-
         };
     }
 }

@@ -1,10 +1,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "telnet_socket.h"
-#include "protocol.h"
 #include <algorithm>
 #include <cassert>
+#include "protocol.h"
+#include "telnet_socket.h"
 
 namespace arg3
 {
@@ -81,9 +81,9 @@ namespace arg3
         {
             assert(action == telnet::WILL || action == telnet::DO || action == telnet::WONT || action == telnet::DONT);
 
-            const socket::data_type packet[] = {telnet::IAC, action, option_value};
+            socket::data_type packet[] = {telnet::IAC, action, option_value};
 
-            send((void *)packet, 3);
+            send(packet, 3);
         }
     }
 }

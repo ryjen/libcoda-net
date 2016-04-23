@@ -3,12 +3,12 @@
 #endif
 #undef VERSION
 #include <bandit/bandit.h>
-#include "telnet_socket.h"
-#include "polling_socket_server.h"
-#include "buffered_socket.h"
-#include "protocol.h"
 #include <string>
 #include <thread>
+#include "buffered_socket.h"
+#include "polling_socket_server.h"
+#include "protocol.h"
+#include "telnet_socket.h"
 
 using namespace bandit;
 
@@ -21,24 +21,13 @@ using namespace std;
 
 class telnet_test_client : public telnet_socket
 {
-
-public:
+   public:
     telnet_test_client(SOCKET sock, const sockaddr_storage &addr) : telnet_socket(sock, addr)
     {
     }
 
     telnet_test_client(const string &host, const int port) : telnet_socket(host, port)
     {
-
-    }
-
-    virtual ~telnet_test_client() {
-
-        close();
-
-        if(bg_) {
-            bg_->join();
-        }
     }
 
     void on_telopt(socket::data_type type, socket::data_type option)
@@ -51,139 +40,93 @@ public:
 
         write(buf);
     };
-    void on_sub_neg(socket::data_type type, const socket::data_buffer &parameters)
-    {
-    };
-
-    void run()
-    {
-        while(is_valid()) {
-            if(!read_to_buffer()) {
-                close();
-                break;
-            }
-
-
-            if (!write_from_buffer()) {
-                close();
-                break;
-            }
-        }
-    }
-
-    void start() {
-        bg_ = std::make_shared<thread>(&telnet_test_client::run, this);
-    }
+    void on_sub_neg(socket::data_type type, const socket::data_buffer &parameters){};
 
     arg3::net::socket::data_type telopt_type, telopt_option;
-    std::shared_ptr<std::thread> bg_;
 };
 
-const socket::data_buffer will_echo
-{
-    arg3::net::telnet::IAC, arg3::net::telnet::WILL, arg3::net::telnet::ECHO
-};
-const socket::data_buffer wont_echo
-{
-    arg3::net::telnet::IAC, arg3::net::telnet::WONT, arg3::net::telnet::ECHO
-};
+const socket::data_buffer will_echo{arg3::net::telnet::IAC, arg3::net::telnet::WILL, arg3::net::telnet::ECHO};
+const socket::data_buffer wont_echo{arg3::net::telnet::IAC, arg3::net::telnet::WONT, arg3::net::telnet::ECHO};
 
-class telnet_socket_factory : public socket_factory, public buffered_socket_listener, public socket_server_listener
+class telnet_socket_factory : public socket_factory,
+                              public buffered_socket_listener,
+                              public socket_server_listener,
+                              public enable_shared_from_this<telnet_socket_factory>
 {
-
-private:
-public:
-    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_storage &addr)
+   private:
+   public:
+    socket_factory::socket_type create_socket(const socket_factory::server_type &server, SOCKET sock, const sockaddr_storage &addr)
     {
         auto socket = make_shared<telnet_test_client>(sock, addr);
 
-        socket->add_listener(this);
-
-        socket->start();
+        socket->add_listener(shared_from_this());
 
         return socket;
     }
 
-    void on_connect(buffered_socket *sock)
+    void on_connect(const buffered_socket_listener::socket_type &sock)
     {
-        //cout <<  sock->ip() << " connected, sending will_echo\n";
+        // cout <<  sock->ip() << " connected, sending will_echo\n";
 
         sock->send(will_echo);
     }
 
-    void on_close(buffered_socket *sock)
+    void on_close(const buffered_socket_listener::socket_type &sock)
     {
-        //cout << sock->ip() << " closed\n";
+        // cout << sock->ip() << " closed\n";
     }
 
-    void on_will_read(buffered_socket *sock)
+    void on_will_read(const buffered_socket_listener::socket_type &sock)
     {
-        //cout << sock->ip() << " will read\n";
-
+        // cout << sock->ip() << " will read\n";
     }
 
-    void on_did_read(buffered_socket *sock)
+    void on_did_read(const buffered_socket_listener::socket_type &sock)
     {
-        //cout << sock->ip() << " did read\n";
+        // cout << sock->ip() << " did read\n";
     }
 
-    void on_will_write(buffered_socket *sock)
+    void on_will_write(const buffered_socket_listener::socket_type &sock)
     {
-        //cout << sock->ip() << " will write\n";
+        // cout << sock->ip() << " will write\n";
     }
 
-    void on_did_write(buffered_socket *sock)
+    void on_did_write(const buffered_socket_listener::socket_type &sock)
     {
-        //cout << sock->ip() << " did write\n";
+        // cout << sock->ip() << " did write\n";
 
         sock->close();
     }
 
-    void on_poll(socket_server *server)
+    void on_start(const socket_server_listener::server_type &server)
     {
     }
 
-    void on_start(socket_server *server)
-    {
-    }
-
-    void on_stop(socket_server *server)
+    void on_stop(const socket_server_listener::server_type &server)
     {
     }
 };
 
-go_bandit([]()
-{
+go_bandit([]() {
 
-    telnet_socket_factory telnetFactory;
+    std::shared_ptr<telnet_socket_factory> telnetFactory = std::make_shared<telnet_socket_factory>();
 
-    socket_server telnetServer(&telnetFactory);
+    polling_socket_server telnetServer(telnetFactory);
 
-    telnetServer.add_listener(&telnetFactory);
+    telnetServer.add_listener(telnetFactory);
 
-    describe("a telnet socket", [&]()
-    {
-        before_each([&]()
-        {
-            try
-            {
+    describe("a telnet socket", [&]() {
+        before_each([&]() {
+            try {
                 telnetServer.start_in_background(9876);
-
-                //log::trace("Mock server started");
-            }
-            catch (const exception &e)
-            {
+            } catch (const exception &e) {
                 std::cerr << e.what() << std::endl;
             }
         });
 
-        after_each([&]()
-        {
-            telnetServer.stop();
-        });
+        after_each([&]() { telnetServer.stop(); });
 
-        it("supports ECHO", []()
-        {
+        it("supports ECHO", []() {
             telnet_test_client client("127.0.0.1", 9876);
 
             Assert::That(client.is_valid(), Equals(true));

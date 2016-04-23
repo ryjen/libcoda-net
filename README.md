@@ -2,7 +2,7 @@ libarg3net
 ==========
 
 [![Build Status](http://img.shields.io/travis/ryjen/arg3net/master.svg)](https://travis-ci.org/ryjen/arg3net)
-[![Coverage Status](http://http://img.shields.io/coveralls/ryjen/arg3net/master.svg)](https://coveralls.io/github/ryjen/arg3net?branch=master)
+[![Coverage Status](http://img.shields.io/coveralls/ryjen/arg3net/master.svg)](https://coveralls.io/github/ryjen/arg3net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
 
 A c++11 networking library.
@@ -29,87 +29,115 @@ options supported are:
     -DWITH_SSL=ON        :   enable openssl usage for non-curl http client
 
 
-Servers
-=======
+Model
+=====
 
-The default **socket_server** is a blocking asynchronous server and client handlers should
-should run in a separate thread.
+![arg3net UML](arg3net.png)
 
-***polling_socket_server*** is a non-blocking synchronous server that polls on a defined interval.
+Usage
+=====
 
-Sockets
-=======
+There are two ways to implement a server.
 
-The **socket** class is a wrapper for system socket methods.  The **buffered_socket** adds a read and write buffer to the implementation.
-**telnet_socket** is an example implementation of a socket that implements [rfc 184](https://tools.ietf.org/html/rfc854).
+#### Method A
+1) subclass a socket and implement callback to perform an action on input/output
 
+2) subclass a socket_factory to create the new socket type
+
+3) start a server with the factory
+
+#### Method B
+
+1) subclass a socket listener to perform an action on input/output
+
+2) subclass a socket_factory to add the listener to a socket
+
+3) start a server with the factory
 
 Examples
 ========
 
-*Simple example*
+### Implement a factory and a listener
 
 ```c++
-// a client listener
-class example_listener : public arg3::net::buffered_socket_listener
+/**
+ * create connections and listen to connection events
+ */
+class example_factory : public arg3::net:socket_factory, public arg3::net::buffered_socket_listener
 {
 public:
-    void on_will_read(buffered_socket *sock)
-    {
-    	cout << "going to read from client socket" << endl;
+    /* creates a client on a new connection and adds a listener */
+    socket_factory::socket_type create_socket(const socket_factory::server_type &server, 
+                                              SOCKET sock, const sockaddr_in &addr) {
+      	if (!server || server->is_non_blocking()) {
+            return std::make_shared<buffered_socket>(sock, addr);
+        }
+
+        auto client = std::make_shared<socket_client>(sock, addr);
+
+        client->start();
+
+        return client;
   	}
 
-    void on_did_read(buffered_socket *sock)
-    {
-    	cout << "read from client socket" << endl;
+    void on_did_read(const socket_type &sock) {
+      cout << "read from client socket" << endl;
     }
 
-    void on_will_write(buffered_socket *sock)
-    {
-    	cout << "going to write to client socket" << endl;
+    void on_did_write(const socket_type &sock) {
+      cout << "wrote to client socket" << endl;
     }
 
-    void on_did_write(buffered_socket *sock)
-    {
-    	cout << "wrote to client socket" << endl;
-    }
-
-    void on_connect(buffered_socket *sock)
-    {
-    	cout << "client socket connected" << endl;
-    }
-
-    void on_close(buffered_socket *sock)
-    {
-    	cout << "client socket closed" << endl;
+    void on_connect(const socket_type &sock) {
+      cout << "client socket connected" << endl;
     }
 };
-
-class example_factory : public arg3::net:socket_factory
-{
-private:
-	example_listener listener_;
-public:
-    /* creates a client on a new connection and adds our listener */
-    std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const sockaddr_in &addr)
-    {
-    	auto connection = std::make_shared<buffered_socket>(sock, addr);
-
-    	connection->add_listener(&listener_);
-
-    	return connection;
-	}
-};
-
-example_factory mySocketFactory;
-
-arg3::net::socket_server example_server(1337, &mySocketFactory);
-
-example_server.start();
 ```
 
-HTTP
-====
+#### Run a server in the background
+
+```c++
+int main() {
+    /* create a factory */
+    std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
+
+    /* create a server */
+    arg3::net::socket_server example_server(1337, mySocketFactory);
+
+    /* start running */
+    example_server.start_in_background();
+
+    /* wait till done */
+    while(example_server.is_valid()) {
+        sleep(1);
+    }
+
+    return 0;
+}
+
+```
+
+
+#### Run an polling server in the foreground
+
+```c++
+int main() {
+    /* create a factory */
+    std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
+
+    /* create a server */
+    arg3::net::polling_socket_server example_server(1337, mySocketFactory);
+
+    /* start running */
+    example_server.start();
+
+    return 0;
+}
+
+```
+
+Other
+=====
 
 **http_client** is a very basic implementation of a HTTP/Rest client:
 
@@ -129,3 +157,9 @@ api.post("version/resource")
 
 // etc
 ```
+
+TODO
+====
+
+* more socket rfc implementations (HTTP, SMTP)
+* more testing

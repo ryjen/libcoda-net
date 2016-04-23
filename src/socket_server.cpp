@@ -1,18 +1,17 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <cstring>
-#include "socket_server.h"
-#include "exception.h"
 #include <algorithm>
 #include <cassert>
+#include <cstring>
+#include "exception.h"
+#include "socket_server.h"
 
 namespace arg3
 {
     namespace net
     {
-        socket_server::socket_server(socket_factory *factory)
-            : factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
+        socket_server::socket_server(const factory_type &factory) : factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
         {
         }
 
@@ -39,11 +38,8 @@ namespace arg3
             socket::operator=(std::move(other));
 
             factory_ = other.factory_;
-
             backgroundThread_ = std::move(other.backgroundThread_);
-
             sockets_ = std::move(other.sockets_);
-
             listeners_ = std::move(other.listeners_);
 
             // invalidate moved instance
@@ -75,34 +71,35 @@ namespace arg3
 
         void socket_server::stop()
         {
-            close();
-
-            notify_stop();
-
-            {
-                std::lock_guard<std::mutex> lock(sockets_mutex_);
-                sockets_.clear();
+            if (is_valid()) {
+                notify_stop();
             }
+
+            close();
 
             if (backgroundThread_ != nullptr) {
                 if (backgroundThread_->joinable()) {
-                   backgroundThread_->join();
+                    backgroundThread_->join();
                 }
 
                 backgroundThread_ = nullptr;
             }
+
+            std::lock_guard<std::mutex> lock(sockets_mutex_);
+            sockets_.clear();
         }
 
-        void socket_server::add_listener(socket_server_listener *listener)
+        socket_server &socket_server::add_listener(const listener_type &listener)
         {
             std::lock_guard<std::mutex> lock(listeners_mutex_);
 
             if (listener != NULL && find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
             }
+            return *this;
         }
 
-        void socket_server::set_socket_factory(socket_factory *factory)
+        void socket_server::set_socket_factory(const factory_type &factory)
         {
             factory_ = factory;
         }
@@ -186,7 +183,7 @@ namespace arg3
 
             assert(sockets_.empty());
 
-            while(is_valid()) {
+            while (is_valid()) {
                 sockaddr_storage addr;
 
                 auto sock = factory_->create_socket(this, accept(addr), addr);

@@ -2,18 +2,18 @@
 #include "config.h"
 #endif
 #include <cerrno>
-#include <fstream>
 #include <cstring>
-#include "socket.h"
+#include <fstream>
 #include "exception.h"
+#include "socket.h"
 #ifndef _WIN32
 #include <fcntl.h>
 #endif
 
 #ifdef HAVE_LIBSSL
+#include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 #endif
 
 using namespace std;
@@ -396,7 +396,8 @@ namespace arg3
             non_blocking_ = b;
         }
 
-        bool socket::is_non_blocking() const {
+        bool socket::is_non_blocking() const
+        {
             return non_blocking_;
         }
 

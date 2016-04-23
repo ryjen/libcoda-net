@@ -5,12 +5,12 @@
 #include <algorithm>
 #include <functional>
 
-#include "http_client.h"
-#include "exception.h"
 #include <cinttypes>
+#include "exception.h"
+#include "http_client.h"
 #ifndef HAVE_LIBCURL
-#include "buffered_socket.h"
 #include <cstring>
+#include "buffered_socket.h"
 #else
 #include <cstring>
 #endif
@@ -252,7 +252,9 @@ namespace arg3
                 pos = skip_newline(response_, next);
             }
 
-            if (pos != string::npos) payload_ = response_.substr(pos);
+            if (pos != string::npos) {
+                payload_ = response_.substr(pos);
+            }
         }
 
 

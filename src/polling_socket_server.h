@@ -7,15 +7,27 @@ namespace arg3
 {
     namespace net
     {
+        class polling_socket_server;
+
+        class polling_socket_server_listener : public socket_server_listener
+        {
+            typedef socket_server *server_type;
+
+           public:
+            /*!
+             * called when the server has polled its connections
+             */
+            virtual void on_poll(const server_type &server) = 0;
+        };
+
         class polling_socket_server : public socket_server
         {
-        public:
-
+           public:
             /*!
              * default constructor
              * @factory the factory to create sockets with
              */
-            polling_socket_server(socket_factory *factory = &default_socket_factory);
+            polling_socket_server(const factory_type &factory = default_socket_factory);
 
             /*!
              * non-copyable constructor
@@ -51,26 +63,24 @@ namespace arg3
              */
             void poll();
 
-        protected:
-
+           protected:
             void run();
 
             virtual void on_start();
 
-        private:
+           private:
             constexpr static int DEFAULT_POLL_FREQUENCY = 4;
 
             /*!
              * Will loop each connection and if the delegate returns false, will remove the connection
              */
-            void check_connections(std::function<bool(const std::shared_ptr<buffered_socket> &)> delegate);
+            void check_connections(std::function<bool(const socket_type &)> delegate);
 
             void wait_for_poll(struct timeval *);
 
             void notify_poll();
 
             unsigned pollFrequency_;
-
         };
     }
 }

@@ -16,26 +16,29 @@ namespace arg3
         class socket_factory
         {
            public:
+            typedef socket_server *server_type;
+            typedef std::shared_ptr<buffered_socket> socket_type;
+
             /* creates a buffered socket from a raw socket */
-            virtual std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const struct sockaddr_storage &addr) = 0;
+            virtual socket_type create_socket(const server_type &server, SOCKET sock, const struct sockaddr_storage &addr) = 0;
 
             virtual ~socket_factory()
             {
             }
         };
 
-        namespace detail
+        namespace impl
         {
             /* default implementation of a socket factory */
             class default_socket_factory : public socket_factory
             {
                public:
-                virtual std::shared_ptr<buffered_socket> create_socket(socket_server *server, SOCKET sock, const struct sockaddr_storage &addr);
+                virtual socket_type create_socket(const server_type &server, SOCKET sock, const struct sockaddr_storage &addr);
             };
         }
 
         /* default factory instance */
-        extern detail::default_socket_factory default_socket_factory;
+        extern std::shared_ptr<impl::default_socket_factory> default_socket_factory;
     }
 }
 
