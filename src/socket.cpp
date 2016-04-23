@@ -396,6 +396,10 @@ namespace arg3
             non_blocking_ = b;
         }
 
+        bool socket::is_non_blocking() const {
+            return non_blocking_;
+        }
+
         bool socket::is_secure() const
         {
 #ifdef HAVE_LIBSSL

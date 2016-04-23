@@ -1,8 +1,8 @@
 libarg3net
 ==========
 
-[![Build Status](http://img.shields.io/travis/ryjen/arg3net.svg)](https://travis-ci.org/ryjen/arg3net)
-[![Coverage Status](https://coveralls.io/repos/ryjen/arg3net/badge.svg?branch=master&service=github)](https://coveralls.io/github/ryjen/arg3net?branch=master)
+[![Build Status](http://img.shields.io/travis/ryjen/arg3net/master.svg)](https://travis-ci.org/ryjen/arg3net)
+[![Coverage Status](http://http://img.shields.io/coveralls/ryjen/arg3net/master.svg)](https://coveralls.io/github/ryjen/arg3net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
 
 A c++11 networking library.
@@ -19,16 +19,6 @@ mkdir debug; cd debug
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 make test
-```
-
-for homebrew you can add the install prefix:
-
-```bash
-mkdir release; cd release
-cmake $(cd..;brew diy --version=0.5.0) -DCMAKE_BUILD_TYPE=Release ..
-make
-make install
-brew link arg3net
 ```
 
 options supported are:

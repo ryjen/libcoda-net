@@ -85,7 +85,9 @@ namespace arg3
             }
 
             if (backgroundThread_ != nullptr) {
-                if (backgroundThread_->joinable()) backgroundThread_->join();
+                if (backgroundThread_->joinable()) {
+                   backgroundThread_->join();
+                }
 
                 backgroundThread_ = nullptr;
             }

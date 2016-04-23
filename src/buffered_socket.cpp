@@ -107,7 +107,7 @@ namespace arg3
                 do {
                     inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
 
-                } while (read_chunk(chunk));
+                } while (is_non_blocking() && read_chunk(chunk));
 
                 notify_did_read();
             } catch (const socket_exception &e) {

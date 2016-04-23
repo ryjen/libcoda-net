@@ -186,10 +186,6 @@ go_bandit([]()
         {
             telnet_test_client client("127.0.0.1", 9876);
 
-            client.set_non_blocking(false);
-
-            sleep(1);
-
             Assert::That(client.is_valid(), Equals(true));
 
             char buf[101] = {0};
@@ -197,9 +193,7 @@ go_bandit([]()
 
             string test(buf);
 
-            arg3::net::socket::data_buffer data;
-
-            client.recv(data);
+            client.read_to_buffer();
 
             string output(client.output().begin(), client.output().end());
 
