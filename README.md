@@ -63,18 +63,26 @@ Examples
 /**
  * create connections and listen to connection events
  */
-class example_factory : public arg3::net:socket_factory, public arg3::net::buffered_socket_listener
+class example_factory : public arg3::net:socket_factory, public arg3::net::buffered_socket_listener,
+                        public enable_shared_from_this<example_factory>
 {
 public:
     /* creates a client on a new connection and adds a listener */
     socket_factory::socket_type create_socket(const socket_factory::server_type &server, 
                                               SOCKET sock, const sockaddr_in &addr) {
-      	if (!server || server->is_non_blocking()) {
-            return std::make_shared<buffered_socket>(sock, addr);
+      	if (server->is_non_blocking()) {
+            auto sock = std::make_shared<buffered_socket>(sock, addr);
+
+            sock->add_listener(shared_from_this());
+
+            return sock;
         }
 
         auto client = std::make_shared<socket_client>(sock, addr);
 
+        client->add_listener(shared_from_this());
+
+        // start the read/write loop
         client->start();
 
         return client;
@@ -161,5 +169,5 @@ api.post("version/resource")
 TODO
 ====
 
-* more socket rfc implementations (HTTP, SMTP)
+* more socket rfc implementations (HTTP, SMTP, WebSockets)
 * more testing
