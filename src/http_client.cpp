@@ -15,6 +15,8 @@
 #include <cstring>
 #endif
 
+using namespace std;
+
 namespace arg3
 {
     namespace net
@@ -526,9 +528,11 @@ namespace arg3
             if (!sock.write_from_buffer()) {
                 throw socket_exception("unable to write to socket");
             }
+
             if (!sock.read_to_buffer()) {
                 throw socket_exception("unable to read from socket");
             }
+
             auto input = sock.input();
 
             response_.parse(string(input.begin(), input.end()));

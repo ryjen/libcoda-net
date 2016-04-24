@@ -92,6 +92,7 @@ namespace arg3
                 free(ssl_);
             }
             if (sock_ != INVALID) {
+                shutdown(sock_, SHUT_RDWR);
                 closesocket(sock_);
                 sock_ = INVALID;
             }
@@ -366,7 +367,7 @@ namespace arg3
             SOCKET sock = ::accept(sock_, (struct sockaddr *)&addr, &addr_length);
 
             if (sock <= 0) {
-                return false;
+                return INVALID;
             }
 
             return sock;

@@ -9,8 +9,6 @@
 #include <string>
 #include "protocol.h"
 
-using namespace std;
-
 namespace arg3
 {
     namespace net
@@ -29,30 +27,30 @@ namespace arg3
             /*!
              * the post data usually
              */
-            string payload() const;
+            std::string payload() const;
 
-            string version() const;
+            std::string version() const;
 
-            void set_version(const string &value);
+            void set_version(const std::string &value);
 
             /*!
              * returns the value for an HTTP header for this request
              */
-            string header(const string &key);
+            std::string header(const std::string &key);
 
-            const map<string, string> headers() const;
+            const std::map<std::string, std::string> headers() const;
 
            protected:
-            string payload_;
-            map<string, string> headers_;
-            string version_;
+            std::string payload_;
+            std::map<std::string, std::string> headers_;
+            std::string version_;
         };
 
         class http_response : public http_transfer
         {
            public:
             http_response();
-            http_response(const string &);
+            http_response(const std::string &);
             http_response(const http_response &);
             http_response(http_response &&);
             virtual ~http_response();
@@ -60,9 +58,9 @@ namespace arg3
             http_response &operator=(const http_response &);
             http_response &operator=(http_response &&other);
 
-            string full_response() const;
+            std::string full_response() const;
 
-            operator string() const;
+            operator std::string() const;
 
             /*!
              * the HTTP response code
@@ -73,9 +71,9 @@ namespace arg3
             void clear();
 
             void parse();
-            void parse(const string &);
+            void parse(const std::string &);
 
-            string response_;
+            std::string response_;
 
             int responseCode_;
 
@@ -85,7 +83,7 @@ namespace arg3
         class http_client : public http_transfer
         {
            public:
-            http_client(const string &host);
+            http_client(const std::string &host);
             http_client();
             virtual ~http_client();
             http_client(const http_client &other);
@@ -96,17 +94,17 @@ namespace arg3
             /*!
              * adds an HTTP header to the request
              */
-            http_client &add_header(const string &key, const string &value);
+            http_client &add_header(const std::string &key, const std::string &value);
 
             /*!
              * Removes an HTTP header from the request
              */
-            void remove_header(const string &key);
+            void remove_header(const std::string &key);
 
             /*!
              * returns the host used to connect
              */
-            string host() const;
+            std::string host() const;
 
             /*!
              * the response body
@@ -121,37 +119,37 @@ namespace arg3
             /*!
              * sets the host for this request
              */
-            http_client &set_host(const string &);
+            http_client &set_host(const std::string &);
 
             /*!
              * sets the payload for this request
              */
-            http_client &set_payload(const string &value);
+            http_client &set_payload(const std::string &value);
 
             /*!
              * performs a request
              */
-            http_client &request(http::method method, const string &path);
+            http_client &request(http::method method, const std::string &path);
 
             /*!
              * performs a GET request
              */
-            http_client &get(const string &path);
+            http_client &get(const std::string &path);
 
             /*!
              * performs a POST request
              */
-            http_client &post(const string &path);
+            http_client &post(const std::string &path);
 
             /*!
              * performs a PUT request
              */
-            http_client &put(const string &path);
+            http_client &put(const std::string &path);
 
             /*!
              * performs a DELETE request
              */
-            http_client &de1ete(const string &path);
+            http_client &de1ete(const std::string &path);
 
             /*!
              * sets whether this request uses HTTPS
@@ -162,12 +160,12 @@ namespace arg3
 
            private:
 #ifdef HAVE_LIBCURL
-            void request_curl(http::method method, const string &path);
+            void request_curl(http::method method, const std::string &path);
 #else
-            void request_socket(http::method method, const string &path);
+            void request_socket(http::method method, const std::string &path);
 #endif
-            string scheme_;
-            string host_;
+            std::string scheme_;
+            std::string host_;
             int timeout_;
             http_response response_;
         };

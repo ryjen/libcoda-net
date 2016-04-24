@@ -43,22 +43,23 @@ class test_socket_factory : public socket_factory, public buffered_socket_listen
 
     void on_connect(const buffered_socket_listener::socket_type &sock)
     {
-        // log::trace(format("{0} connected", sock->getIP()));
+        // cout << sock->ip() << " connected" << endl;
     }
 
     void on_close(const buffered_socket_listener::socket_type &sock)
     {
-        // log::trace(format("{0} closed", sock->getIP()));
+        // cout << sock->ip() << " closed" << endl;
     }
 
     void on_will_read(const buffered_socket_listener::socket_type &sock)
     {
-        // log::trace(format("{0} will read", sock->getIP()));
+        // cout << sock->ip() << " will read" << endl;
     }
 
     void on_did_read(const buffered_socket_listener::socket_type &sock)
     {
-        // log::trace(format("{0} did read", sock->getIP()));
+        // cout << sock->ip() << " did read" << endl;
+
         string line = sock->readln();
 
         string method = line.substr(0, line.find(' '));
@@ -68,12 +69,12 @@ class test_socket_factory : public socket_factory, public buffered_socket_listen
 
     void on_will_write(const buffered_socket_listener::socket_type &sock)
     {
-        // log::trace(format("{0} will write", sock->getIP()));
+        // cout << sock->ip() << " will write" << endl;
     }
 
     void on_did_write(const buffered_socket_listener::socket_type &sock)
     {
-        // log::trace(format("{0} did write", sock->getIP()));
+        // cout << sock->ip() << " did write" << endl;
 
         sock->close();
     }

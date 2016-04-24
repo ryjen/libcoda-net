@@ -7,6 +7,8 @@
 #include "exception.h"
 #include "socket_server.h"
 
+using namespace std;
+
 namespace arg3
 {
     namespace net
@@ -84,14 +86,12 @@ namespace arg3
 
                 backgroundThread_ = nullptr;
             }
-
-            std::lock_guard<std::mutex> lock(sockets_mutex_);
-            sockets_.clear();
+            clear_sockets();
         }
 
         socket_server &socket_server::add_listener(const listener_type &listener)
         {
-            std::lock_guard<std::mutex> lock(listeners_mutex_);
+            std::lock_guard<std::recursive_mutex> lock(listeners_mutex_);
 
             if (listener != NULL && find(listeners_.begin(), listeners_.end(), listener) == listeners_.end()) {
                 listeners_.push_back(listener);
@@ -108,7 +108,7 @@ namespace arg3
         {
             on_start();
 
-            std::lock_guard<std::mutex> lock(listeners_mutex_);
+            std::lock_guard<std::recursive_mutex> lock(listeners_mutex_);
 
             for (const auto &listener : listeners_) {
                 listener->on_start(this);
@@ -119,7 +119,7 @@ namespace arg3
         {
             on_stop();
 
-            std::lock_guard<std::mutex> lock(listeners_mutex_);
+            std::lock_guard<std::recursive_mutex> lock(listeners_mutex_);
 
             for (const auto &listener : listeners_) {
                 listener->on_stop(this);
@@ -175,6 +175,18 @@ namespace arg3
         {
         }
 
+        void socket_server::add_socket(const socket_type &sock)
+        {
+            std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
+            sockets_.push_back(sock);
+        }
+
+        void socket_server::clear_sockets()
+        {
+            std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
+            sockets_.clear();
+        }
+
         void socket_server::run()
         {
             struct timeval last_time;
@@ -186,13 +198,17 @@ namespace arg3
             while (is_valid()) {
                 sockaddr_storage addr;
 
-                auto sock = factory_->create_socket(this, accept(addr), addr);
+                auto sys_sock = accept(addr);
+
+                if (sys_sock == INVALID) {
+                    continue;
+                }
+
+                auto sock = factory_->create_socket(this, sys_sock, addr);
 
                 sock->notify_connect();
 
-                std::lock_guard<std::mutex> lock(sockets_mutex_);
-
-                sockets_.push_back(sock);
+                add_socket(sock);
             }
         }
     }

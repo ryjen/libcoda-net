@@ -6,6 +6,8 @@
 #include "buffered_socket.h"
 #include "exception.h"
 
+using namespace std;
+
 namespace arg3
 {
     namespace net
@@ -67,6 +69,10 @@ namespace arg3
 
         bool buffered_socket::read_chunk(data_buffer &chunk)
         {
+            if (!is_valid()) {
+                return false;
+            }
+
             int status = socket::recv(chunk);
 
             if (status < 0) {

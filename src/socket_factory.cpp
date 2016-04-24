@@ -8,7 +8,7 @@ namespace arg3
 {
     namespace net
     {
-        std::shared_ptr<impl::default_socket_factory> default_socket_factory = make_shared<impl::default_socket_factory>();
+        std::shared_ptr<impl::default_socket_factory> default_socket_factory = std::make_shared<impl::default_socket_factory>();
 
         namespace impl
         {

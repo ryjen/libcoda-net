@@ -36,10 +36,10 @@ namespace arg3
         {
             on_poll();
 
-            std::lock_guard<std::mutex> lock(listeners_mutex_);
+            std::lock_guard<std::recursive_mutex> lock(listeners_mutex_);
 
             for (const auto &listener : listeners_) {
-                auto poll_listener = dynamic_pointer_cast<polling_socket_server_listener>(listener);
+                auto poll_listener = std::dynamic_pointer_cast<polling_socket_server_listener>(listener);
 
                 if (poll_listener) {
                     poll_listener->on_poll(this);
@@ -51,7 +51,7 @@ namespace arg3
         {
             if (!is_valid()) return;
 
-            std::lock_guard<std::mutex> lock(sockets_mutex_);
+            std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
 
             sockets_.erase(std::remove_if(std::begin(sockets_), std::end(sockets_), delegate), std::end(sockets_));
         }
@@ -98,9 +98,7 @@ namespace arg3
 
                 sock->notify_connect();
 
-                std::lock_guard<std::mutex> lock(sockets_mutex_);
-
-                sockets_.push_back(sock);
+                add_socket(sock);
             }
 
             /* check for freaky connections */

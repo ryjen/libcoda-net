@@ -11,7 +11,7 @@ namespace arg3
         {
            public:
             telnet_socket(SOCKET sock, const sockaddr_storage &addr);
-            telnet_socket(const string &host, const int port);
+            telnet_socket(const std::string &host, const int port);
 
            protected:
             virtual void on_telopt(socket::data_type type, socket::data_type option) = 0;

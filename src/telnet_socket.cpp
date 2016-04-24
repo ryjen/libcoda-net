@@ -6,6 +6,8 @@
 #include "protocol.h"
 #include "telnet_socket.h"
 
+using namespace std;
+
 namespace arg3
 {
     namespace net

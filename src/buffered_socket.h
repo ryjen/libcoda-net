@@ -6,8 +6,6 @@
 #include <vector>
 #include "socket.h"
 
-using namespace std;
-
 namespace arg3
 {
     namespace net
@@ -114,12 +112,12 @@ namespace arg3
             /*!
              * Reads a line from the read buffer
              */
-            string readln();
+            std::string readln();
 
             /*!
              * Appends some data to the write buffer with a new line.
              */
-            buffered_socket &writeln(const string &value);
+            buffered_socket &writeln(const std::string &value);
 
             /*!
             * Appends a new line to the write buffer
@@ -129,7 +127,7 @@ namespace arg3
             /*!
              * Appends some data to the write buffer.
              */
-            buffered_socket &write(const string &value);
+            buffered_socket &write(const std::string &value);
 
             /*!
              * Appends some bytes to the write buffer
@@ -215,7 +213,7 @@ namespace arg3
 
             bool read_chunk(data_buffer &chunk);
 
-            vector<listener_type> listeners_;
+            std::vector<listener_type> listeners_;
         };
     }
 }

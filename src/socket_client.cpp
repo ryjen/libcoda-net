@@ -18,6 +18,10 @@ namespace arg3
                     break;
                 }
 
+                if (!is_valid()) {
+                    break;
+                }
+
                 if (!read_to_buffer()) {
                     close();
                     break;
@@ -27,7 +31,7 @@ namespace arg3
 
         void socket_client::start()
         {
-            thread_ = std::make_shared<thread>(&socket_client::run, this);
+            thread_ = std::make_shared<std::thread>(&socket_client::run, this);
         }
     }
 }

@@ -7,8 +7,6 @@
 #include <vector>
 #include "socket_factory.h"
 
-using namespace std;
-
 namespace arg3
 {
     namespace net
@@ -119,10 +117,13 @@ namespace arg3
             virtual void on_start();
             virtual void on_stop();
 
-            mutex sockets_mutex_;
-            mutex listeners_mutex_;
-            vector<socket_type> sockets_;
-            vector<listener_type> listeners_;
+            void add_socket(const socket_type &sock);
+            void clear_sockets();
+
+            std::recursive_mutex sockets_mutex_;
+            std::recursive_mutex listeners_mutex_;
+            std::vector<socket_type> sockets_;
+            std::vector<listener_type> listeners_;
             factory_type factory_;
 
            private:
@@ -130,7 +131,7 @@ namespace arg3
 
             void notify_stop();
 
-            shared_ptr<thread> backgroundThread_;
+            std::shared_ptr<std::thread> backgroundThread_;
         };
     }
 }

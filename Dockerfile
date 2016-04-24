@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 
 RUN apt-get -y install software-properties-common && add-apt-repository ppa:george-edison55/cmake-3.x && add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update
 
-RUN apt-get -y install build-essential gcc-5 g++-5 gdb cmake cmake-data valgrind lcov libcurl4-openssl-dev
+RUN apt-get -y install build-essential gcc-5 g++-5 gdb cmake cmake-data valgrind lcov libcurl4-openssl-dev vim
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
 
