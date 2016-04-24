@@ -13,12 +13,12 @@ namespace arg3
         void socket_client::run()
         {
             while (is_valid()) {
-                if (!read_to_buffer()) {
+                if (!write_from_buffer()) {
                     close();
                     break;
                 }
 
-                if (!write_from_buffer()) {
+                if (!read_to_buffer()) {
                     close();
                     break;
                 }

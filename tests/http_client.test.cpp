@@ -59,7 +59,6 @@ class test_socket_factory : public socket_factory, public buffered_socket_listen
     void on_did_read(const buffered_socket_listener::socket_type &sock)
     {
         // log::trace(format("{0} did read", sock->getIP()));
-
         string line = sock->readln();
 
         string method = line.substr(0, line.find(' '));
@@ -87,9 +86,12 @@ go_bandit([]() {
     socket_server testServer(testFactory);
 
     describe("an http client", [&]() {
-        before_each([&testServer]() {
+        before_each([&testServer, &testFactory]() {
             try {
                 testServer.start_in_background(9876);
+
+                testFactory->set_response("Hello, World!");
+
             } catch (const exception &e) {
                 std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
             }
@@ -100,16 +102,10 @@ go_bandit([]() {
         it("can get", [&]() {
             http_client client("localhost:9876");
 
-            testFactory->set_response("Hello, World!");
+            client.get("test");
 
-            try {
-                client.get("test");
+            Assert::That(client.response().payload(), Equals("GET: Hello, World!"));
 
-                Assert::That(client.response().payload(), Equals("GET: Hello, World!"));
-            } catch (const exception &e) {
-                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
-                throw e;
-            }
         });
 #if defined(HAVE_LIBSSL)
         it("is secure", []() {
@@ -127,14 +123,10 @@ go_bandit([]() {
 
             client.set_payload("Hello, World!");
 
-            try {
-                client.post("test");
+            client.post("test");
 
-                Assert::That(client.response().payload(), Equals("POST: Hello, World!"));
-            } catch (const exception &e) {
-                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
-                throw e;
-            }
+            Assert::That(client.response().payload(), Equals("POST: Hello, World!"));
+
         });
 
         it("can read http response", []() {

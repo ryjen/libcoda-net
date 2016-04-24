@@ -450,16 +450,21 @@ namespace arg3
             // create the socket based on hostname and port
             auto pos = host().find(':');
 
-            if (is_secure()) sock.set_secure(true);
+            if (is_secure()) {
+                sock.set_secure(true);
+            }
 
             if (pos != string::npos) {
                 string hostname = host().substr(0, pos);
                 int port = stoi(host().substr(pos + 1));
 
-                if (!sock.connect(hostname, port)) throw socket_exception("unable to connect to " + host());
-            } else {
-                if (!sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT))
+                if (!sock.connect(hostname, port)) {
                     throw socket_exception("unable to connect to " + host());
+                }
+            } else {
+                if (!sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT)) {
+                    throw socket_exception("unable to connect to " + host());
+                }
             }
 
             // send the method and path
@@ -518,10 +523,12 @@ namespace arg3
             cout << string(sock.output().begin(), sock.output().end());
 #endif
 
-            if (!sock.write_from_buffer()) throw socket_exception("unable to write to socket");
-
-            if (!sock.read_to_buffer()) throw socket_exception("unable to read from socket");
-
+            if (!sock.write_from_buffer()) {
+                throw socket_exception("unable to write to socket");
+            }
+            if (!sock.read_to_buffer()) {
+                throw socket_exception("unable to read from socket");
+            }
             auto input = sock.input();
 
             response_.parse(string(input.begin(), input.end()));
@@ -534,7 +541,9 @@ namespace arg3
         {
             response_.clear();
 
-            if (host_.empty()) throw socket_exception("no host");
+            if (host_.empty()) {
+                throw socket_exception("no host");
+            }
 
 #ifdef HAVE_LIBCURL
             request_curl(method, path);
