@@ -1,19 +1,92 @@
-#include "uri.h"
+
 #include <stdexcept>
+#include <string>
+#include <sstream>
+#include <type_traits>
+#include <algorithm>
+#include "uri.h"
+
+using namespace std;
 
 namespace arg3
 {
     namespace net
     {
-        uri::uri(std::string uri) : uri_(uri)
+        uri::uri(const std::string &uri, const char *defaultScheme) : uri_(uri)
+        {
+            isValid_ = parse(uri, defaultScheme);
+        }
+
+        std::string uri::to_string() const {
+            return uri_;
+        }
+
+        uri::operator std::string() const {
+            return uri_;
+        }
+
+        bool uri::parse(const std::string &uri_s, const char *defaultScheme)
         {
 #ifdef HAVE_LIBURIPARSER
             UriParserStateA state_;
             state_.uri = &uriParse_;
-            isValid_ = uriParseUriA(&state_, uri_.c_str()) == URI_SUCCESS;
+            return uriParseUriA(&state_, uri_s.c_str()) == URI_SUCCESS;
 #else
-            isValid_ = false;
-            throw std::runtime_error("uriparser library not enabled.");
+            // do the manual implementation from stack overflow
+            // with some mods for the port
+            const string prot_end("://");
+            string::const_iterator pos_i = search(uri_s.begin(), uri_s.end(), prot_end.begin(), prot_end.end());
+            if (pos_i == uri_s.end()) {
+                if (defaultScheme == NULL || !*defaultScheme) {
+                    return false;
+                } else {
+                    scheme_ = defaultScheme;
+                    pos_i = uri_s.begin();
+                }
+            }
+            else {
+                scheme_.reserve(distance(uri_s.begin(), pos_i));
+                transform(uri_s.begin(), pos_i, back_inserter(scheme_), ptr_fun<int, int>(tolower));  // protocol is icase
+                advance(pos_i, prot_end.length());
+            }
+
+            string::const_iterator user_i = find(pos_i, uri_s.end(), '@');
+            string::const_iterator path_i;
+
+            if (user_i != uri_s.end()) {
+                string::const_iterator pwd_i = find(pos_i, user_i, ':');
+
+                if (pwd_i != user_i) {
+                    password_.assign(pwd_i, user_i);
+                    user_.assign(pos_i, pwd_i);
+                } else {
+                    user_.assign(pos_i, user_i);
+                }
+
+                pos_i = user_i + 1;
+            }
+
+            path_i = find(pos_i, uri_s.end(), '/');
+
+            string::const_iterator port_i = find(pos_i, path_i, ':');
+            string::const_iterator host_end;
+            if (port_i != uri_s.end()) {
+                port_.assign(*port_i == ':' ? (port_i + 1) : port_i, path_i);
+                host_end = port_i;
+            } else {
+                host_end = path_i;
+            }
+            host_.reserve(distance(pos_i, host_end));
+            transform(pos_i, host_end, back_inserter(host_), ptr_fun<int, int>(tolower));  // host is icase
+            string::const_iterator query_i = find(path_i, uri_s.end(), '?');
+            path_.assign(*path_i == '/' ? (path_i + 1) : path_i, query_i);
+            if (query_i != uri_s.end()) ++query_i;
+            string::const_iterator frag_i = find(query_i, uri_s.end(), '#');
+            query_.assign(query_i, frag_i);
+            if (frag_i != uri_s.end()) {
+                fragment_.assign(frag_i, uri_s.end());
+            }
+            return true;
 #endif
         }
 
@@ -34,15 +107,46 @@ namespace arg3
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.scheme);
 #else
-            throw std::runtime_error("uriparser library not enabled.");
+            return scheme_;
 #endif
         }
+
+        std::string uri::username() const
+        {
+#ifdef HAVE_LIBURIPARSER
+            const char*userInfo = fromRange(uriParse_.userInfo);
+            if (userInfo) {
+                std::string temp(userInfo);
+                return temp.substr(0, temp.find(':'));
+            } else {
+                return std::string();
+            }
+#else
+            return user_;
+#endif
+        }
+
+        std::string uri::password() const
+        {
+#ifdef HAVE_LIBURIPARSER
+            const char*userInfo = fromRange(uriParse_.userInfo);
+            if (userInfo) {
+                std::string temp(userInfo);
+                return temp.substr(temp.find(':') + 1);
+            } else {
+                return std::string();
+            }
+#else
+            return password_;
+#endif
+        }
+
         std::string uri::host() const
         {
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.hostText);
 #else
-            throw std::runtime_error("uriparser library not enabled.");
+            return host_;
 #endif
         }
         std::string uri::port() const
@@ -50,7 +154,7 @@ namespace arg3
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.portText);
 #else
-            throw std::runtime_error("uriparser library not enabled.");
+            return port_;
 #endif
         }
         std::string uri::path() const
@@ -58,7 +162,7 @@ namespace arg3
 #ifdef HAVE_LIBURIPARSER
             return fromList(uriParse_.pathHead, "/");
 #else
-            throw std::runtime_error("uriparser library not enabled.");
+            return path_;
 #endif
         }
         std::string uri::query() const
@@ -66,7 +170,7 @@ namespace arg3
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.query);
 #else
-            throw std::runtime_error("uriparser library not enabled.");
+            return query_;
 #endif
         }
         std::string uri::fragment() const
@@ -74,13 +178,17 @@ namespace arg3
 #ifdef HAVE_LIBURIPARSER
             return fromRange(uriParse_.fragment);
 #else
-            throw std::runtime_error("uriparser library not enabled.");
+            return fragment_;
 #endif
         }
 #ifdef HAVE_LIBURIPARSER
         std::string uri::fromRange(const UriTextRangeA &rng) const
         {
-            return std::string(rng.first, rng.afterLast);
+            if (rng.first && rng.afterLast) {
+                return std::string(rng.first, rng.afterLast);
+            } else {
+                return std::string();
+            }
         }
 
         std::string uri::fromList(UriPathSegmentA *xs, const std::string &delim) const

@@ -23,10 +23,10 @@ namespace arg3
     {
 #define THIS_USER_AGENT "libarg3net"
 
-#ifdef HAVE_LIBCURL
-
         namespace helper
         {
+#ifdef HAVE_LIBCURL
+
             size_t curl_append_response_callback(void *ptr, size_t size, size_t nmemb, string *s)
             {
                 if (s == NULL) return 0;
@@ -65,16 +65,16 @@ namespace arg3
                     throw rest_exception(curl_easy_strerror(code));
                 }
             }
-        }
+
 #endif
+            size_t skip_newline(const string &s, size_t pos)
+            {
+                for (int i = 0; i < 2; i++, pos++) {
+                    if (s[pos] != '\r' && s[pos] != '\n') break;
+                }
 
-        size_t skip_newline(const string &s, size_t pos)
-        {
-            for (int i = 0; i < 2; i++, pos++) {
-                if (s[pos] != '\r' && s[pos] != '\n') break;
+                return pos;
             }
-
-            return pos;
         }
 
         http_transfer::http_transfer() : version_(http::VERSION_1_1)
@@ -232,7 +232,7 @@ namespace arg3
 
             version_ = version;
 
-            pos = skip_newline(response_, pos);
+            pos = helper::skip_newline(response_, pos);
 
             while (!line.empty()) {
                 auto next = response_.find("\r\n", pos);
@@ -251,7 +251,7 @@ namespace arg3
                     headers_[key] = value;
                 }
 
-                pos = skip_newline(response_, next);
+                pos = helper::skip_newline(response_, next);
             }
 
             if (pos != string::npos) {
@@ -260,29 +260,26 @@ namespace arg3
         }
 
 
-        http_client::http_client(const string &host) : scheme_(http::SCHEME), host_(host), timeout_(20)
+        http_client::http_client(const arg3::net::uri &uri) : uri_(uri), timeout_(http::DEFAULT_HTTP_TIMEOUT)
         {
             add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
         }
 
-        http_client::http_client() : timeout_(20)
-        {
-            add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
-        }
+        http_client::http_client(const std::string &uri) : http_client(arg3::net::uri(uri, http::PROTOCOL))
+        {}
 
         http_client::~http_client()
         {
         }
 
         http_client::http_client(const http_client &other)
-            : http_transfer(other), scheme_(other.scheme_), host_(other.host_), response_(other.response_), timeout_(other.timeout_)
+            : http_transfer(other), uri_(other.uri_), response_(other.response_), timeout_(other.timeout_)
         {
         }
 
         http_client::http_client(http_client &&other)
             : http_transfer(std::move(other)),
-              scheme_(std::move(other.scheme_)),
-              host_(std::move(other.host_)),
+              uri_(std::move(other.uri_)),
               response_(std::move(other.response_)),
               timeout_(other.timeout_)
         {
@@ -291,8 +288,7 @@ namespace arg3
         http_client &http_client::operator=(const http_client &other)
         {
             http_transfer::operator=(other);
-            scheme_ = other.scheme_;
-            host_ = other.host_;
+            uri_ = other.uri_;
             headers_ = other.headers_;
             timeout_ = other.timeout_;
             return *this;
@@ -301,8 +297,7 @@ namespace arg3
         http_client &http_client::operator=(http_client &&other)
         {
             http_transfer::operator=(std::move(other));
-            scheme_ = std::move(other.scheme_);
-            host_ = std::move(other.host_);
+            uri_ = std::move(other.uri_);
             response_ = std::move(other.response_);
             timeout_ = other.timeout_;
             return *this;
@@ -319,9 +314,9 @@ namespace arg3
             headers_.erase(key);
         }
 
-        string http_client::host() const
+        arg3::net::uri http_client::uri() const
         {
-            return host_;
+            return uri_;
         }
 
         http_response http_client::response() const
@@ -331,19 +326,7 @@ namespace arg3
 
         bool http_client::is_secure() const
         {
-            return scheme_ == http::SECURE_SCHEME;
-        }
-
-        http_client &http_client::set_host(const string &host)
-        {
-            host_ = host;
-            return *this;
-        }
-
-        http_client &http_client::set_secure(bool value)
-        {
-            scheme_ = value ? http::SECURE_SCHEME : http::SCHEME;
-            return *this;
+            return uri_.scheme() == http::SECURE_PROTOCOL;
         }
 
         http_client &http_client::set_payload(const string &payload)
@@ -449,23 +432,19 @@ namespace arg3
 
             buffered_socket sock;
 
-            // create the socket based on hostname and port
-            auto pos = host().find(':');
-
             if (is_secure()) {
                 sock.set_secure(true);
             }
 
-            if (pos != string::npos) {
-                string hostname = host().substr(0, pos);
-                int port = stoi(host().substr(pos + 1));
+            if (!uri_.port().empty()) {
+                int port = stoi(uri_.port());
 
-                if (!sock.connect(hostname, port)) {
-                    throw socket_exception("unable to connect to " + host());
+                if (!sock.connect(uri_.host(), port)) {
+                    throw socket_exception("unable to connect to " + uri_.to_string());
                 }
             } else {
-                if (!sock.connect(host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT)) {
-                    throw socket_exception("unable to connect to " + host());
+                if (!sock.connect(uri_.host(), is_secure() ? http::DEFAULT_SECURE_PORT : http::DEFAULT_PORT)) {
+                    throw socket_exception("unable to connect to " + uri_.to_string());
                 }
             }
 
@@ -485,7 +464,7 @@ namespace arg3
 
             // specify the host
             if (headers_.count(http::HEADER_HOST) == 0) {
-                snprintf(buf, http::MAX_URL_LEN, "%s: %s", http::HEADER_HOST, host().c_str());
+                snprintf(buf, http::MAX_URL_LEN, "%s: %s", http::HEADER_HOST, uri_.host().c_str());
                 sock.writeln(buf);
             }
 
@@ -541,12 +520,12 @@ namespace arg3
         }
 #endif
 
-        http_client &http_client::request(http::method method, const string &path)
+        http_client &http_client::request(http::method method, const std::string &path, const http_client_callback &callback)
         {
             response_.clear();
 
-            if (host_.empty()) {
-                throw socket_exception("no host");
+            if (!uri_.is_valid()) {
+                throw socket_exception("invalid uri");
             }
 
 #ifdef HAVE_LIBCURL
@@ -555,27 +534,30 @@ namespace arg3
             request_socket(method, path);
 #endif
 
+            if (callback) {
+                callback(*this, response());
+            }
             return *this;
         }
 
-        http_client &http_client::get(const string &path)
+        http_client &http_client::get(const http_client_callback &callback)
         {
-            return request(http::GET, path);
+            return request(http::GET, uri_.path(), callback);
         }
 
-        http_client &http_client::post(const string &path)
+        http_client &http_client::post(const http_client_callback &callback)
         {
-            return request(http::POST, path);
+            return request(http::POST, uri_.path(), callback);
         }
 
-        http_client &http_client::put(const string &path)
+        http_client &http_client::put(const http_client_callback &callback)
         {
-            return request(http::PUT, path);
+            return request(http::PUT, uri_.path(), callback);
         }
 
-        http_client &http_client::de1ete(const string &path)
+        http_client &http_client::de1ete(const http_client_callback &callback)
         {
-            return request(http::DELETE, path);
+            return request(http::DELETE, uri_.path(), callback);
         }
     }
 }

@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include "protocol.h"
+#include "uri.h"
 
 namespace arg3
 {
@@ -83,8 +84,10 @@ namespace arg3
         class http_client : public http_transfer
         {
            public:
-            http_client(const std::string &host);
-            http_client();
+            typedef std::function<void(const http_client &client, const http_response &)> http_client_callback;
+
+            http_client(const arg3::net::uri &uri);
+            http_client(const std::string &uri);
             virtual ~http_client();
             http_client(const http_client &other);
             http_client(http_client &&other);
@@ -104,7 +107,7 @@ namespace arg3
             /*!
              * returns the host used to connect
              */
-            std::string host() const;
+            arg3::net::uri uri() const;
 
             /*!
              * the response body
@@ -119,7 +122,7 @@ namespace arg3
             /*!
              * sets the host for this request
              */
-            http_client &set_host(const std::string &);
+            http_client &set_uri(const arg3::net::uri &uri);
 
             /*!
              * sets the payload for this request
@@ -129,32 +132,27 @@ namespace arg3
             /*!
              * performs a request
              */
-            http_client &request(http::method method, const std::string &path);
+            http_client &request(http::method method, const std::string &path, const http_client_callback &callback = nullptr);
 
             /*!
              * performs a GET request
              */
-            http_client &get(const std::string &path);
+            http_client &get(const http_client_callback &callback = nullptr);
 
             /*!
              * performs a POST request
              */
-            http_client &post(const std::string &path);
+            http_client &post(const http_client_callback& callback = nullptr);
 
             /*!
              * performs a PUT request
              */
-            http_client &put(const std::string &path);
+            http_client &put(const http_client_callback& callback = nullptr);
 
             /*!
              * performs a DELETE request
              */
-            http_client &de1ete(const std::string &path);
-
-            /*!
-             * sets whether this request uses HTTPS
-             */
-            http_client &set_secure(bool value);
+            http_client &de1ete(const http_client_callback &callback = nullptr);
 
             http_client &set_timeout(int value);
 
@@ -164,8 +162,7 @@ namespace arg3
 #else
             void request_socket(http::method method, const std::string &path);
 #endif
-            std::string scheme_;
-            std::string host_;
+            arg3::net::uri uri_;
             int timeout_;
             http_response response_;
         };

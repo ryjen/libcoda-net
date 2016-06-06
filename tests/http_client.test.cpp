@@ -101,30 +101,30 @@ go_bandit([]() {
         after_each([&testServer]() { testServer.stop(); });
 
         it("can get", [&]() {
-            http_client client("localhost:9876");
+            http_client client("localhost:9876/test");
 
-            client.get("test");
+            client.get();
 
             Assert::That(client.response().payload(), Equals("GET: Hello, World!"));
 
         });
 #if defined(HAVE_LIBSSL)
         it("is secure", []() {
-            http_client client("google.com");
+            http_client client("https://google.com/settings/personalinfo");
 
-            client.set_secure(true);
+            Assert::That(client.is_secure(), IsTrue());
 
-            client.get("/settings/personalinfo");
+            client.get();
 
             Assert::That(client.response().payload().empty(), Equals(false));
         });
 #endif
         it("can post", []() {
-            http_client client("localhost:9876");
+            http_client client("localhost:9876/test");
 
             client.set_payload("Hello, World!");
 
-            client.post("test");
+            client.post();
 
             Assert::That(client.response().payload(), Equals("POST: Hello, World!"));
 
@@ -134,7 +134,7 @@ go_bandit([]() {
             http_client client("www.arg3.com");
 
             try {
-                client.get("/");
+                client.get();
 
                 auto response = client.response();
 

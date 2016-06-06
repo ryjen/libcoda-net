@@ -15,9 +15,9 @@ namespace arg3
 
             constexpr const unsigned MAX_URL_LEN = 2000;
 
-            constexpr const char *const SCHEME = "http";
+            constexpr const char *const PROTOCOL = "http";
 
-            constexpr const char *const SECURE_SCHEME = "https";
+            constexpr const char *const SECURE_PROTOCOL = "https";
 
             // default port
             constexpr static int DEFAULT_PORT = 80;
@@ -37,6 +37,8 @@ namespace arg3
              * An http response header preamble
              */
             constexpr static const char *const RESPONSE_PREAMBLE = "HTTP/%s %d %s";
+
+            constexpr static int DEFAULT_HTTP_TIMEOUT = 20;
 
             /*!
              * header definitions
