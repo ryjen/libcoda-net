@@ -535,7 +535,7 @@ namespace arg3
 #endif
 
             if (callback) {
-                callback(*this, response());
+                callback(response());
             }
             return *this;
         }

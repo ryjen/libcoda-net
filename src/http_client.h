@@ -84,7 +84,7 @@ namespace arg3
         class http_client : public http_transfer
         {
            public:
-            typedef std::function<void(const http_client &client, const http_response &)> http_client_callback;
+            typedef std::function<void(const http_response &)> http_client_callback;
 
             http_client(const arg3::net::uri &uri);
             http_client(const std::string &uri);

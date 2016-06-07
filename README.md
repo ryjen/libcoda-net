@@ -34,25 +34,18 @@ Model
 
 ![arg3net UML](arg3net.png)
 
-Usage
-=====
 
-There are two ways to implement a server.
+A **buffered_socket** adds i/o buffering to a socket.
 
-#### Method A
-1) subclass a socket and implement callback to perform an action on input/output
+A **socket_client** adds the ability to run an blocking i/o in a thread.
 
-2) subclass a socket_factory to create the new socket type
+A **socket_listener** can be attached to a buffered_socket for i/o events.
 
-3) start a server with the factory
+There are two ways to implement a server - you can either subclass a **socket**, **socket_client** or a **socket_listener**.
 
-#### Method B
+A **socket_factory** implementation should return the new socket or add the listener to a socket.
 
-1) subclass a socket listener to perform an action on input/output
-
-2) subclass a socket_factory to add the listener to a socket
-
-3) start a server with the factory
+A **socket_server** is then created with the factory
 
 Examples
 ========
@@ -68,9 +61,10 @@ class example_factory : public arg3::net:socket_factory, public arg3::net::buffe
 {
 public:
     /* creates a client on a new connection and adds a listener */
-    socket_factory::socket_type create_socket(const socket_factory::server_type &server, 
+    socket_factory::socket_type create_socket(const socket_factory::server_type &server,
                                               SOCKET sock, const sockaddr_in &addr) {
-      	if (server->is_non_blocking()) {
+        // If we're using this factory with a non-blocking server don't use an asynchronous socket                                        
+        if (server->is_non_blocking()) {
             auto sock = std::make_shared<buffered_socket>(sock, addr);
 
             sock->add_listener(shared_from_this());
@@ -78,11 +72,12 @@ public:
             return sock;
         }
 
+        // otherwise use the default asynchronous client
         auto client = std::make_shared<socket_client>(sock, addr);
 
         client->add_listener(shared_from_this());
 
-        // start the read/write loop
+        // start the asynch read/write loop
         client->start();
 
         return client;
@@ -147,27 +142,30 @@ int main() {
 Other
 =====
 
-**http_client** is a very basic implementation of a HTTP/Rest client:
+**http_client** is a very basic implementation of a HTTP client:
 
 ```c++
 
-http_client api("api.somehost.com");
+http_client client("api.somehost.com/version/resource/id");
 
 // get some resource
-api.get("version/resource/id");
+client.get([](const http_response &response) {
+     cout << response.code() << ": " << response << endl;
+});
+```
 
-auto response = api.response();
+```c++
+
+http_client client("https://api.somehost.com/version/resource/id");
+
+auto response = client.get().response();
 
 cout << response.code() << ": " << response << endl;
 
-// post some resource
-api.post("version/resource")
-
-// etc
 ```
 
 TODO
 ====
 
-* more socket rfc implementations (HTTP, SMTP, WebSockets)
+* more socket RFC implementations (SMTP, WebSockets)
 * more testing

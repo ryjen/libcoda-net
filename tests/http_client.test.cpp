@@ -103,10 +103,9 @@ go_bandit([]() {
         it("can get", [&]() {
             http_client client("localhost:9876/test");
 
-            client.get();
-
-            Assert::That(client.response().payload(), Equals("GET: Hello, World!"));
-
+            client.get([](const http_response &response) {
+                Assert::That(response.payload(), Equals("GET: Hello, World!"));
+            });
         });
 #if defined(HAVE_LIBSSL)
         it("is secure", []() {
