@@ -515,8 +515,6 @@ namespace arg3
 						auto input = sock.input();
 
 						response_.parse(string(input.begin(), input.end()));
-
-						// sock.close();
 				}
 #endif
 
