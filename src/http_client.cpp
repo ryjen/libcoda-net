@@ -359,11 +359,11 @@ namespace arg3
 						}
 
 						if (path.empty())
-								snprintf(buf, http::MAX_URL_LEN, "%s://%s", uri_.scheme().c_str(), uri_.host().c_str());
+								snprintf(buf, http::MAX_URL_LEN, "%s://%s", uri_.scheme().c_str(), uri_.host_with_port().c_str());
 						else if (path[0] == '/')
-								snprintf(buf, http::MAX_URL_LEN, "%s://%s%s", uri_.scheme().c_str(), uri_.host().c_str(), path.c_str());
+								snprintf(buf, http::MAX_URL_LEN, "%s://%s%s", uri_.scheme().c_str(), uri_.host_with_port().c_str(), path.c_str());
 						else
-								snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", uri_.scheme().c_str(), uri_.host().c_str(), path.c_str());
+								snprintf(buf, http::MAX_URL_LEN, "%s://%s/%s", uri_.scheme().c_str(), uri_.host_with_port().c_str(), path.c_str());
 
 						helper::curl_set_opt(curl, CURLOPT_URL, buf);
 
