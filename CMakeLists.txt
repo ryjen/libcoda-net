@@ -28,7 +28,7 @@ endif ()
 if(CODE_COVERAGE)
 	include(CodeCoverage)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_COVERAGE}")
-	setup_target_for_coverage(${PROJECT_NAME}-coverage ${PROJECT_SOURCE_DIR}/coverage)
+	setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_SOURCE_DIR}/coverage)
 endif()
 
 # create package config
