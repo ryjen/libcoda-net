@@ -4,7 +4,7 @@
 #include <cstring>
 #include "exception.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

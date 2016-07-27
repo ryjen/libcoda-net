@@ -1,7 +1,9 @@
-#ifndef _ARG3_NET_URI_H_
-#define _ARG3_NET_URI_H_
+#ifndef RJ_NET_URI_H_
+#define RJ_NET_URI_H_
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #ifdef HAVE_LIBURIPARSER
 #include <uriparser/Uri.h>
@@ -9,7 +11,7 @@
 
 #include <string>
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

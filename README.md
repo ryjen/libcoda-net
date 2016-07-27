@@ -1,8 +1,8 @@
-libarg3net
-==========
+rj_net
+======
 
-[![Build Status](http://img.shields.io/travis/ryjen/arg3net/master.svg)](https://travis-ci.org/ryjen/arg3net)
-[![Coverage Status](http://img.shields.io/coveralls/ryjen/arg3net/master.svg)](https://coveralls.io/github/ryjen/arg3net?branch=master)
+[![Build Status](http://img.shields.io/travis/ryjen/net/master.svg)](https://travis-ci.org/ryjen/net)
+[![Coverage Status](http://img.shields.io/coveralls/ryjen/net/master.svg)](https://coveralls.io/github/ryjen/net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
 
 A c++11 networking library.
@@ -32,8 +32,7 @@ options supported are:
 Model
 =====
 
-![arg3net UML](arg3net.png)
-
+![UML](uml.png)
 
 A **buffered_socket** adds i/o buffering to a socket.
 
@@ -56,7 +55,7 @@ Examples
 /**
  * create connections and listen to connection events
  */
-class example_factory : public arg3::net:socket_factory, public arg3::net::buffered_socket_listener,
+class example_factory : public rj::net:socket_factory, public rj::net::buffered_socket_listener,
                         public enable_shared_from_this<example_factory>
 {
 public:
@@ -105,7 +104,7 @@ int main() {
     std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
 
     /* create a server */
-    arg3::net::socket_server example_server(1337, mySocketFactory);
+    rj::net::socket_server example_server(1337, mySocketFactory);
 
     /* start running */
     example_server.start_in_background();
@@ -129,7 +128,7 @@ int main() {
     std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
 
     /* create a server */
-    arg3::net::polling_socket_server example_server(1337, mySocketFactory);
+    rj::net::polling_socket_server example_server(1337, mySocketFactory);
 
     /* start running */
     example_server.start();

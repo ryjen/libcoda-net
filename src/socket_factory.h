@@ -1,11 +1,11 @@
-#ifndef ARG3_NET_SOCKETFACTORY_H
-#define ARG3_NET_SOCKETFACTORY_H
+#ifndef RJ_NET_SOCKETFACTORY_H
+#define RJ_NET_SOCKETFACTORY_H
 
 #include "buffered_socket.h"
 
 #include <memory>
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

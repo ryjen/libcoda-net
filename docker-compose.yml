@@ -1,0 +1,25 @@
+version: '2'
+services:
+  test:
+    image: rj_net_test
+    build:
+      context: .
+      args:
+          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Release -DMEMORY_CHECK=ON -DWITH_SSL=ON
+    environment:
+      - TRAVIS_JOB_ID
+    working_dir: /usr/src/build
+    command: make test ARGS=-V
+  test-curl:
+    extends: test
+    image: rj_net_test_curl
+    build:
+      args:
+        CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Release -DMEMORY_CHECK=ON -DWITH_CURL=ON
+  coverage:
+    extends: test
+    image: rj_net_coverage
+    build:
+      args:
+          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DWITH_SSL=ON
+    command: make rj_net_coverage_coveralls

@@ -1,5 +1,5 @@
-#ifndef ARG3_NET_HTTP_CLIENT_H
-#define ARG3_NET_HTTP_CLIENT_H
+#ifndef RJ_NET_HTTP_CLIENT_H
+#define RJ_NET_HTTP_CLIENT_H
 
 #ifdef HAVE_LIBCURL
 #include <curl/curl.h>
@@ -10,7 +10,7 @@
 #include "protocol.h"
 #include "uri.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {
@@ -86,7 +86,7 @@ namespace arg3
            public:
             typedef std::function<void(const http_response &)> http_client_callback;
 
-            http_client(const arg3::net::uri &uri);
+            http_client(const rj::net::uri &uri);
             http_client(const std::string &uri);
             virtual ~http_client();
             http_client(const http_client &other);
@@ -107,7 +107,7 @@ namespace arg3
             /*!
              * returns the host used to connect
              */
-            arg3::net::uri uri() const;
+            rj::net::uri uri() const;
 
             /*!
              * the response body
@@ -122,7 +122,7 @@ namespace arg3
             /*!
              * sets the host for this request
              */
-            http_client &set_uri(const arg3::net::uri &uri);
+            http_client &set_uri(const rj::net::uri &uri);
 
             /*!
              * sets the payload for this request
@@ -142,12 +142,12 @@ namespace arg3
             /*!
              * performs a POST request
              */
-            http_client &post(const http_client_callback& callback = nullptr);
+            http_client &post(const http_client_callback &callback = nullptr);
 
             /*!
              * performs a PUT request
              */
-            http_client &put(const http_client_callback& callback = nullptr);
+            http_client &put(const http_client_callback &callback = nullptr);
 
             /*!
              * performs a DELETE request
@@ -162,7 +162,7 @@ namespace arg3
 #else
             void request_socket(http::method method, const std::string &path);
 #endif
-            arg3::net::uri uri_;
+            rj::net::uri uri_;
             int timeout_;
             http_response response_;
         };

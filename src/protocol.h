@@ -1,9 +1,9 @@
-#ifndef ARG3_NET_PROTOCOL_H
-#define ARG3_NET_PROTOCOL_H
+#ifndef RJ_NET_PROTOCOL_H
+#define RJ_NET_PROTOCOL_H
 
 #include "socket.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

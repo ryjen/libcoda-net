@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace arg3
+namespace rj
 {
     namespace net
     {
@@ -87,6 +87,7 @@ namespace arg3
                     SSL_free(ssl_->handle);
                     ssl_->handle = NULL;
                 }
+                SSL_CTX_free(ssl_->context);
                 ssl_->context = NULL;
 #endif
                 free(ssl_);
@@ -423,7 +424,7 @@ namespace arg3
                         SSL_free(ssl_->handle);
                         ssl_->handle = NULL;
                     }
-
+                    SSL_CTX_free(ssl_->context);
                     ssl_->context = NULL;
 
                     free(ssl_);

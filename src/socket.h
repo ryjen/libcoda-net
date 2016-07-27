@@ -1,8 +1,8 @@
 
 // Definition of the socket class
 
-#ifndef _ARG3_SOCKET_H_
-#define _ARG3_SOCKET_H_
+#ifndef RJ_SOCKET_H
+#define RJ_SOCKET_H
 
 #ifdef _WIN32
 #include <winsock.h>
@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

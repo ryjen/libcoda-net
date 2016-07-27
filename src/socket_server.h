@@ -1,5 +1,5 @@
-#ifndef ARG3_NET_SOCKET_SERVER_H
-#define ARG3_NET_SOCKET_SERVER_H
+#ifndef RJ_NET_SOCKET_SERVER_H
+#define RJ_NET_SOCKET_SERVER_H
 
 #include <sys/time.h>
 #include <mutex>
@@ -7,7 +7,7 @@
 #include <vector>
 #include "socket_factory.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

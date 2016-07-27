@@ -4,7 +4,7 @@
 #include "socket_client.h"
 #include "socket_server.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

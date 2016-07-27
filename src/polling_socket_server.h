@@ -1,9 +1,9 @@
-#ifndef ARG3_NET_POLLING_SOCKET_SERVER_H_
-#define ARG3_NET_POLLING_SOCKET_SERVER_H_
+#ifndef RJ_NET_POLLING_SOCKET_SERVER_H_
+#define RJ_NET_POLLING_SOCKET_SERVER_H_
 
 #include "socket_server.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

@@ -1,10 +1,10 @@
-#ifndef ARG3_NET_SOCKET_CLIENT_H_
-#define ARG3_NET_SOCKET_CLIENT_H_
+#ifndef RJ_NET_SOCKET_CLIENT_H_
+#define RJ_NET_SOCKET_CLIENT_H_
 
 #include <thread>
 #include "buffered_socket.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

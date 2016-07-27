@@ -1,9 +1,9 @@
-#ifndef ARG3_NET_TELNET_SOCKET_H_
-#define ARG3_NET_TELNET_SOCKET_H_
+#ifndef RJ_NET_TELNET_SOCKET_H_
+#define RJ_NET_TELNET_SOCKET_H_
 
 #include "buffered_socket.h"
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

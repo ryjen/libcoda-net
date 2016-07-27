@@ -24,12 +24,9 @@ stamp-h1
 .libs
 *.status
 config.h
-arg3net_test
 *~
 *.gcno
 coverage.info
-arg3net.pc
-arg3net-*.tar.gz
 build
 debug
 *.gch

@@ -1,10 +1,10 @@
-#ifndef ARG3_NET_EXCEPTION_H
-#define ARG3_NET_EXCEPTION_H
+#ifndef RJ_NET_EXCEPTION_H
+#define RJ_NET_EXCEPTION_H
 
 #include <exception>
 #include <string>
 
-namespace arg3
+namespace rj
 {
     namespace net
     {

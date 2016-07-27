@@ -12,9 +12,9 @@
 
 using namespace bandit;
 
-using namespace arg3::net;
+using namespace rj::net;
 
-using namespace arg3;
+using namespace rj;
 
 using namespace std;
 
@@ -42,11 +42,11 @@ class telnet_test_client : public telnet_socket
     };
     void on_sub_neg(socket::data_type type, const socket::data_buffer &parameters){};
 
-    arg3::net::socket::data_type telopt_type, telopt_option;
+    rj::net::socket::data_type telopt_type, telopt_option;
 };
 
-const socket::data_buffer will_echo{arg3::net::telnet::IAC, arg3::net::telnet::WILL, arg3::net::telnet::ECHO};
-const socket::data_buffer wont_echo{arg3::net::telnet::IAC, arg3::net::telnet::WONT, arg3::net::telnet::ECHO};
+const socket::data_buffer will_echo{rj::net::telnet::IAC, rj::net::telnet::WILL, rj::net::telnet::ECHO};
+const socket::data_buffer wont_echo{rj::net::telnet::IAC, rj::net::telnet::WONT, rj::net::telnet::ECHO};
 
 class telnet_socket_factory : public socket_factory,
                               public buffered_socket_listener,
@@ -132,7 +132,7 @@ go_bandit([]() {
             Assert::That(client.is_valid(), Equals(true));
 
             char buf[101] = {0};
-            snprintf(buf, 100, "got %d %d", arg3::net::telnet::WILL, arg3::net::telnet::ECHO);
+            snprintf(buf, 100, "got %d %d", rj::net::telnet::WILL, rj::net::telnet::ECHO);
 
             string test(buf);
 
