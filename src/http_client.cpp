@@ -540,20 +540,33 @@ namespace rj
         {
             return request(http::GET, uri_.path(), callback);
         }
-
+        http_client &http_client::get(const std::string &path, const http_client_callback &callback)
+        {
+            return request(http::GET, uri_.path() + "/" + path, callback);
+        }
         http_client &http_client::post(const http_client_callback &callback)
         {
             return request(http::POST, uri_.path(), callback);
         }
-
+        http_client &http_client::post(const std::string &path, const http_client_callback &callback)
+        {
+            return request(http::POST, uri_.path() + "/" + path, callback);
+        }
         http_client &http_client::put(const http_client_callback &callback)
         {
             return request(http::PUT, uri_.path(), callback);
         }
-
+        http_client &http_client::put(const std::string &path, const http_client_callback &callback)
+        {
+            return request(http::PUT, uri_.path() + "/" + path, callback);
+        }
         http_client &http_client::de1ete(const http_client_callback &callback)
         {
             return request(http::DELETE, uri_.path(), callback);
+        }
+        http_client &http_client::de1ete(const std::string &path, const http_client_callback &callback)
+        {
+            return request(http::DELETE, uri_.path() + "/" + path, callback);
         }
     }
 }

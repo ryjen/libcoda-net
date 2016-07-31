@@ -140,9 +140,19 @@ namespace rj
             http_client &get(const http_client_callback &callback = nullptr);
 
             /*!
+             * performs a GET request
+             */
+            http_client &get(const std::string &path, const http_client_callback &callback = nullptr);
+
+            /*!
              * performs a POST request
              */
             http_client &post(const http_client_callback &callback = nullptr);
+
+            /*!
+             * performs a POST request
+             */
+            http_client &post(const std::string &path, const http_client_callback &callback = nullptr);
 
             /*!
              * performs a PUT request
@@ -150,9 +160,19 @@ namespace rj
             http_client &put(const http_client_callback &callback = nullptr);
 
             /*!
+             * performs a PUT request
+             */
+            http_client &put(const std::string &path, const http_client_callback &callback = nullptr);
+
+            /*!
              * performs a DELETE request
              */
             http_client &de1ete(const http_client_callback &callback = nullptr);
+
+            /*!
+             * performs a DELETE request
+             */
+            http_client &de1ete(const std::string &path, const http_client_callback &callback = nullptr);
 
             http_client &set_timeout(int value);
 
