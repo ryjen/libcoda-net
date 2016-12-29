@@ -14,7 +14,7 @@ set(SOURCE_FILES
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} INTERFACE ${OPENSSL_INCLUDE_DIR} INTERFACE vendor/cereal/include)
+target_include_directories(${PROJECT_NAME} INTERFACE ${OPENSSL_INCLUDE_DIR} SYSTEM PUBLIC "./vendor/cereal/include")
 
 target_link_libraries(${PROJECT_NAME} INTERFACE ${CMAKE_THREAD_LIBS_INIT} INTERFACE ${OPENSSL_LIBRARIES} INTERFACE ${URIPARSER_LIBRARIES})
 

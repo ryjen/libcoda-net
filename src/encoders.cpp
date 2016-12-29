@@ -1,15 +1,10 @@
 #include "encoders.h"
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
+#include <cereal/archives/json.hpp>
 #include <codecvt>
 #include <iostream>
 #include <locale>
 #include <string>
 #include "uri.h"
-
-using boost::property_tree::ptree;
-using boost::property_tree::read_json;
-using boost::property_tree::write_json;
 
 namespace rj
 {
@@ -35,12 +30,11 @@ namespace rj
 
         jsonencoder::type jsonencoder::encode(const std::map<std::string, std::string> &values) const
         {
-            ptree pt;
-            for (auto &entry : values) {
-                pt.put(entry.first, entry.second);
-            }
             std::ostringstream buf;
-            write_json(buf, pt, false);
+            cereal::JSONOutputArchive archive(buf);
+            for (auto &entry : values) {
+                archive << cereal::make_nvp(entry.first, entry.second);
+            }
             return buf.str();
         }
         jsonencoder::type jsonencoder::encode(const std::string &value) const
