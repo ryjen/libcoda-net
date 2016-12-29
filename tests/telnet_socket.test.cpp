@@ -6,9 +6,9 @@
 #include <string>
 #include <thread>
 #include "buffered_socket.h"
-#include "polling_socket_server.h"
-#include "protocol.h"
-#include "telnet_socket.h"
+#include "polling_server.h"
+#include "telnet/protocol.h"
+#include "telnet/socket.h"
 
 using namespace bandit;
 
@@ -55,9 +55,12 @@ class telnet_socket_factory : public socket_factory,
 {
    private:
    public:
-    socket_factory::socket_type create_socket(const socket_factory::server_type &server, SOCKET sock, const sockaddr_storage &addr)
+    socket_factory::socket_type create_socket(const socket_factory::server_type &server, SOCKET sock,
+                                              const sockaddr_storage &addr)
     {
         auto socket = make_shared<telnet_test_client>(sock, addr);
+
+        socket->set_non_blocking(server->is_non_blocking());
 
         socket->add_listener(shared_from_this());
 
@@ -111,7 +114,7 @@ go_bandit([]() {
 
     std::shared_ptr<telnet_socket_factory> telnetFactory = std::make_shared<telnet_socket_factory>();
 
-    polling_socket_server telnetServer(telnetFactory);
+    polling::server telnetServer(telnetFactory);
 
     telnetServer.add_listener(telnetFactory);
 

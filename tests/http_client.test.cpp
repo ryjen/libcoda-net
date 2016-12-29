@@ -1,15 +1,8 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#undef VERSION
-
 #include <bandit/bandit.h>
 #include <string>
 #include <thread>
-#include "http_client.h"
-#include "polling_socket_server.h"
-#include "socket_client.h"
+#include "async_server.h"
+#include "http/client.h"
 
 using namespace bandit;
 
@@ -19,7 +12,9 @@ using namespace rj;
 
 using namespace std;
 
-class test_socket_factory : public socket_factory, public buffered_socket_listener, public enable_shared_from_this<test_socket_factory>
+class test_socket_factory : public socket_factory,
+                            public buffered_socket_listener,
+                            public enable_shared_from_this<test_socket_factory>
 {
    private:
     string response_;
@@ -27,11 +22,11 @@ class test_socket_factory : public socket_factory, public buffered_socket_listen
    public:
     socket_factory::socket_type create_socket(const server_type &server, SOCKET sock, const sockaddr_storage &addr)
     {
-        auto socket = make_shared<socket_client>(sock, addr);
+        auto socket = std::make_shared<buffered_socket>(sock, addr);
+
+        socket->set_non_blocking(server->is_non_blocking());
 
         socket->add_listener(shared_from_this());
-
-        socket->start();
 
         return socket;
     }
@@ -84,7 +79,7 @@ go_bandit([]() {
 
     std::shared_ptr<test_socket_factory> testFactory = std::make_shared<test_socket_factory>();
 
-    socket_server testServer(testFactory);
+    async::server testServer(testFactory);
 
     describe("an http client", [&]() {
         before_each([&testServer, &testFactory]() {
@@ -101,43 +96,44 @@ go_bandit([]() {
         after_each([&testServer]() { testServer.stop(); });
 
         it("can get", [&]() {
-            http_client client("localhost:9876/test");
+            http::client client("localhost:9876/test");
 
-            client.get([](const http_response &response) { Assert::That(response.payload(), Equals("GET: Hello, World!")); });
+            client.get(
+                [](const http::response &response) { Assert::That(response.content(), Equals("GET: Hello, World!")); });
         });
-#if defined(HAVE_LIBSSL)
+#ifdef OPENSSL_FOUND
         it("is secure", []() {
-            http_client client("https://google.com/settings/personalinfo");
+            http::client client("https://ryan-jennings.net");
 
             Assert::That(client.is_secure(), IsTrue());
 
             client.get();
 
-            Assert::That(client.response().payload().empty(), Equals(false));
+            Assert::That(client.response().content().empty(), Equals(false));
         });
 #endif
         it("can post", []() {
-            http_client client("localhost:9876/test");
+            http::client client("localhost:9876/test");
 
-            client.set_payload("Hello, World!");
+            client.set_content("Hello, World!");
 
             client.post();
 
-            Assert::That(client.response().payload(), Equals("POST: Hello, World!"));
+            Assert::That(client.response().content(), Equals("POST: Hello, World!"));
 
         });
 
         it("can read http response", []() {
-            http_client client("ryan-jennings.net");
+            http::client client("ryan-jennings.net");
 
             try {
                 client.get();
 
                 auto response = client.response();
 
-                Assert::That(response.payload().empty(), Equals(false));
+                Assert::That(response.content().empty(), Equals(false));
 
-                Assert::That(response.payload().find("<html>"), !Equals(string::npos));
+                Assert::That(response.content().find("<html>"), !Equals(string::npos));
 
             } catch (const exception &e) {
                 std::cerr << typeid(e).name() << ": " << e.what() << std::endl;

@@ -23,11 +23,11 @@ make test
 
 options supported are:
 
-    -DCODE_COVERAGE=ON   :   enable code coverage using lcov
-    -DMEMORY_CHECK=ON    :   enable valgrind memory checking on tests
-    -DWITH_CURL=ON       :   enable curl usage for http client
-    -DWITH_SSL=ON        :   enable openssl usage for non-curl http client
-
+    -DENABLE_COVERAGE=OFF :   enable code coverage using lcov
+    -DENABLE_MEMCHECK=OFF :   enable valgrind memory checking on tests
+    -DWITH_CURL=ON        :   enable curl usage for http client
+    -DWITH_SSL=ON         :   enable sockets with OpenSSL support
+    -DWITH_URIPARSER=ON   :   enable uriparser library for parsing
 
 Model
 =====
@@ -36,11 +36,9 @@ Model
 
 A **buffered_socket** adds i/o buffering to a socket.
 
-A **socket_client** adds the ability to run an blocking i/o in a thread.
+A **socket_client** adds the ability to run a blocking i/o in a thread to a socket.
 
 A **socket_listener** can be attached to a buffered_socket for i/o events.
-
-There are two ways to implement a server - you can either subclass a **socket**, **socket_client** or a **socket_listener**.
 
 A **socket_factory** implementation should return the new socket or add the listener to a socket.
 
@@ -76,7 +74,7 @@ public:
 
         client->add_listener(shared_from_this());
 
-        // start the asynch read/write loop
+        // start the async read/write loop
         client->start();
 
         return client;
@@ -141,11 +139,13 @@ int main() {
 Other
 =====
 
-**http_client** is a very basic implementation of a HTTP client:
+##### http::client
+ 
+ a very basic implementation of an HTTP client:
 
 ```c++
 
-http_client client("api.somehost.com/version/resource/id");
+http::client client("api.somehost.com/version/resource/id");
 
 // get some resource
 client.get([](const http_response &response) {
@@ -155,13 +155,25 @@ client.get([](const http_response &response) {
 
 ```c++
 
-http_client client("https://api.somehost.com/version/resource/id");
+http::client client("https://api.somehost.com/version/resource/id");
 
-auto response = client.get().response();
+map<string,string> data = {{"key1", "value1"}, {"key2", "value2"}};
+
+client.add_header(http::CONTENT_TYPE, "application/json");
+
+client.set_content(jsonencoder().encode(data));
+
+auto response = client.post().response();
 
 cout << response.code() << ": " << response << endl;
 
 ```
+
+##### jest
+
+jest is a simple command line util for testing REST services.  It will remember your last request (headers,etc), leaving you free to just specify the path.
+
+
 
 TODO
 ====

@@ -1,19 +1,12 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+
+#include "socket.h"
 #include <cerrno>
 #include <cstring>
 #include <fstream>
 #include "exception.h"
-#include "socket.h"
+#include "secure_layer.h"
 #ifndef _WIN32
 #include <fcntl.h>
-#endif
-
-#ifdef HAVE_LIBSSL
-#include <openssl/err.h>
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
 #endif
 
 using namespace std;
@@ -22,41 +15,40 @@ namespace rj
 {
     namespace net
     {
-        struct ssl_socket {
-#ifdef HAVE_LIBSSL
-            SSL *handle;
-            SSL_CTX *context;
-#endif
-        };
-
 #ifndef _WIN32
-
         int closesocket(SOCKET socket)
         {
             return close(socket);
         }
 #endif
 
-        socket::socket() : sock_(INVALID), ssl_(NULL), non_blocking_(false)
+        socket::socket() : sock_(INVALID), non_blocking_(false), ssl_(nullptr)
         {
             memset(&addr_, 0, sizeof(addr_));
         }
 
 
-        socket::socket(SOCKET sock, const sockaddr_storage &addr) : sock_(sock), addr_(addr), ssl_(NULL), non_blocking_(false)
+        socket::socket(SOCKET sock, const sockaddr_storage &addr)
+            : sock_(sock), addr_(addr), non_blocking_(false), ssl_(nullptr)
         {
         }
 
         socket::socket(socket &&other)
-            : sock_(other.sock_), addr_(std::move(other.addr_)), ssl_(std::move(other.ssl_)), non_blocking_(other.non_blocking_)
+            : sock_(other.sock_),
+              addr_(std::move(other.addr_)),
+              non_blocking_(other.non_blocking_),
+              ssl_(std::move(other.ssl_))
         {
             other.sock_ = INVALID;
-            other.ssl_ = NULL;
+            other.ssl_ = nullptr;
         }
 
-        socket::socket(const std::string &host, const int port) : sock_(INVALID), ssl_(NULL), non_blocking_(false)
+        socket::socket(const std::string &host, const int port, bool secure)
+            : sock_(INVALID), non_blocking_(false), ssl_(nullptr)
         {
             memset(&addr_, 0, sizeof(addr_));
+
+            set_secure(secure);
 
             connect(host, port);
         }
@@ -66,9 +58,9 @@ namespace rj
             sock_ = other.sock_;
             addr_ = std::move(other.addr_);
             non_blocking_ = other.non_blocking_;
-            ssl_ = std::move(other.ssl_);
-            other.ssl_ = NULL;
+            ssl_ = other.ssl_;
             other.sock_ = INVALID;
+            other.ssl_ = nullptr;
 
             return *this;
         }
@@ -78,20 +70,17 @@ namespace rj
             close();
         }
 
+        bool socket::operator==(const socket &other) const
+        {
+            return sock_ == other.sock_;
+        }
+
         void socket::close()
         {
-            if (ssl_ != NULL) {
-#ifdef HAVE_LIBSSL
-                if (ssl_->handle != NULL) {
-                    SSL_shutdown(ssl_->handle);
-                    SSL_free(ssl_->handle);
-                    ssl_->handle = NULL;
-                }
-                SSL_CTX_free(ssl_->context);
-                ssl_->context = NULL;
-#endif
-                free(ssl_);
+            if (ssl_) {
+                ssl_->shutdown();
             }
+
             if (sock_ != INVALID) {
                 shutdown(sock_, SHUT_RDWR);
                 closesocket(sock_);
@@ -102,37 +91,22 @@ namespace rj
 
         int socket::send(const data_buffer &s, int flags)
         {
-            if (!is_valid()) {
-                return INVALID;
-            }
-
-            if (s.empty()) {
-                return 0;
-            }
-
-#ifdef HAVE_LIBSSL
-            if (ssl_ != NULL && ssl_->handle != NULL) {
-                return SSL_write(ssl_->handle, s.data(), s.size());
-            }
-#endif
-            return ::send(sock_, s.data(), s.size(), flags);
+            return this->send(s.data(), s.size(), flags);
         }
 
-        int socket::send(void *s, size_t len, int flags)
+        int socket::send(const void *s, size_t len, int flags)
         {
             if (!is_valid()) {
                 return INVALID;
             }
 
-            if (len == 0) {
+            if (len == 0 || s == NULL) {
                 return 0;
             }
 
-#ifdef HAVE_LIBSSL
-            if (ssl_ != NULL && ssl_->handle != NULL) {
-                return SSL_write(ssl_->handle, s, len);
+            if (ssl_) {
+                return ssl_->send(s, len);
             }
-#endif
 
             return ::send(sock_, s, len, flags);
         }
@@ -185,7 +159,7 @@ namespace rj
             }
         }
 
-        int socket::recv(data_buffer &s)
+        int socket::recv(data_buffer &s, int flags)
         {
             if (!is_valid()) {
                 return INVALID;
@@ -193,16 +167,15 @@ namespace rj
 
             unsigned char buf[MAXRECV + 1] = {0};
 
-            int status;
-
             s.clear();
 
-#ifdef HAVE_LIBSSL
-            if (ssl_ != NULL && ssl_->handle != NULL) {
-                status = SSL_read(ssl_->handle, buf, MAXRECV);
-            } else
-#endif
-                status = ::recv(sock_, buf, MAXRECV, 0);
+            int status;
+
+            if (ssl_) {
+                status = ssl_->read(buf, MAXRECV);
+            } else {
+                status = ::recv(sock_, buf, MAXRECV, flags);
+            }
 
             if (status > 0) {
                 s.insert(s.end(), &buf[0], &buf[status]);
@@ -278,19 +251,10 @@ namespace rj
 
             freeaddrinfo(result);
 
-#ifdef HAVE_LIBSSL
-            if (ssl_ != NULL && ssl_->handle != NULL) {
-                // Connect the SSL struct to our connection
-                if (!SSL_set_fd(ssl_->handle, sock_)) {
-                    throw socket_exception(ERR_error_string(ERR_get_error(), NULL));
-                }
-
-                // Initiate SSL handshake
-                if (SSL_connect(ssl_->handle) != 1) {
-                    throw socket_exception(ERR_error_string(ERR_get_error(), NULL));
-                }
+            if (ssl_) {
+                ssl_->attach(sock_);
             }
-#endif
+
             return true;
         }
 
@@ -358,6 +322,10 @@ namespace rj
                 return false;
             }
 
+            if (ssl_) {
+                ssl_->attach(sock_);
+            }
+
             return true;
         }
 
@@ -405,71 +373,18 @@ namespace rj
 
         bool socket::is_secure() const
         {
-#ifdef HAVE_LIBSSL
-            return ssl_ != NULL && ssl_->handle != NULL && ssl_->context != NULL;
-#else
-            return false;
-#endif
+            return ssl_ != nullptr;
         }
-        void socket::set_secure(const bool b)
+
+        void socket::set_secure(bool value)
         {
-#ifndef HAVE_LIBSSL
-            throw socket_exception("SSL not supported");
-#else
-            if (!b) {
-                if (ssl_ != NULL) {
-                    // check if we need to free
-                    if (ssl_->handle != NULL) {
-                        SSL_shutdown(ssl_->handle);
-                        SSL_free(ssl_->handle);
-                        ssl_->handle = NULL;
-                    }
-                    SSL_CTX_free(ssl_->context);
-                    ssl_->context = NULL;
-
-                    free(ssl_);
-                    ssl_ = NULL;
-                }
-
-
-                return;
-            }
-
-            // check we're already initialized
-            if (ssl_ && ssl_->handle) {
-                return;
-            }
-
-            if (is_valid()) {
-                throw socket_exception("socket already initalized");
-            }
-
-            static bool initialized = false;
-
-            if (!initialized) {
-                // Register the available ciphers and digests
-                SSL_library_init();
-                // Register the error strings for libcrypto & libssl
-                SSL_load_error_strings();
-
-                initialized = true;
-            }
-
-            ssl_ = (struct ssl_socket *)malloc(sizeof(struct ssl_socket));
-
-            // New context saying we are a client, and using SSL 2 or 3
-            ssl_->context = SSL_CTX_new(SSLv23_client_method());
-            if (ssl_->context == NULL) {
-                throw socket_exception(ERR_error_string(ERR_get_error(), NULL));
-            }
-
-            // Create an SSL struct for the connection
-            ssl_->handle = SSL_new(ssl_->context);
-
-            if (ssl_->handle == NULL) {
-                throw socket_exception(ERR_error_string(ERR_get_error(), NULL));
-            }
+            if (value) {
+#ifdef OPENSSL_FOUND
+                ssl_ = std::make_shared<openssl_layer>();
 #endif
+            } else {
+                ssl_ = nullptr;
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 #ifndef RJ_NET_TELNET_SOCKET_H_
 #define RJ_NET_TELNET_SOCKET_H_
 
-#include "buffered_socket.h"
+#include "../buffered_socket.h"
 
 namespace rj
 {

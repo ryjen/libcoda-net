@@ -4,3 +4,6 @@
 [submodule "cmake"]
 	path = cmake
 	url = http://github.com/ryjen/cmake.git
+[submodule "src/vendor/cereal"]
+	path = src/vendor/cereal
+	url = https://github.com/USCiLab/cereal.git

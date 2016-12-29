@@ -16,6 +16,7 @@
 #endif
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -31,7 +32,7 @@ namespace rj
         int closesocket(SOCKET socket);
 #endif
 
-        struct ssl_socket;
+        class secure_layer;
 
         /*!
          * A wrapper for a raw socket.  Includes both client and server functionality
@@ -39,6 +40,8 @@ namespace rj
         class socket
         {
            public:
+            static const int INVALID = -1;
+
             /*!
              * the base data type for sockets
              */
@@ -62,7 +65,7 @@ namespace rj
             /*!
              * Constructor to open a socket given the host and port
              */
-            socket(const std::string &host, const int port);
+            socket(const std::string &host, const int port, bool secure = false);
 
             /*!
              * Non copyable
@@ -89,6 +92,8 @@ namespace rj
              */
             socket &operator=(socket &&);
 
+            bool operator==(const socket &other) const;
+
             // Data Transimission
 
             /*!
@@ -101,13 +106,13 @@ namespace rj
              * Will write a block of data to the socket
              * @return the number of bytes written
              */
-            virtual int send(void *, size_t, int flags = 0);
+            virtual int send(const void *, size_t, int flags = 0);
 
             /*!
              * Recieves a block of input
              * @returns the number of bytes read
              */
-            virtual int recv(data_buffer &);
+            virtual int recv(data_buffer &, int flags = 0);
 
             /*!
              * @returns true if the socket is alive and connected
@@ -169,14 +174,13 @@ namespace rj
 
             bool is_non_blocking() const;
 
-            void set_secure(const bool);
-
             bool is_secure() const;
+
+            void set_secure(bool value);
 
            protected:
             static const int MAXHOSTNAME = 200;
             static const int MAXRECV = 500;
-            static const int INVALID = -1;
             static const int BACKLOG_SIZE = 10;
 
             virtual void on_recv(data_buffer &s);
@@ -187,13 +191,9 @@ namespace rj
             // the socket address
             struct sockaddr_storage addr_;
 
-            struct ssl_socket *ssl_;
-
            private:
             bool non_blocking_;
-
-            friend class socket_server;
-            friend class polling_socket_server;
+            std::shared_ptr<secure_layer> ssl_;
         };
     }
 }

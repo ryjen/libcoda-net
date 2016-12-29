@@ -51,25 +51,6 @@ namespace rj
            private:
             std::string message_;
         };
-
-
-        /*!
-         * exception used by the rest client class
-         */
-        class rest_exception : public socket_exception
-        {
-           public:
-            rest_exception(const std::string &s) : socket_exception(s){};
-            virtual ~rest_exception() throw()
-            {
-            }
-            rest_exception(const rest_exception &e) : socket_exception(e)
-            {
-            }
-            rest_exception(rest_exception &&e) : socket_exception(std::move(e))
-            {
-            }
-        };
     }
 }
 

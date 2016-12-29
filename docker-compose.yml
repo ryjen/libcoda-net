@@ -5,21 +5,25 @@ services:
     build:
       context: .
       args:
-          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Release -DMEMORY_CHECK=ON -DWITH_SSL=ON
+          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Release -DENABLE_MEMCHECK=ON -DCMAKE_CXX_COMPILER=g++
     environment:
       - TRAVIS_JOB_ID
     working_dir: /usr/src/build
     command: make test ARGS=-V
-  test-curl:
-    extends: test
-    image: rj_net_test_curl
+  test-nodeps:
+    image: rj_net_test_nodeps
     build:
+      context: .
       args:
-        CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Release -DMEMORY_CHECK=ON -DWITH_CURL=ON
+          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Release -DENABLE_MEMCHECK=ON -DWITH_CURL=NO -DWITH_SSL=NO -DWITH_URIPARSER=NO -DCMAKE_CXX_COMPILER=g++
+    environment:
+      - TRAVIS_JOB_ID
+    working_dir: /usr/src/build
+    command: make test ARGS=-V    
   coverage:
     extends: test
     image: rj_net_coverage
     build:
       args:
-          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DWITH_SSL=ON
-    command: make rj_net_coverage_coveralls
+          CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON -DCMAKE_CXX_COMPILER=g++
+    command: make rj_net_coverage

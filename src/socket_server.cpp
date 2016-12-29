@@ -1,11 +1,9 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+
+#include "socket_server.h"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
 #include "exception.h"
-#include "socket_server.h"
 
 using namespace std;
 
@@ -13,7 +11,8 @@ namespace rj
 {
     namespace net
     {
-        socket_server::socket_server(const factory_type &factory) : factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
+        socket_server::socket_server(const factory_type &factory)
+            : factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
         {
         }
 
@@ -163,16 +162,23 @@ namespace rj
             run();
         }
 
-        void socket_server::on_poll()
-        {
-        }
-
         void socket_server::on_start()
         {
         }
 
         void socket_server::on_stop()
         {
+        }
+
+        socket_server::socket_type socket_server::on_accept(SOCKET socket, sockaddr_storage addr)
+        {
+            auto sock = factory_->create_socket(this, socket, addr);
+
+            sock->notify_connect();
+
+            add_socket(sock);
+
+            return sock;
         }
 
         void socket_server::add_socket(const socket_type &sock)
@@ -193,8 +199,6 @@ namespace rj
 
             gettimeofday(&last_time, NULL);
 
-            assert(sockets_.empty());
-
             while (is_valid()) {
                 sockaddr_storage addr;
 
@@ -204,11 +208,7 @@ namespace rj
                     continue;
                 }
 
-                auto sock = factory_->create_socket(this, sys_sock, addr);
-
-                sock->notify_connect();
-
-                add_socket(sock);
+                on_accept(sys_sock, addr);
             }
         }
     }

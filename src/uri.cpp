@@ -1,6 +1,7 @@
 
 #include "uri.h"
 #include <algorithm>
+#include <iomanip>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -12,7 +13,41 @@ namespace rj
 {
     namespace net
     {
-        uri::uri(const std::string &uri, const char *defaultScheme) : uri_(uri)
+        namespace helper
+        {
+#ifdef URIPARSER_FOUND
+            static std::string fromRange(const UriTextRangeA &rng)
+            {
+                if (rng.first && rng.afterLast) {
+                    return std::string(rng.first, rng.afterLast);
+                } else {
+                    return std::string();
+                }
+            }
+
+            static std::string fromList(UriPathSegmentA *xs, const std::string &delim)
+            {
+                UriPathSegmentStructA *head(xs);
+                std::string accum;
+
+                while (head) {
+                    accum += delim + fromRange(head->text);
+                    head = head->next;
+                }
+
+                return accum;
+            }
+#endif
+            char from_hex(char ch)
+            {
+                return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
+            }
+        }
+        uri::uri() : isValid_(false)
+        {
+        }
+
+        uri::uri(const std::string &uri, const std::string &defaultScheme) : uri_(uri)
         {
             isValid_ = parse(uri, defaultScheme);
         }
@@ -27,19 +62,65 @@ namespace rj
             return uri_;
         }
 
-        bool uri::parse(const std::string &uri_s, const char *defaultScheme)
+        std::string uri::full_path() const
         {
-#ifdef HAVE_LIBURIPARSER
-            UriParserStateA state_;
-            state_.uri = &uriParse_;
-            return uriParseUriA(&state_, uri_s.c_str()) == URI_SUCCESS;
+            std::string temp = path();
+            if (!query().empty()) {
+                temp += '?';
+                temp += query_;
+            }
+            if (!fragment().empty()) {
+                temp += '#';
+                temp += fragment();
+            }
+            return temp;
+        }
+        bool uri::parse(const std::string &uri_s, const std::string &defaultScheme)
+        {
+            static const string prot_end("://");
+
+            if (uri_s.empty()) {
+                return false;
+            }
+
+            string::const_iterator pos_i = search(uri_s.begin(), uri_s.end(), prot_end.begin(), prot_end.end());
+#ifdef URIPARSER_FOUND
+            UriUriA uri;
+            UriParserStateA state;
+            state.uri = &uri;
+            std::string url;
+
+            // ensure we always have a scheme
+            if (pos_i == uri_s.end()) {
+                url.append(defaultScheme).append(prot_end).append(uri_s);
+            } else {
+                url = uri_s;
+            }
+
+            bool rval = uriParseUriA(&state, url.c_str()) == URI_SUCCESS;
+
+            if (rval) {
+                scheme_ = helper::fromRange(uri.scheme);
+                auto userInfo = helper::fromRange(uri.userInfo);
+                if (!userInfo.empty()) {
+                    user_ = userInfo.substr(0, userInfo.find(':'));
+                    password_ = userInfo.substr(userInfo.find(':') + 1);
+                }
+                host_ = helper::fromRange(uri.hostText);
+                port_ = helper::fromRange(uri.portText);
+                path_ = helper::fromList(uri.pathHead, "/");
+                query_ = helper::fromRange(uri.query);
+                fragment_ = helper::fromRange(uri.fragment);
+            }
+
+            uriFreeUriMembersA(&uri);
+
+            return rval;
 #else
             // do the manual implementation from stack overflow
             // with some mods for the port
-            const string prot_end("://");
-            string::const_iterator pos_i = search(uri_s.begin(), uri_s.end(), prot_end.begin(), prot_end.end());
             if (pos_i == uri_s.end()) {
-                if (defaultScheme == NULL || !*defaultScheme) {
+                if (defaultScheme.empty()) {
                     return false;
                 } else {
                     scheme_ = defaultScheme;
@@ -47,7 +128,8 @@ namespace rj
                 }
             } else {
                 scheme_.reserve(distance(uri_s.begin(), pos_i));
-                transform(uri_s.begin(), pos_i, back_inserter(scheme_), ptr_fun<int, int>(tolower));  // protocol is icase
+                transform(uri_s.begin(), pos_i, back_inserter(scheme_),
+                          ptr_fun<int, int>(tolower));  // protocol is icase
                 advance(pos_i, prot_end.length());
             }
 
@@ -78,7 +160,7 @@ namespace rj
                 host_end = path_i;
             }
             host_.reserve(distance(pos_i, host_end));
-            transform(pos_i, host_end, back_inserter(host_), ptr_fun<int, int>(tolower));  // host is icase
+            transform(pos_i, host_end, back_inserter(host_), ptr_fun<int, int>(tolower));
             string::const_iterator query_i = find(path_i, uri_s.end(), '?');
             path_.assign(*path_i == '/' ? (path_i + 1) : path_i, query_i);
             if (query_i != uri_s.end()) ++query_i;
@@ -93,9 +175,6 @@ namespace rj
 
         uri::~uri()
         {
-#ifdef HAVE_LIBURIPARSER
-            uriFreeUriMembersA(&uriParse_);
-#endif
         }
 
         bool uri::is_valid() const
@@ -105,58 +184,26 @@ namespace rj
 
         std::string uri::scheme() const
         {
-#ifdef HAVE_LIBURIPARSER
-            return fromRange(uriParse_.scheme);
-#else
             return scheme_;
-#endif
         }
 
         std::string uri::username() const
         {
-#ifdef HAVE_LIBURIPARSER
-            const char *userInfo = fromRange(uriParse_.userInfo);
-            if (userInfo) {
-                std::string temp(userInfo);
-                return temp.substr(0, temp.find(':'));
-            } else {
-                return std::string();
-            }
-#else
             return user_;
-#endif
         }
 
         std::string uri::password() const
         {
-#ifdef HAVE_LIBURIPARSER
-            const char *userInfo = fromRange(uriParse_.userInfo);
-            if (userInfo) {
-                std::string temp(userInfo);
-                return temp.substr(temp.find(':') + 1);
-            } else {
-                return std::string();
-            }
-#else
             return password_;
-#endif
         }
 
         std::string uri::host() const
         {
-#ifdef HAVE_LIBURIPARSER
-            return fromRange(uriParse_.hostText);
-#else
             return host_;
-#endif
         }
         std::string uri::port() const
         {
-#ifdef HAVE_LIBURIPARSER
-            return fromRange(uriParse_.portText);
-#else
             return port_;
-#endif
         }
 
         std::string uri::host_with_port() const
@@ -171,50 +218,64 @@ namespace rj
 
         std::string uri::path() const
         {
-#ifdef HAVE_LIBURIPARSER
-            return fromList(uriParse_.pathHead, "/");
-#else
             return path_;
-#endif
         }
         std::string uri::query() const
         {
-#ifdef HAVE_LIBURIPARSER
-            return fromRange(uriParse_.query);
-#else
             return query_;
-#endif
         }
         std::string uri::fragment() const
         {
-#ifdef HAVE_LIBURIPARSER
-            return fromRange(uriParse_.fragment);
-#else
             return fragment_;
-#endif
         }
-#ifdef HAVE_LIBURIPARSER
-        std::string uri::fromRange(const UriTextRangeA &rng) const
+
+        std::string uri::encode(const std::string &value)
         {
-            if (rng.first && rng.afterLast) {
-                return std::string(rng.first, rng.afterLast);
-            } else {
-                return std::string();
+            ostringstream escaped;
+            escaped.fill('0');
+            escaped << hex;
+
+            for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
+                string::value_type c = (*i);
+
+                // Keep alphanumeric and other accepted characters intact
+                if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+                    escaped << c;
+                    continue;
+                }
+
+                // Any other characters are percent-encoded
+                escaped << uppercase;
+                escaped << '%' << setw(2) << int((unsigned char)c);
+                escaped << nouppercase;
             }
+
+            return escaped.str();
         }
 
-        std::string uri::fromList(UriPathSegmentA *xs, const std::string &delim) const
+        std::string uri::decode(const std::string &value)
         {
-            UriPathSegmentStructA *head(xs);
-            std::string accum;
+            char h;
+            ostringstream escaped;
+            escaped.fill('0');
 
-            while (head) {
-                accum += delim + fromRange(head->text);
-                head = head->next;
+            for (auto i = value.begin(), n = value.end(); i != n; ++i) {
+                string::value_type c = (*i);
+
+                if (c == '%') {
+                    if (i[1] && i[2]) {
+                        h = helper::from_hex(i[1]) << 4 | helper::from_hex(i[2]);
+                        escaped << h;
+                        i += 2;
+                    }
+                } else if (c == '+') {
+                    escaped << ' ';
+                } else {
+                    escaped << c;
+                }
             }
 
-            return accum;
+            return escaped.str();
         }
-#endif
     }
 }

@@ -1,10 +1,8 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+
+#include "socket.h"
 #include <algorithm>
 #include <cassert>
 #include "protocol.h"
-#include "telnet_socket.h"
 
 using namespace std;
 
@@ -20,7 +18,8 @@ namespace rj
         {
         }
 
-        socket::data_buffer::iterator telnet_socket::handle_telopt(data_buffer &s, const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_socket::handle_telopt(data_buffer &s,
+                                                                   const socket::data_buffer::iterator &it)
         {
             if (it == s.end()) return it;
 
@@ -33,7 +32,8 @@ namespace rj
             return s.erase(it, pos + 1);
         }
 
-        socket::data_buffer::iterator telnet_socket::handle_sub_neg(data_buffer &s, const socket::data_buffer::iterator &it)
+        socket::data_buffer::iterator telnet_socket::handle_sub_neg(data_buffer &s,
+                                                                    const socket::data_buffer::iterator &it)
         {
             if (it == s.end() || (it + 1) == s.end()) return it;
 

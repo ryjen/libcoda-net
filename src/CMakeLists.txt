@@ -1,25 +1,42 @@
-add_library(${PROJECT_NAME} buffered_socket.cpp socket.cpp http_client.cpp polling_socket_server.cpp socket_client.cpp socket_server.cpp socket_factory.cpp uri.cpp telnet_socket.cpp)
 
-include_directories(${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+set(SOURCE_FILES
+  buffered_socket.cpp 
+  socket.cpp
+  polling_server.cpp
+  async_server.cpp
+  socket_server.cpp 
+  socket_factory.cpp
+  secure_layer.cpp
+  uri.cpp 
+  telnet/socket.cpp 
+  encoders.cpp
+)
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
+target_include_directories(${PROJECT_NAME} INTERFACE ${OPENSSL_INCLUDE_DIR} INTERFACE vendor/cereal/include)
+
+target_link_libraries(${PROJECT_NAME} INTERFACE ${CMAKE_THREAD_LIBS_INIT} INTERFACE ${OPENSSL_LIBRARIES} INTERFACE ${URIPARSER_LIBRARIES})
 
 set(${PROJECT_NAME}_HEADERS
   buffered_socket.h
   exception.h
-  http_client.h
-  polling_socket_server.h
-  protocol.h
+  polling_server.h
+  async_server.h
+  secure_layer.h
   socket.h
-  socket_client.h
   socket_factory.h
   socket_server.h
-  telnet_socket.h
   uri.h
+  encoders.h
 )
+
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME})
 
 install(FILES ${${PROJECT_NAME}_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${INSTALL_DIRECTORY}")
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
+add_subdirectory(http)
+add_subdirectory(telnet)
+

@@ -81,10 +81,13 @@ namespace rj
              */
             void start(int port, int backlogSize = BACKLOG_SIZE);
 
+            /*!
+             * starts the server in a background thread
+             */
             void start_in_background(int port, int backlogSize = BACKLOG_SIZE);
 
             /*!
-             * Adds a l istener to the server
+             * Adds a listener to the server
              */
             socket_server &add_listener(const listener_type &listener);
 
@@ -98,27 +101,38 @@ namespace rj
              */
             bool operator!=(const socket_server &other);
 
+            /*!
+             * stops the server
+             */
             void stop();
 
+            /*!
+             * listens on a port
+             */
             bool listen(const int port, const int backlogSize);
 
+            /*!
+             * sets the factory used to create sockets on connections
+             */
             void set_socket_factory(const factory_type &factory);
 
            protected:
             /*!
-             * starts a syncronous loop of updating connections
+             * executes a server loop
              */
             virtual void run();
 
             /*!
+             * call when the server loop accepts a new connection
+             */
+            virtual socket_type on_accept(SOCKET socket, sockaddr_storage addr);
+
+            /*!
              * can override these without adding a listener
              */
-            virtual void on_poll();
             virtual void on_start();
             virtual void on_stop();
 
-            void add_socket(const socket_type &sock);
-            void clear_sockets();
 
             std::recursive_mutex sockets_mutex_;
             std::recursive_mutex listeners_mutex_;
@@ -127,6 +141,10 @@ namespace rj
             factory_type factory_;
 
            private:
+            void add_socket(const socket_type &sock);
+
+            void clear_sockets();
+
             void notify_start();
 
             void notify_stop();
