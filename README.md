@@ -7,7 +7,7 @@ rj_net
 
 A c++11 networking library.
 
-A good working example is [Yahtsee](http://github.com/ryjen/yahtsee).
+A working example is [Yahtsee](http://github.com/ryjen/yahtsee).
 
 Building
 ========
@@ -27,22 +27,22 @@ options supported are:
     -DENABLE_MEMCHECK=OFF :   enable valgrind memory checking on tests
     -DWITH_CURL=ON        :   enable curl usage for http client
     -DWITH_SSL=ON         :   enable sockets with OpenSSL support
-    -DWITH_URIPARSER=ON   :   enable uriparser library for parsing
+    -DWITH_URIPARSER=ON   :   enable uriparser library for parsing (otherwise will do its own)
 
 Model
 =====
 
-![UML](uml.png)
+A **socket** adds c++ interface to a system socket
 
 A **buffered_socket** adds i/o buffering to a socket.
 
-A **socket_client** adds the ability to run a blocking i/o in a thread to a socket.
-
 A **socket_listener** can be attached to a buffered_socket for i/o events.
 
-A **socket_factory** implementation should return the new socket or add the listener to a socket.
+A **socket_factory** implementation should create a new socket type for a server.
 
-A **socket_server** is then created with the factory
+An **async_server** is a server that will run sockets in an i/o thread loop.
+
+A **polling_server** is a server that executes i/o synchronously for each socket in intervals.
 
 Examples
 ========
@@ -60,41 +60,38 @@ public:
     /* creates a client on a new connection and adds a listener */
     socket_factory::socket_type create_socket(const socket_factory::server_type &server,
                                               SOCKET sock, const sockaddr_in &addr) {
-        // If we're using this factory with a non-blocking server don't use an asynchronous socket                                        
-        if (server->is_non_blocking()) {
+
+            // create a new socket
             auto sock = std::make_shared<buffered_socket>(sock, addr);
 
+            // sets the socket the same as the server blocking mode
+            socket->set_non_blocking(server->is_non_blocking());
+
+            // add this instance as a listener
             sock->add_listener(shared_from_this());
 
             return sock;
         }
-
-        // otherwise use the default asynchronous client
-        auto client = std::make_shared<socket_client>(sock, addr);
-
-        client->add_listener(shared_from_this());
-
-        // start the async read/write loop
-        client->start();
-
-        return client;
   	}
 
     void on_did_read(const socket_type &sock) {
+      // TODO: Perform input parsing here
       cout << "read from client socket" << endl;
     }
 
     void on_did_write(const socket_type &sock) {
+      // TODO: Perform post i/o actions here
       cout << "wrote to client socket" << endl;
     }
 
     void on_connect(const socket_type &sock) {
+      // TODO: Perform initialization here
       cout << "client socket connected" << endl;
     }
 };
 ```
 
-#### Run a server in the background
+#### Run an async server in the background
 
 ```c++
 int main() {
@@ -102,7 +99,7 @@ int main() {
     std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
 
     /* create a server */
-    rj::net::socket_server example_server(1337, mySocketFactory);
+    rj::net::async_server example_server(1337, mySocketFactory);
 
     /* start running */
     example_server.start_in_background();
@@ -118,7 +115,7 @@ int main() {
 ```
 
 
-#### Run an polling server in the foreground
+#### Run a polling server in the foreground
 
 ```c++
 int main() {
@@ -126,7 +123,7 @@ int main() {
     std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
 
     /* create a server */
-    rj::net::polling_socket_server example_server(1337, mySocketFactory);
+    rj::net::polling_server example_server(1337, mySocketFactory);
 
     /* start running */
     example_server.start();
@@ -161,7 +158,7 @@ map<string,string> data = {{"key1", "value1"}, {"key2", "value2"}};
 
 client.add_header(http::CONTENT_TYPE, "application/json");
 
-client.set_content(jsonencoder().encode(data));
+client.set_content(encoding::json().encode(data));
 
 auto response = client.post().response();
 
