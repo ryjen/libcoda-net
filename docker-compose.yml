@@ -26,4 +26,4 @@ services:
     build:
       args:
           CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON -DCMAKE_CXX_COMPILER=g++
-    command: make rj_net_coverage
+    command: make rj_net_coverage_coveralls
