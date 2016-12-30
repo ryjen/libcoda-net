@@ -60,7 +60,6 @@ public:
     /* creates a client on a new connection and adds a listener */
     socket_factory::socket_type create_socket(const socket_factory::server_type &server,
                                               SOCKET sock, const sockaddr_in &addr) {
-
             // create a new socket
             auto sock = std::make_shared<buffered_socket>(sock, addr);
 
