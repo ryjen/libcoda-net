@@ -367,7 +367,7 @@ namespace rj
                 return request(http::DELETE, uri_.path() + "/" + path, callback);
             }
 
-            void client::set_implementation(const implementation &impl)
+            void client::set_request_type(const implementation &impl)
             {
                 impl_ = impl;
             }

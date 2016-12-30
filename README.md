@@ -173,8 +173,6 @@ cout << response.code() << ": " << response << endl;
 
 jest is a simple command line util for testing REST services.  It will remember your last request (headers,etc), leaving you free to just specify the path.
 
-
-
 TODO
 ====
 

@@ -210,7 +210,6 @@ namespace rj
         buffered_socket &buffered_socket::operator>>(string &s)
         {
             s.append(inBuffer_.begin(), inBuffer_.end());
-
             return *this;
         }
 
@@ -228,9 +227,7 @@ namespace rj
         {
             if (is_valid()) {
                 notify_close();
-
                 flush();
-
                 socket::close();
             }
         }

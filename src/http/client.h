@@ -98,7 +98,7 @@ namespace rj
                 client &operator=(const client &other);
                 client &operator=(client &&other);
 
-                static void set_implementation(const implementation &impl);
+                static void set_request_type(const implementation &impl);
 
                 /*!
                  * adds an HTTP header to the request

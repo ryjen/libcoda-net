@@ -157,8 +157,7 @@ namespace rj
 
             client.add_headers(headers_);
 
-            jsonencoder encoder;
-
+            encoding::json encoder;
 
             if (!data_.empty()) {
                 client.set_content(encoder.encode(data_));

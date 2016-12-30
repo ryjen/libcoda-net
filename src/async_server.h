@@ -9,14 +9,24 @@ namespace rj
     {
         namespace async
         {
+            class client
+            {
+               public:
+                virtual void run() = 0;
+            };
+
+            extern socket_server::factory_type async_socket_factory;
+
             class server : public rj::net::socket_server
             {
                public:
+                typedef std::function<void(const socket_type &socket)> client_loop;
+
                 /*!
                  * default constructor
                  * @factory the factory to create sockets with
                  */
-                server(const factory_type &factory = default_socket_factory);
+                server(const factory_type &factory = async_socket_factory);
 
                 /*!
                  * non-copyable constructor

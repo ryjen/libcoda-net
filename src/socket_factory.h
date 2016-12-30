@@ -20,7 +20,8 @@ namespace rj
             typedef std::shared_ptr<buffered_socket> socket_type;
 
             /* creates a buffered socket from a raw socket */
-            virtual socket_type create_socket(const server_type &server, SOCKET sock, const struct sockaddr_storage &addr) = 0;
+            virtual socket_type create_socket(const server_type &server, SOCKET sock,
+                                              const struct sockaddr_storage &addr) = 0;
 
             virtual ~socket_factory()
             {
@@ -33,7 +34,8 @@ namespace rj
             class default_socket_factory : public socket_factory
             {
                public:
-                virtual socket_type create_socket(const server_type &server, SOCKET sock, const struct sockaddr_storage &addr);
+                virtual socket_type create_socket(const server_type &server, SOCKET sock,
+                                                  const struct sockaddr_storage &addr);
             };
         }
 

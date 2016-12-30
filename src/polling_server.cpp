@@ -201,9 +201,7 @@ namespace rj
                 gettimeofday(&last_time, NULL);
 
                 while (is_valid()) {
-                    if (frequency_ > 0) {
-                        wait_for_poll(&last_time);
-                    }
+                    wait_for_poll(&last_time);
 
                     poll();
                 }
