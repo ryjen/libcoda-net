@@ -1,9 +1,10 @@
 
 #include <sys/stat.h>
-#include "../../exception.h"
 #include "config.h"
 #include "jester.h"
 #include "util.h"
+
+#include "../../exception.h"
 
 using namespace rj::net;
 
