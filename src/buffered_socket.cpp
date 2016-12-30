@@ -1,9 +1,7 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+
+#include "buffered_socket.h"
 #include <algorithm>
 #include <cstring>
-#include "buffered_socket.h"
 #include "exception.h"
 
 using namespace std;

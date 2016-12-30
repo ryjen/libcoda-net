@@ -231,6 +231,7 @@ namespace rj
 
         std::string uri::encode(const std::string &value)
         {
+            // TODO: test. Grabbed from stack overflow
             ostringstream escaped;
             escaped.fill('0');
             escaped << hex;
@@ -255,6 +256,7 @@ namespace rj
 
         std::string uri::decode(const std::string &value)
         {
+            // TODO: test. grabbed from stack overflow
             char h;
             ostringstream escaped;
             escaped.fill('0');

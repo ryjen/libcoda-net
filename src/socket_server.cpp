@@ -183,12 +183,14 @@ namespace rj
 
         void socket_server::add_socket(const socket_type &sock)
         {
+            // TODO: recursive mutex could get heavy
             std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
             sockets_.push_back(sock);
         }
 
         void socket_server::clear_sockets()
         {
+            // TODO: recursive mutex could get heavy
             std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
             sockets_.clear();
         }

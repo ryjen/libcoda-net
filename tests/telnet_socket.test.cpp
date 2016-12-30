@@ -1,7 +1,4 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#undef VERSION
+
 #include <bandit/bandit.h>
 #include <string>
 #include <thread>
