@@ -11,44 +11,34 @@ namespace rj
     {
         namespace async
         {
+            void default_client::run()
+            {
+                while (is_valid()) {
+                    if (!write_from_buffer()) {
+                        close();
+                        break;
+                    }
+
+                    if (!is_valid()) {
+                        break;
+                    }
+
+                    if (!read_to_buffer()) {
+                        close();
+                        break;
+                    }
+                }
+            }
+
             namespace impl
             {
-                /*!
-                 * a default async client
-                 */
-                class client : public buffered_socket, public async::client
-                {
-                   public:
-                    using buffered_socket::buffered_socket;
-                    using buffered_socket::operator=;
-
-                    void run()
-                    {
-                        while (is_valid()) {
-                            if (!write_from_buffer()) {
-                                close();
-                                break;
-                            }
-
-                            if (!is_valid()) {
-                                break;
-                            }
-
-                            if (!read_to_buffer()) {
-                                close();
-                                break;
-                            }
-                        }
-                    }
-                };
-
                 class socket_factory : public net::socket_factory
                 {
                    public:
                     virtual socket_type create_socket(const server_type &server, SOCKET sock,
                                                       const struct sockaddr_storage &addr)
                     {
-                        return std::make_shared<client>(sock, addr);
+                        return std::make_shared<default_client>(sock, addr);
                     }
                 };
             }

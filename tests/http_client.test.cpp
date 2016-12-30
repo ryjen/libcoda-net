@@ -12,72 +12,76 @@ using namespace rj;
 
 using namespace std;
 
-class test_socket_factory : public socket_factory,
-                            public buffered_socket_listener,
-                            public enable_shared_from_this<test_socket_factory>
+namespace test
 {
-   private:
-    string response_;
-
-   public:
-    socket_factory::socket_type create_socket(const server_type &server, SOCKET sock, const sockaddr_storage &addr)
+    class socket_factory : public net::socket_factory,
+                           public buffered_socket_listener,
+                           public enable_shared_from_this<test::socket_factory>
     {
-        auto socket = std::make_shared<buffered_socket>(sock, addr);
+       private:
+        string response_;
 
-        socket->set_non_blocking(server->is_non_blocking());
+       public:
+        net::socket_factory::socket_type create_socket(const server_type &server, SOCKET sock,
+                                                       const sockaddr_storage &addr)
+        {
+            auto socket = std::make_shared<async::default_client>(sock, addr);
 
-        socket->add_listener(shared_from_this());
+            socket->set_non_blocking(server->is_non_blocking());
 
-        return socket;
-    }
+            socket->add_listener(shared_from_this());
 
-    void set_response(const string &response)
-    {
-        response_ = response;
-    }
+            return socket;
+        }
 
-    void on_connect(const buffered_socket_listener::socket_type &sock)
-    {
-        // cout << sock->ip() << " connected" << endl;
-    }
+        void set_response(const string &response)
+        {
+            response_ = response;
+        }
 
-    void on_close(const buffered_socket_listener::socket_type &sock)
-    {
-        // cout << sock->ip() << " closed" << endl;
-    }
+        void on_connect(const buffered_socket_listener::socket_type &sock)
+        {
+            // cout << sock->ip() << " connected" << endl;
+        }
 
-    void on_will_read(const buffered_socket_listener::socket_type &sock)
-    {
-        // cout << sock->ip() << " will read" << endl;
-    }
+        void on_close(const buffered_socket_listener::socket_type &sock)
+        {
+            // cout << sock->ip() << " closed" << endl;
+        }
 
-    void on_did_read(const buffered_socket_listener::socket_type &sock)
-    {
-        // cout << sock->ip() << " did read" << endl;
+        void on_will_read(const buffered_socket_listener::socket_type &sock)
+        {
+            // cout << sock->ip() << " will read" << endl;
+        }
 
-        string line = sock->readln();
+        void on_did_read(const buffered_socket_listener::socket_type &sock)
+        {
+            // cout << sock->ip() << " did read" << endl;
 
-        string method = line.substr(0, line.find(' '));
+            string line = sock->readln();
 
-        sock->write(method + ": " + response_);
-    }
+            string method = line.substr(0, line.find(' '));
 
-    void on_will_write(const buffered_socket_listener::socket_type &sock)
-    {
-        // cout << sock->ip() << " will write" << endl;
-    }
+            sock->write(method + ": " + response_);
+        }
 
-    void on_did_write(const buffered_socket_listener::socket_type &sock)
-    {
-        // cout << sock->ip() << " did write" << endl;
+        void on_will_write(const buffered_socket_listener::socket_type &sock)
+        {
+            // cout << sock->ip() << " will write" << endl;
+        }
 
-        sock->close();
-    }
-};
+        void on_did_write(const buffered_socket_listener::socket_type &sock)
+        {
+            // cout << sock->ip() << " did write" << endl;
+
+            sock->close();
+        }
+    };
+}
 
 go_bandit([]() {
 
-    std::shared_ptr<test_socket_factory> testFactory = std::make_shared<test_socket_factory>();
+    auto testFactory = std::make_shared<test::socket_factory>();
 
     async::server testServer(testFactory);
 

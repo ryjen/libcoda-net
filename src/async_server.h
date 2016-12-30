@@ -15,7 +15,15 @@ namespace rj
                 virtual void run() = 0;
             };
 
-            extern socket_server::factory_type async_socket_factory;
+            class default_client : public buffered_socket, public client
+            {
+               public:
+                using buffered_socket::buffered_socket;
+                using buffered_socket::operator=;
+                void run();
+            };
+
+            extern socket_server::factory_type socket_factory;
 
             class server : public rj::net::socket_server
             {
@@ -26,7 +34,7 @@ namespace rj
                  * default constructor
                  * @factory the factory to create sockets with
                  */
-                server(const factory_type &factory = async_socket_factory);
+                server(const factory_type &factory = socket_factory);
 
                 /*!
                  * non-copyable constructor
