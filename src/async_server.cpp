@@ -71,7 +71,7 @@ namespace rj
 
             void server::on_start()
             {
-                set_non_blocking(false);
+                socket_server::set_non_blocking(false);
             }
 
             void server::run()

@@ -15,7 +15,6 @@ using namespace rj;
 
 using namespace std;
 
-
 class telnet_test_client : public telnet_socket
 {
    public:

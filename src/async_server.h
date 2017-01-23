@@ -64,6 +64,8 @@ namespace rj
                 void on_start();
 
                private:
+                void set_non_blocking(bool);
+
                 std::vector<std::shared_ptr<std::thread>> threads_;
             };
         }
