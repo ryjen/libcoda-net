@@ -53,7 +53,7 @@ endif()
 
 # create package config
 include(CreatePackage)
-create_package("a c++ networking library")
+create_package(DESCRIPTION "a c++ networking library")
 
 # add directories
 add_subdirectory(src)
