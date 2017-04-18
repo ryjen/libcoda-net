@@ -5,3 +5,11 @@
    fun:ASN1_STRING_set
    ...
 }
+{
+    <glibc_freeres>
+    Memcheck:Free
+    fun:free
+    ...
+    fun:__libc_freeres
+    ...
+ }
