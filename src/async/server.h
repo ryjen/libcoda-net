@@ -1,7 +1,7 @@
-#ifndef RJ_NET_ASYNC_SERVER_H_
-#define RJ_NET_ASYNC_SERVER_H_
+#ifndef RJ_NET_SERVER_ASYNC_H
+#define RJ_NET_SERVER_ASYNC_H
 
-#include "socket_server.h"
+#include "../socket_server.h"
 
 namespace rj
 {
@@ -9,20 +9,6 @@ namespace rj
     {
         namespace async
         {
-            class client
-            {
-               public:
-                virtual void run() = 0;
-            };
-
-            class default_client : public buffered_socket, public client
-            {
-               public:
-                using buffered_socket::buffered_socket;
-                using buffered_socket::operator=;
-                void run();
-            };
-
             extern socket_server::factory_type socket_factory;
 
             class server : public rj::net::socket_server

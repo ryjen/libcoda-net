@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstring>
 #include "exception.h"
+#include "socket_server_listener.h"
 
 using namespace std;
 
@@ -11,6 +12,49 @@ namespace rj
 {
     namespace net
     {
+        namespace detail
+        {
+            class cleanup_listener : public buffered_socket_listener
+            {
+               private:
+                socket_server &server_;
+
+               public:
+                cleanup_listener(socket_server &server) : server_(server)
+                {
+                }
+
+                void on_close(const buffered_socket_listener::socket_type &socket)
+                {
+                    if (!socket || !socket->is_valid()) {
+                        return;
+                    }
+
+                    server_.remove_socket(socket->raw_socket());
+                }
+
+
+                void on_connect(const buffered_socket_listener::socket_type &sock)
+                {
+                }
+
+                void on_will_read(const buffered_socket_listener::socket_type &sock)
+                {
+                }
+
+                void on_did_read(const buffered_socket_listener::socket_type &sock)
+                {
+                }
+
+                void on_will_write(const buffered_socket_listener::socket_type &sock)
+                {
+                }
+
+                void on_did_write(const buffered_socket_listener::socket_type &sock)
+                {
+                }
+            };
+        }
         socket_server::socket_server(const factory_type &factory)
             : factory_(factory), backgroundThread_(nullptr), sockets_(), listeners_()
         {
@@ -68,6 +112,17 @@ namespace rj
         bool socket_server::is_valid() const
         {
             return socket::is_valid() && factory_ != NULL;
+        }
+
+        socket_server::socket_type socket_server::find_socket(SOCKET value) const
+        {
+            auto it = sockets_.find(value);
+
+            if (it == sockets_.end()) {
+                return nullptr;
+            }
+
+            return it->second;
         }
 
         void socket_server::stop()
@@ -146,7 +201,7 @@ namespace rj
                 throw socket_exception("unable to listen on port");
             }
 
-            backgroundThread_ = make_shared<thread>(&socket_server::run, this);
+            backgroundThread_ = std::make_shared<thread>(&socket_server::run, this);
         }
 
         void socket_server::start(int port, int backlogSize)
@@ -183,9 +238,24 @@ namespace rj
 
         void socket_server::add_socket(const socket_type &sock)
         {
+            if (!sock || !sock->is_valid()) {
+                return;
+            }
+
             // TODO: recursive mutex could get heavy
             std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
-            sockets_.push_back(sock);
+
+            sock->add_listener(std::make_shared<detail::cleanup_listener>(*this));
+
+            sockets_[sock->raw_socket()] = sock;
+        }
+
+        void socket_server::remove_socket(const SOCKET &sock)
+        {
+            // TODO: recursive mutex could get heavy
+            std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
+
+            sockets_.erase(sock);
         }
 
         void socket_server::clear_sockets()

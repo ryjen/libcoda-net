@@ -2,6 +2,7 @@
 #define RJ_NET_SOCKET_SERVER_H
 
 #include <sys/time.h>
+#include <map>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -11,27 +12,12 @@ namespace rj
 {
     namespace net
     {
-        class socket_server;
+        class socket_server_listener;
 
-        /*!
-         * Defines an interface to listen to a socket server
-         */
-        class socket_server_listener
+        namespace detail
         {
-           public:
-            typedef socket_server *server_type;
-
-            /*!
-             * called when the server starts
-             */
-            virtual void on_start(const server_type &server) = 0;
-
-            /*!
-             * called when the server stops
-             */
-            virtual void on_stop(const server_type &server) = 0;
-        };
-
+            class cleanup_listener;
+        }
 
         /*!
          * Defines a network server that accepts incomming connections, processes their input and writes their output.
@@ -133,15 +119,22 @@ namespace rj
             virtual void on_start();
             virtual void on_stop();
 
+            void on_close(const buffered_socket_listener::socket_type &sock);
 
             std::recursive_mutex sockets_mutex_;
             std::recursive_mutex listeners_mutex_;
-            std::vector<socket_type> sockets_;
+            std::map<SOCKET, socket_type> sockets_;
             std::vector<listener_type> listeners_;
             factory_type factory_;
 
+            socket_type find_socket(SOCKET value) const;
+
            private:
+            friend class detail::cleanup_listener;
+
             void add_socket(const socket_type &sock);
+
+            void remove_socket(const SOCKET &sock);
 
             void clear_sockets();
 

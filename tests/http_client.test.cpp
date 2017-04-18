@@ -1,7 +1,8 @@
 #include <bandit/bandit.h>
 #include <string>
 #include <thread>
-#include "async_server.h"
+#include "async/client.h"
+#include "async/server.h"
 #include "http/client.h"
 
 using namespace bandit;

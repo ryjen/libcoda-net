@@ -1,9 +1,10 @@
-#include "async_server.h"
+#include "server.h"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <memory>
-#include "exception.h"
+#include "../exception.h"
+#include "client.h"
 
 namespace rj
 {
@@ -11,25 +12,6 @@ namespace rj
     {
         namespace async
         {
-            void default_client::run()
-            {
-                while (is_valid()) {
-                    if (!write_from_buffer()) {
-                        close();
-                        break;
-                    }
-
-                    if (!is_valid()) {
-                        break;
-                    }
-
-                    if (!read_to_buffer()) {
-                        close();
-                        break;
-                    }
-                }
-            }
-
             namespace impl
             {
                 class socket_factory : public net::socket_factory

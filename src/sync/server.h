@@ -1,30 +1,23 @@
-#ifndef RJ_NET_POLLING_SERVER_H
-#define RJ_NET_POLLING_SERVER_H
+#ifndef RJ_NET_SERVER_SYNC_H
+#define RJ_NET_SERVER_SYNC_H
 
-#include "socket_server.h"
+#include "../socket_server.h"
+#include "server_impl.h"
 
 namespace rj
 {
     namespace net
     {
-        namespace polling
+        namespace sync
         {
-            class server;
-
-            class server_listener : public socket_server_listener
-            {
-                typedef server *server_type;
-
-               public:
-                /*!
-                 * called when the server has polled its connections
-                 */
-                virtual void on_poll(const server_type &server) = 0;
-            };
-
+            /*!
+             * A syncronous server has a poll frequency and no threads
+             */
             class server : public socket_server
             {
                public:
+                typedef struct timeval timer;
+
                 /*!
                  * default constructor
                  * @factory the factory to create sockets with
@@ -52,35 +45,35 @@ namespace rj
                 server &operator=(server &&other);
 
                 /*!
+                 * updates the servers connections (performs read/writes)
+                 * - will do nothing if the server is not alive
+                 * - is called by the server based on the poll frequency
+                 */
+                void poll(timer *last_time);
+
+                bool listen(const int port, const int backlogSize);
+
+                /*!
                  * Sets the frequency of connection updates (used when looping)
                  * Only uses in non-async
                  * @param value the number of cycles per secon
                  */
                 void set_frequency(unsigned cyclesPerSecond);
 
-                /*!
-                 * updates the servers connections (performs read/writes)
-                 * - will do nothing if the server is not alive
-                 * - is called by the server based on the poll frequency
-                 */
-                void poll();
-
                protected:
+                static const unsigned DEFAULT_FREQUENCY = 4;
+
+                friend class impl;
+
+                timer *wait_time(timer *last_time) const;
+
+                std::shared_ptr<server_impl> impl_;
+
                 void run();
 
                 virtual void on_start();
 
                 virtual void on_poll();
-
-               private:
-                constexpr static int DEFAULT_POLL_FREQUENCY = 4;
-
-                /*!
-                 * Will loop each connection and if the delegate returns false, will remove the connection
-                 */
-                void check_connections(std::function<bool(const socket_type &)> delegate);
-
-                void wait_for_poll(struct timeval *);
 
                 void notify_poll();
 

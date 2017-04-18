@@ -23,7 +23,18 @@ set(PROJECT_NAME_TELNET "${PROJECT_NAME}_telnet")
 
 set(PROJECT_NAME_HTTP "${PROJECT_NAME}_http")
 
+set(PROJECT_NAME_ASYNC "${PROJECT_NAME}_async")
+
+set(PROJECT_NAME_SYNC "${PROJECT_NAME}_sync")
+
 set(TEST_PROJECT_NAME "${PROJECT_NAME}_test")
+
+include (CheckIncludeFiles)
+check_include_files("sys/epoll.h" EPOLL_FOUND)
+
+if (EPOLL_FOUND)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEPOLL_FOUND")
+endif()
 
 if (WITH_CURL)
 	find_package (CURL REQUIRED)

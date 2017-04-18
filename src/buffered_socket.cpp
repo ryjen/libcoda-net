@@ -42,7 +42,6 @@ namespace rj
 
             inBuffer_ = std::move(other.inBuffer_);
             outBuffer_ = std::move(other.outBuffer_);
-
             listeners_ = std::move(other.listeners_);
 
             return *this;
@@ -110,7 +109,6 @@ namespace rj
                 // while not an error or the peer connection was closed
                 do {
                     inBuffer_.insert(inBuffer_.end(), chunk.begin(), chunk.end());
-
                 } while (is_non_blocking() && read_chunk(chunk));
 
                 notify_did_read();
@@ -134,9 +132,7 @@ namespace rj
 
             if (pos == inBuffer_.end()) {
                 string temp(inBuffer_.begin(), inBuffer_.end());
-
                 inBuffer_.clear();
-
                 return temp;
             }
 
@@ -248,9 +244,7 @@ namespace rj
             }
 
             outBuffer_.clear();
-
             notify_did_write();
-
             return true;
         }
 

@@ -1,18 +1,16 @@
 
-set(SOURCE_FILES
+set(${PROJECT_NAME}_SOURCE_FILES
   buffered_socket.cpp 
   socket.cpp
-  polling_server.cpp
-  async_server.cpp
-  socket_server.cpp 
-  socket_factory.cpp
   secure_layer.cpp
+  socket_factory.cpp
+  socket_server.cpp
   uri.cpp 
   telnet/socket.cpp 
   encoders.cpp
 )
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} INTERFACE ${OPENSSL_INCLUDE_DIR} SYSTEM PUBLIC "vendor/cereal/include")
 
@@ -21,12 +19,10 @@ target_link_libraries(${PROJECT_NAME} INTERFACE ${CMAKE_THREAD_LIBS_INIT} INTERF
 set(${PROJECT_NAME}_HEADERS
   buffered_socket.h
   exception.h
-  polling_server.h
-  async_server.h
   secure_layer.h
   socket.h
   socket_factory.h
-  socket_server.h
+  socket_server_listener.h
   uri.h
   encoders.h
 )
@@ -37,6 +33,8 @@ install(FILES ${${PROJECT_NAME}_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/in
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
+add_subdirectory(async)
 add_subdirectory(http)
+add_subdirectory(sync)
 add_subdirectory(telnet)
 

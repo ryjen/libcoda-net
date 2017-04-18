@@ -10,8 +10,8 @@ services:
       - TRAVIS_JOB_ID
     working_dir: /usr/src/build
     command: make test ARGS=-V
-  test-nodeps:
-    image: rj_net_test_nodeps
+  test-no-deps:
+    image: rj_net_test_no_deps
     build:
       context: .
       args:

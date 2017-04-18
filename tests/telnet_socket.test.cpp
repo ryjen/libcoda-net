@@ -3,7 +3,8 @@
 #include <string>
 #include <thread>
 #include "buffered_socket.h"
-#include "polling_server.h"
+#include "socket_server_listener.h"
+#include "sync/server.h"
 #include "telnet/protocol.h"
 #include "telnet/socket.h"
 
@@ -65,7 +66,7 @@ class telnet_socket_factory : public socket_factory,
 
     void on_connect(const buffered_socket_listener::socket_type &sock)
     {
-        // cout <<  sock->ip() << " connected, sending will_echo\n";
+        // cout << sock->ip() << " connected, sending will_echo\n";
 
         sock->send(will_echo);
     }
@@ -110,14 +111,14 @@ go_bandit([]() {
 
     std::shared_ptr<telnet_socket_factory> telnetFactory = std::make_shared<telnet_socket_factory>();
 
-    polling::server telnetServer(telnetFactory);
+    sync::server telnetServer(telnetFactory);
 
     telnetServer.add_listener(telnetFactory);
 
     describe("a telnet socket", [&]() {
         before_each([&]() {
             try {
-                telnetServer.start_in_background(9876);
+                telnetServer.start_in_background(8765);
             } catch (const exception &e) {
                 std::cerr << e.what() << std::endl;
             }
@@ -126,7 +127,7 @@ go_bandit([]() {
         after_each([&]() { telnetServer.stop(); });
 
         it("supports ECHO", []() {
-            telnet_test_client client("127.0.0.1", 9876);
+            telnet_test_client client("127.0.0.1", 8765);
 
             Assert::That(client.is_valid(), Equals(true));
 
