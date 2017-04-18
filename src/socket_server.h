@@ -4,8 +4,8 @@
 #include <sys/time.h>
 #include <map>
 #include <mutex>
+#include <set>
 #include <thread>
-#include <vector>
 #include "socket_factory.h"
 
 namespace rj
@@ -13,11 +13,6 @@ namespace rj
     namespace net
     {
         class socket_server_listener;
-
-        namespace detail
-        {
-            class cleanup_listener;
-        }
 
         /*!
          * Defines a network server that accepts incomming connections, processes their input and writes their output.
@@ -90,12 +85,12 @@ namespace rj
             /*!
              * stops the server
              */
-            void stop();
+            virtual void stop();
 
             /*!
              * listens on a port
              */
-            bool listen(const int port, const int backlogSize);
+            virtual bool listen(const int port, const int backlogSize);
 
             /*!
              * sets the factory used to create sockets on connections
@@ -106,7 +101,7 @@ namespace rj
             /*!
              * executes a server loop
              */
-            virtual void run();
+            virtual void run() = 0;
 
             /*!
              * call when the server loop accepts a new connection
@@ -119,25 +114,11 @@ namespace rj
             virtual void on_start();
             virtual void on_stop();
 
-            void on_close(const buffered_socket_listener::socket_type &sock);
-
-            std::recursive_mutex sockets_mutex_;
             std::recursive_mutex listeners_mutex_;
-            std::map<SOCKET, socket_type> sockets_;
-            std::vector<listener_type> listeners_;
+            std::set<listener_type> listeners_;
             factory_type factory_;
 
-            socket_type find_socket(SOCKET value) const;
-
            private:
-            friend class detail::cleanup_listener;
-
-            void add_socket(const socket_type &sock);
-
-            void remove_socket(const SOCKET &sock);
-
-            void clear_sockets();
-
             void notify_start();
 
             void notify_stop();

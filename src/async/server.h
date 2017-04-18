@@ -9,18 +9,14 @@ namespace rj
     {
         namespace async
         {
-            extern socket_server::factory_type socket_factory;
-
             class server : public rj::net::socket_server
             {
                public:
-                typedef std::function<void(const socket_type &socket)> client_loop;
-
                 /*!
                  * default constructor
                  * @factory the factory to create sockets with
                  */
-                server(const factory_type &factory = socket_factory);
+                server(const factory_type &factory = default_socket_factory);
 
                 /*!
                  * non-copyable constructor
@@ -44,15 +40,11 @@ namespace rj
                  */
                 server &operator=(server &&other);
 
-               protected:
-                void run();
-
-                void on_start();
-
                private:
                 void set_non_blocking(bool);
+                void on_start();
 
-                std::vector<std::shared_ptr<std::thread>> threads_;
+                void run();
             };
         }
     }

@@ -12,6 +12,50 @@ namespace rj
     {
         namespace sync
         {
+            namespace detail
+            {
+                class cleanup_listener : public buffered_socket_listener
+                {
+                   private:
+                    server &server_;
+
+                   public:
+                    cleanup_listener(server &server) : server_(server)
+                    {
+                    }
+
+                    void on_close(const buffered_socket_listener::socket_type &socket)
+                    {
+                        if (!socket || !socket->is_valid()) {
+                            return;
+                        }
+
+                        server_.remove_socket(socket->raw_socket());
+                    }
+
+
+                    void on_connect(const buffered_socket_listener::socket_type &sock)
+                    {
+                    }
+
+                    void on_will_read(const buffered_socket_listener::socket_type &sock)
+                    {
+                    }
+
+                    void on_did_read(const buffered_socket_listener::socket_type &sock)
+                    {
+                    }
+
+                    void on_will_write(const buffered_socket_listener::socket_type &sock)
+                    {
+                    }
+
+                    void on_did_write(const buffered_socket_listener::socket_type &sock)
+                    {
+                    }
+                };
+            }
+
             extern std::shared_ptr<server_impl> create_server_impl();
 
             server::server(const factory_type &factory)
@@ -145,6 +189,63 @@ namespace rj
                 while (is_valid()) {
                     poll(&last_time);
                 }
+            }
+
+            void server::stop()
+            {
+                socket_server::stop();
+
+                clear_sockets();
+            }
+
+            server::socket_type server::on_accept(SOCKET sock, sockaddr_storage addr)
+            {
+                auto socket = socket_server::on_accept(sock, addr);
+
+                add_socket(socket);
+
+                return socket;
+            }
+
+            socket_server::socket_type server::find_socket(SOCKET value) const
+            {
+                auto it = sockets_.find(value);
+
+                if (it == sockets_.end()) {
+                    return nullptr;
+                }
+
+                return it->second;
+            }
+
+
+            void server::add_socket(const socket_type &sock)
+            {
+                if (!sock || !sock->is_valid()) {
+                    return;
+                }
+
+                // TODO: recursive mutex could get heavy
+                std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
+
+                sock->add_listener(std::make_shared<detail::cleanup_listener>(*this));
+
+                sockets_[sock->raw_socket()] = sock;
+            }
+
+            void server::remove_socket(const SOCKET &sock)
+            {
+                // TODO: recursive mutex could get heavy
+                std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
+
+                sockets_.erase(sock);
+            }
+
+            void server::clear_sockets()
+            {
+                // TODO: recursive mutex could get heavy
+                std::lock_guard<std::recursive_mutex> lock(sockets_mutex_);
+                sockets_.clear();
             }
         }
     }

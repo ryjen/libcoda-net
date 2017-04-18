@@ -18,9 +18,44 @@ namespace rj
             class default_client : public buffered_socket, public client
             {
                public:
-                using buffered_socket::buffered_socket;
-                using buffered_socket::operator=;
+                default_client(SOCKET sock, const sockaddr_storage &addr);
+
+                default_client(const std::string &host, const int port);
+
+                default_client();
+
+                /*!
+                 * Non copyable
+                 */
+                default_client(const default_client &) = delete;
+
+                /*!
+                 * Move constructor
+                 */
+                default_client(default_client &&other);
+
+                /*!
+                 * Destructor
+                 */
+                virtual ~default_client();
+
+                /*!
+                 * Non copy-assignable
+                 */
+                default_client &operator=(const default_client &other) = delete;
+
+                /*!
+                 * Move assigment
+                 */
+                default_client &operator=(default_client &&other);
+
                 void run();
+
+               protected:
+                void on_connect();
+
+               private:
+                std::shared_ptr<std::thread> backgroundThread_;
             };
         }
     }

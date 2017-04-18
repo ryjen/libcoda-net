@@ -1,8 +1,10 @@
 #ifdef EPOLL_FOUND
 
 #include "epoll_impl.h"
-
 #include <sys/epoll.h>
+#include <cstring>
+#include "../exception.h"
+#include "server.h"
 
 #define MAXEVENTS 64
 

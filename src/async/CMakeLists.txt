@@ -2,8 +2,7 @@
 set(SOURCE_FILES client.cpp server.cpp)
 
 set(${PROJECT_NAME_ASYNC}_HEADER_FILES
-  client.h
-  server.h
+  client.h server.h
 )
 
 add_library(${PROJECT_NAME_ASYNC} ${SOURCE_FILES})

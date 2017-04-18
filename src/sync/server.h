@@ -10,6 +10,11 @@ namespace rj
     {
         namespace sync
         {
+            namespace detail
+            {
+                class cleanup_listener;
+            }
+
             /*!
              * A syncronous server has a poll frequency and no threads
              */
@@ -60,12 +65,24 @@ namespace rj
                  */
                 void set_frequency(unsigned cyclesPerSecond);
 
-               protected:
-                static const unsigned DEFAULT_FREQUENCY = 4;
+                void stop();
 
-                friend class impl;
+               protected:
+                void add_socket(const socket_type &sock);
+
+                void remove_socket(const SOCKET &sock);
+
+                void clear_sockets();
+
+                virtual socket_type on_accept(SOCKET socket, sockaddr_storage addr);
 
                 timer *wait_time(timer *last_time) const;
+
+               private:
+                static const unsigned DEFAULT_FREQUENCY = 4;
+
+                std::recursive_mutex sockets_mutex_;
+                socket_type find_socket(SOCKET value) const;
 
                 std::shared_ptr<server_impl> impl_;
 
@@ -77,7 +94,12 @@ namespace rj
 
                 void notify_poll();
 
+                std::map<SOCKET, socket_type> sockets_;
+
                 unsigned frequency_;
+
+                friend class impl;
+                friend class detail::cleanup_listener;
             };
         }
     }

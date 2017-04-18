@@ -3,6 +3,7 @@
 
 #ifdef EPOLL_FOUND
 
+#include "../socket.h"
 #include "server_impl.h"
 
 namespace rj
@@ -29,5 +30,7 @@ namespace rj
         }
     }
 }
+
+#endif
 
 #endif

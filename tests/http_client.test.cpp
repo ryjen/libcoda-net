@@ -4,6 +4,7 @@
 #include "async/client.h"
 #include "async/server.h"
 #include "http/client.h"
+#include "socket_server.h"
 
 using namespace bandit;
 
