@@ -1,6 +1,6 @@
+#include <string>
 
 #include <bandit/bandit.h>
-#include <string>
 #include <thread>
 #include "buffered_socket.h"
 #include "socket_server_listener.h"
@@ -15,6 +15,8 @@ using namespace rj::net;
 using namespace rj;
 
 using namespace std;
+
+using namespace snowhouse;
 
 class telnet_test_client : public telnet_socket
 {

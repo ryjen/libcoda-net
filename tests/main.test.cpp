@@ -1,4 +1,6 @@
 
+#include <string>
+
 #include <bandit/bandit.h>
 #include "http/client.h"
 
