@@ -18,13 +18,14 @@ target_link_libraries(${PROJECT_NAME} INTERFACE ${CMAKE_THREAD_LIBS_INIT} INTERF
 
 set(${PROJECT_NAME}_HEADERS
   buffered_socket.h
+  encoders.h
   exception.h
   secure_layer.h
   socket.h
   socket_factory.h
+  socket_server.h
   socket_server_listener.h
   uri.h
-  encoders.h
 )
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME})
