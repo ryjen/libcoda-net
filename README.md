@@ -7,7 +7,21 @@ rj_net
 
 A c++11 networking library.
 
-A working example is [Yahtsee](http://github.com/ryjen/yahtsee).
+Model
+=====
+
+A **socket** adds RAII style c++ interface to a system socket
+
+A **buffered_socket** adds i/o buffering to a socket.
+
+A **socket_listener** can be attached to a buffered_socket for i/o events.
+
+A **socket_factory** implementation should create a new socket type for a server.
+
+An **async_server** is a server that will run sockets in an i/o thread loop.
+
+A **polling_server** is a server that executes i/o synchronously for each socket in intervals.
+
 
 Building
 ========
@@ -29,20 +43,6 @@ options supported are:
     -DWITH_SSL=ON         :   enable sockets with OpenSSL support
     -DWITH_URIPARSER=ON   :   enable uriparser library for parsing (otherwise will do its own)
 
-Model
-=====
-
-A **socket** adds c++ interface to a system socket
-
-A **buffered_socket** adds i/o buffering to a socket.
-
-A **socket_listener** can be attached to a buffered_socket for i/o events.
-
-A **socket_factory** implementation should create a new socket type for a server.
-
-An **async_server** is a server that will run sockets in an i/o thread loop.
-
-A **polling_server** is a server that executes i/o synchronously for each socket in intervals.
 
 Examples
 ========
@@ -137,7 +137,7 @@ Other
 
 ##### http::client
  
- a very basic implementation of an HTTP client:
+ A very basic implementation of an HTTP client. Was intended to quickly test:
 
 ```c++
 
