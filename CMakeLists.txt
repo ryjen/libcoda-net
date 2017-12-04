@@ -41,6 +41,7 @@ if (WITH_URIPARSER)
 	pkg_check_modules (URIPARSER liburiparser)
 	if (URIPARSER_FOUND)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DURIPARSER_FOUND")
+		link_directories(${URIPARSER_LIBRARY_DIRS})
 	endif ()
 endif()
 
