@@ -22,6 +22,7 @@ set(${PROJECT_NAME}_HEADERS
   secure_layer.h
   socket.h
   socket_factory.h
+  socket_server.h
   socket_server_listener.h
   uri.h
   encoders.h
