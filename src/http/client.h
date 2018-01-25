@@ -4,7 +4,6 @@
 #include <functional>
 #include <map>
 #include <string>
-#include "../uri.h"
 #include "protocol.h"
 
 namespace rj

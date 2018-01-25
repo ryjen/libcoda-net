@@ -1,3 +1,5 @@
+
+#include "../socket_server.h"
 #include "client.h"
 
 namespace rj

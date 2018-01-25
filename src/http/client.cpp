@@ -3,6 +3,8 @@
 #include <functional>
 
 #include <cinttypes>
+#include "../socket.h"
+#include "../uri.h"
 #include "../exception.h"
 #include "client.h"
 

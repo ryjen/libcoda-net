@@ -1,3 +1,5 @@
+#include "../../socket.h"
+#include "../../uri.h"
 #include "jester.h"
 #include <getopt.h>
 #include "../../encoders.h"

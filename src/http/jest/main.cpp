@@ -1,6 +1,9 @@
 
 #include <sys/stat.h>
 #include "config.h"
+#include "../../socket.h"
+#include "../../uri.h"
+#include "uri.h"
 #include "jester.h"
 #include "util.h"
 
