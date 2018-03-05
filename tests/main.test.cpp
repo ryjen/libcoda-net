@@ -1,5 +1,9 @@
 
+#include <string>
+
 #include <bandit/bandit.h>
+#include "socket.h"
+#include "uri.h"
 #include "http/client.h"
 
 using namespace bandit;

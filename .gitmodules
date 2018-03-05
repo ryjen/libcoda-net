@@ -3,7 +3,8 @@
 	url = https://github.com/joakimkarlsson/bandit.git
 [submodule "cmake"]
 	path = cmake
-	url = http://github.com/ryjen/cmake.git
+	url = https://github.com/ryjen/cmake.git
 [submodule "src/vendor/cereal"]
 	path = src/vendor/cereal
-	url = https://github.com/USCiLab/cereal.git
+    url = https://github.com/USCiLab/cereal.git
+

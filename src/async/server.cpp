@@ -1,3 +1,4 @@
+#include "../socket_server.h"
 #include "server.h"
 #include <algorithm>
 #include <cassert>

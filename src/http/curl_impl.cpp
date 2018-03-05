@@ -1,5 +1,6 @@
-
+#include "../socket.h"
 #include "../exception.h"
+#include "../uri.h"
 #include "client.h"
 
 #ifdef CURL_FOUND

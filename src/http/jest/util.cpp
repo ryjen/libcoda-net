@@ -1,3 +1,5 @@
+#include "../../socket.h"
+#include "../../uri.h"
 #include "util.h"
 #include "../protocol.h"
 #include "jester.h"

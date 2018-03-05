@@ -1,8 +1,6 @@
 #ifndef RJ_NET_SERVER_ASYNC_H
 #define RJ_NET_SERVER_ASYNC_H
 
-#include "../socket_server.h"
-
 namespace rj
 {
     namespace net

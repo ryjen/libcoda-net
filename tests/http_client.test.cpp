@@ -1,6 +1,9 @@
-#include <bandit/bandit.h>
 #include <string>
+
+#include <bandit/bandit.h>
 #include <thread>
+#include "socket_server.h"
+#include "uri.h"
 #include "async/client.h"
 #include "async/server.h"
 #include "http/client.h"
@@ -13,6 +16,8 @@ using namespace rj::net;
 using namespace rj;
 
 using namespace std;
+
+using namespace snowhouse;
 
 namespace test
 {

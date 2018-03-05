@@ -1,6 +1,7 @@
 #include <strings.h>
 #include "../buffered_socket.h"
 #include "../exception.h"
+#include "../uri.h"
 #include "client.h"
 
 using namespace std;

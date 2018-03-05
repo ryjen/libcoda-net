@@ -1,8 +1,6 @@
 #ifndef RJ_NET_HTTP_PROTOCOL_H
 #define RJ_NET_HTTP_PROTOCOL_H
 
-#include "../socket.h"
-
 namespace rj
 {
     namespace net
