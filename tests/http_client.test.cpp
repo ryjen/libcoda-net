@@ -114,7 +114,7 @@ go_bandit([]() {
         });
 #ifdef OPENSSL_FOUND
         it("is secure", []() {
-            http::client client("https://ryan-jennings.net");
+            http::client client("https://www.httpvshttps.com");
 
             Assert::That(client.is_secure(), IsTrue());
 
@@ -135,21 +135,16 @@ go_bandit([]() {
         });
 
         it("can read http response", []() {
-            http::client client("ryan-jennings.net");
+            http::client client("http://www.httpvshttps.com");
 
-            try {
                 client.get();
 
                 auto response = client.response();
 
                 Assert::That(response.content().empty(), Equals(false));
 
-                Assert::That(response.content().find("<html>"), !Equals(string::npos));
+                Assert::That(response.content().find("<html"), !Equals(string::npos));
 
-            } catch (const exception &e) {
-                std::cerr << typeid(e).name() << ": " << e.what() << std::endl;
-                throw e;
-            }
         });
     });
 
