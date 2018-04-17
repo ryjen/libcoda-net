@@ -8,7 +8,7 @@
 
 #define MAXEVENTS 64
 
-namespace rj
+namespace coda
 {
     namespace net
     {

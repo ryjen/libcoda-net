@@ -1,12 +1,12 @@
-#ifndef RJ_NET_HTTP_CLIENT_H
-#define RJ_NET_HTTP_CLIENT_H
+#ifndef CODA_NET_HTTP_CLIENT_H
+#define CODA_NET_HTTP_CLIENT_H
 
 #include <functional>
 #include <map>
 #include <string>
 #include "protocol.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {
@@ -89,7 +89,7 @@ namespace rj
                 typedef std::function<std::string(http::client &, http::method, const std::string &)> implementation;
 
                public:
-                client(const rj::net::uri &uri);
+                client(const coda::net::uri &uri);
                 client(const std::string &uri);
                 virtual ~client();
                 client(const client &other);
@@ -117,7 +117,7 @@ namespace rj
                 /*!
                  * returns the host used to connect
                  */
-                rj::net::uri uri() const;
+                coda::net::uri uri() const;
 
                 /*!
                  * the response body
@@ -134,7 +134,7 @@ namespace rj
                 /*!
                  * sets the host for this request
                  */
-                client &set_uri(const rj::net::uri &uri);
+                client &set_uri(const coda::net::uri &uri);
 
                 /*!
                  * sets the payload for this request
@@ -191,7 +191,7 @@ namespace rj
 
                private:
                 static client::implementation impl_;
-                rj::net::uri uri_;
+                coda::net::uri uri_;
                 int timeout_;
                 http::response response_;
             };

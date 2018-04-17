@@ -1,10 +1,10 @@
-#ifndef RJ_NET_EXCEPTION_H
-#define RJ_NET_EXCEPTION_H
+#ifndef CODA_NET_EXCEPTION_H
+#define CODA_NET_EXCEPTION_H
 
 #include <exception>
 #include <string>
 
-namespace rj
+namespace coda
 {
     namespace net
     {

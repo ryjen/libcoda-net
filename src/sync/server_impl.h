@@ -1,9 +1,9 @@
-#ifndef RJ_NET_SERVER_SYNC_IMPL_H
-#define RJ_NET_SERVER_SYNC_IMPL_H
+#ifndef CODA_NET_SERVER_SYNC_IMPL_H
+#define CODA_NET_SERVER_SYNC_IMPL_H
 
 #include <sys/time.h>
 
-namespace rj
+namespace coda
 {
     namespace net
     {

@@ -1,7 +1,7 @@
-#ifndef RJ_NET_HTTP_PROTOCOL_H
-#define RJ_NET_HTTP_PROTOCOL_H
+#ifndef CODA_NET_HTTP_PROTOCOL_H
+#define CODA_NET_HTTP_PROTOCOL_H
 
-namespace rj
+namespace coda
 {
     namespace net
     {

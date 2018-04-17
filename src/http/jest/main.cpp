@@ -9,12 +9,12 @@
 
 #include "../../exception.h"
 
-using namespace rj::net;
+using namespace coda::net;
 
 int main(int argc, char *argv[])
 {
     std::string dir = jest::get_config_folder();
-    rj::net::jester jester;
+    coda::net::jester jester;
     jest::config history("history");
 
     int err = mkdir(dir.c_str(), 0777);

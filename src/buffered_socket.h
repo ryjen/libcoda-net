@@ -1,12 +1,12 @@
-#ifndef RJ_NET_BUFFERED_SOCKET_H_
-#define RJ_NET_BUFFERED_SOCKET_H_
+#ifndef CODA_NET_BUFFERED_SOCKET_H_
+#define CODA_NET_BUFFERED_SOCKET_H_
 
 #include <memory>
 #include <string>
 #include <vector>
 #include "socket.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

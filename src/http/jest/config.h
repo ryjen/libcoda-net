@@ -1,5 +1,5 @@
-#ifndef RJ_NET_JEST_CONFIG_H
-#define RJ_NET_JEST_CONFIG_H
+#ifndef CODA_NET_JEST_CONFIG_H
+#define CODA_NET_JEST_CONFIG_H
 
 #include <fstream>
 #include <map>
@@ -11,7 +11,7 @@ namespace std
     std::ostream &operator<<(std::ostream &os, const std::pair<std::string, std::string> &ps);
 }
 
-namespace rj
+namespace coda
 {
     namespace net
     {

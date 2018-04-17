@@ -6,7 +6,7 @@
 #include "../client.h"
 #include "util.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {
@@ -16,7 +16,7 @@ namespace rj
 
         jester &jester::set_uri(const std::string &value)
         {
-            uri_ = rj::net::uri(value);
+            uri_ = coda::net::uri(value);
             return *this;
         }
         jester &jester::set_method(http::method value)

@@ -1,13 +1,13 @@
 
-set(SOURCE_FILES epoll_impl.cpp select_impl.cpp server.cpp)
-
 set(${PROJECT_NAME_SYNC}_HEADER_FILES
-  epoll_impl.h
-  listener.h
-  select_impl.h
-  server.h
-  server_impl.h
+        epoll_impl.h
+        listener.h
+        select_impl.h
+        server.h
+        server_impl.h
 )
+
+set(SOURCE_FILES ${${PROJECT_NAME_SYNC}_HEADER_FILES} epoll_impl.cpp select_impl.cpp server.cpp)
 
 add_library(${PROJECT_NAME_SYNC} ${SOURCE_FILES})
 

@@ -1,12 +1,12 @@
-#ifndef RJ_NET_SERVER_SYNC_EPOLL_IMPL_H
-#define RJ_NET_SERVER_SYNC_EPOLL_IMPL_H
+#ifndef CODA_NET_SERVER_SYNC_EPOLL_IMPL_H
+#define CODA_NET_SERVER_SYNC_EPOLL_IMPL_H
 
 #ifdef EPOLL_FOUND
 
 #include "../socket.h"
 #include "server_impl.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

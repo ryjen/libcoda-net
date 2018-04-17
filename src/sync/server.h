@@ -1,10 +1,10 @@
-#ifndef RJ_NET_SERVER_SYNC_H
-#define RJ_NET_SERVER_SYNC_H
+#ifndef CODA_NET_SERVER_SYNC_H
+#define CODA_NET_SERVER_SYNC_H
 
 #include "../socket_server.h"
 #include "server_impl.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

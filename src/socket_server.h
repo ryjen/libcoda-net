@@ -1,5 +1,5 @@
-#ifndef RJ_NET_SOCKET_SERVER_H
-#define RJ_NET_SOCKET_SERVER_H
+#ifndef CODA_NET_SOCKET_SERVER_H
+#define CODA_NET_SOCKET_SERVER_H
 
 #include <sys/time.h>
 #include <map>
@@ -8,7 +8,7 @@
 #include <thread>
 #include "socket_factory.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

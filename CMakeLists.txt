@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.1)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # add options for testing
 option(ENABLE_COVERAGE "Enable code coverage testing." OFF)
@@ -11,7 +11,7 @@ option(WITH_SSL "Compile sockets with OpenSSL support." ON)
 option(WITH_URIPARSER "Use liburiparser for uri parsing." ON)
 
 # define project name
-project (rj_net VERSION 0.3.0)
+project (coda_net VERSION 0.3.0)
 
 # set path to custom modules
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)

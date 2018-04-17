@@ -1,7 +1,7 @@
-#ifndef RJ_NET_SERVER_ASYNC_CLIENT_H
-#define RJ_NET_SERVER_ASYNC_CLIENT_H
+#ifndef CODA_NET_SERVER_ASYNC_CLIENT_H
+#define CODA_NET_SERVER_ASYNC_CLIENT_H
 
-namespace rj
+namespace coda
 {
     namespace net
     {

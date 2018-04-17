@@ -3,7 +3,7 @@
 #include "socket_factory.h"
 #include "socket_server.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

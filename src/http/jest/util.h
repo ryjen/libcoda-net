@@ -1,5 +1,5 @@
-#ifndef RJ_NET_JEST_UTIL_H
-#define RJ_NET_JEST_UTIL_H
+#ifndef CODA_NET_JEST_UTIL_H
+#define CODA_NET_JEST_UTIL_H
 
 #include <functional>
 #include <memory>
@@ -10,7 +10,7 @@
 #define PATH_SEP "/"
 #endif
 
-namespace rj
+namespace coda
 {
     namespace net
     {

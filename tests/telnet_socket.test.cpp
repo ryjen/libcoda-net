@@ -10,9 +10,9 @@
 
 using namespace bandit;
 
-using namespace rj::net;
+using namespace coda::net;
 
-using namespace rj;
+using namespace coda;
 
 using namespace std;
 
@@ -41,11 +41,11 @@ class telnet_test_client : public telnet_socket
     };
     void on_sub_neg(socket::data_type type, const socket::data_buffer &parameters){};
 
-    rj::net::socket::data_type telopt_type, telopt_option;
+    coda::net::socket::data_type telopt_type, telopt_option;
 };
 
-const socket::data_buffer will_echo{rj::net::telnet::IAC, rj::net::telnet::WILL, rj::net::telnet::ECHO};
-const socket::data_buffer wont_echo{rj::net::telnet::IAC, rj::net::telnet::WONT, rj::net::telnet::ECHO};
+const socket::data_buffer will_echo{coda::net::telnet::IAC, coda::net::telnet::WILL, coda::net::telnet::ECHO};
+const socket::data_buffer wont_echo{coda::net::telnet::IAC, coda::net::telnet::WONT, coda::net::telnet::ECHO};
 
 class telnet_socket_factory : public socket_factory,
                               public buffered_socket_listener,
@@ -134,7 +134,7 @@ go_bandit([]() {
             Assert::That(client.is_valid(), Equals(true));
 
             char buf[101] = {0};
-            snprintf(buf, 100, "got %d %d", rj::net::telnet::WILL, rj::net::telnet::ECHO);
+            snprintf(buf, 100, "got %d %d", coda::net::telnet::WILL, coda::net::telnet::ECHO);
 
             string test(buf);
 

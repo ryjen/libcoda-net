@@ -1,13 +1,13 @@
 
-#ifndef RJ_NET_SECURE_LAYER_H
-#define RJ_NET_SECURE_LAYER_H
+#ifndef CODA_NET_SECURE_LAYER_H
+#define CODA_NET_SECURE_LAYER_H
 
 #ifdef OPENSSL_FOUND
 #include <openssl/ssl.h>
 #endif
 #include "socket.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

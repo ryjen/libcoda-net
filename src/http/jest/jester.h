@@ -1,11 +1,11 @@
-#ifndef RJ_NET_JEST_JESTER_H
-#define RJ_NET_JEST_JESTER_H
+#ifndef CODA_NET_JEST_JESTER_H
+#define CODA_NET_JEST_JESTER_H
 
 #include <map>
 #include <string>
 #include "../client.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {
@@ -30,7 +30,7 @@ namespace rj
             jester &set_content(const std::string &value);
 
             http::method method() const;
-            rj::net::uri uri() const;
+            coda::net::uri uri() const;
 
             void syntax(const char *bin) const;
             int parse_options(int argc, char *argv[]);
@@ -43,7 +43,7 @@ namespace rj
             std::map<std::string, std::string> data_;
             std::string content_;
             std::map<std::string, std::string> headers_;
-            rj::net::uri uri_;
+            coda::net::uri uri_;
             bool interactive_;
         };
     }

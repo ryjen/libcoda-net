@@ -7,7 +7,7 @@
 #include "http/client.h"
 
 using namespace bandit;
-using namespace rj::net;
+using namespace coda::net;
 
 int main(int argc, char *argv[])
 {

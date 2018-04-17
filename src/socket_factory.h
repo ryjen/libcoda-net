@@ -1,11 +1,11 @@
-#ifndef RJ_NET_SOCKET_FACTORY_H
-#define RJ_NET_SOCKET_FACTORY_H
+#ifndef CODA_NET_SOCKET_FACTORY_H
+#define CODA_NET_SOCKET_FACTORY_H
 
 #include "buffered_socket.h"
 
 #include <memory>
 
-namespace rj
+namespace coda
 {
     namespace net
     {

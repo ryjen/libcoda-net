@@ -6,7 +6,7 @@
 #include "../exception.h"
 #include "listener.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

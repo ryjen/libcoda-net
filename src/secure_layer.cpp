@@ -6,7 +6,7 @@
 #include <openssl/rand.h>
 #endif
 
-namespace rj
+namespace coda
 {
     namespace net
     {

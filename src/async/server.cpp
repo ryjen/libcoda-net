@@ -7,7 +7,7 @@
 #include "../exception.h"
 #include "client.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

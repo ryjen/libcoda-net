@@ -1,4 +1,4 @@
-rj_net
+coda_net
 ======
 
 [![Build Status](http://img.shields.io/travis/ryjen/net/master.svg)](https://travis-ci.org/ryjen/net)
@@ -53,7 +53,7 @@ Examples
 /**
  * create connections and listen to connection events
  */
-class example_factory : public rj::net:socket_factory, public rj::net::buffered_socket_listener,
+class example_factory : public coda::net:socket_factory, public coda::net::buffered_socket_listener,
                         public enable_shared_from_this<example_factory>
 {
 public:
@@ -98,7 +98,7 @@ int main() {
     std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
 
     /* create a server */
-    rj::net::async_server example_server(1337, mySocketFactory);
+    coda::net::async_server example_server(1337, mySocketFactory);
 
     /* start running */
     example_server.start_in_background();
@@ -122,7 +122,7 @@ int main() {
     std::shared_ptr<example_factory> mySocketFactory = std::make_shared<example_factory>();
 
     /* create a server */
-    rj::net::polling_server example_server(1337, mySocketFactory);
+    coda::net::polling_server example_server(1337, mySocketFactory);
 
     /* start running */
     example_server.start();

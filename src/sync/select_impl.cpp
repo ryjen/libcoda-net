@@ -5,7 +5,7 @@
 #include <sys/select.h>
 #include "../exception.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

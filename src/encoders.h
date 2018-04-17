@@ -1,11 +1,11 @@
-#ifndef RJ_NET_ENCODERS_H
-#define RJ_NET_ENCODERS_H
+#ifndef CODA_NET_ENCODERS_H
+#define CODA_NET_ENCODERS_H
 
 #include <map>
 #include <string>
 #include <vector>
 
-namespace rj
+namespace coda
 {
     namespace net
     {

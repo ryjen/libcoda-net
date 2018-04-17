@@ -1,5 +1,5 @@
-#ifndef RJ_NET_URI_H_
-#define RJ_NET_URI_H_
+#ifndef CODA_NET_URI_H_
+#define CODA_NET_URI_H_
 
 #ifdef URIPARSER_FOUND
 #include <uriparser/Uri.h>
@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace rj
+namespace coda
 {
     namespace net
     {

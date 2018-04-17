@@ -1,9 +1,9 @@
-#ifndef RJ_NET_SERVER_SYNC_LISTENER_H
-#define RJ_NET_SERVER_SYNC_LISTENER_H
+#ifndef CODA_NET_SERVER_SYNC_LISTENER_H
+#define CODA_NET_SERVER_SYNC_LISTENER_H
 
 #include "../socket_server_listener.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

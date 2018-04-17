@@ -7,7 +7,7 @@
 #include <string>
 #include "uri.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {

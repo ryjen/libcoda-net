@@ -1,7 +1,7 @@
 version: '2'
 services:
   test:
-    image: rj_net_test
+    image: coda_net_test
     build:
       context: .
       args:
@@ -11,7 +11,7 @@ services:
     working_dir: /usr/src/build
     command: make test ARGS=-V
   test-no-deps:
-    image: rj_net_test_no_deps
+    image: coda_net_test_no_deps
     build:
       context: .
       args:
@@ -22,8 +22,8 @@ services:
     command: make test ARGS=-V    
   coverage:
     extends: test
-    image: rj_net_coverage
+    image: coda_net_coverage
     build:
       args:
           CMAKE_DEFINES: -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON -DCMAKE_CXX_COMPILER=g++
-    command: make rj_net_coverage_coveralls
+    command: make coda_net_coverage_coveralls

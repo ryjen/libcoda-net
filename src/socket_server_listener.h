@@ -1,8 +1,8 @@
-#ifndef RJ_NET_SOCKET_SERVER_LISTENER_H
-#define RJ_NET_SOCKET_SERVER_LISTENER_H
+#ifndef CODA_NET_SOCKET_SERVER_LISTENER_H
+#define CODA_NET_SOCKET_SERVER_LISTENER_H
 
 
-namespace rj
+namespace coda
 {
     namespace net
     {

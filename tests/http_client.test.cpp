@@ -11,9 +11,9 @@
 
 using namespace bandit;
 
-using namespace rj::net;
+using namespace coda::net;
 
-using namespace rj;
+using namespace coda;
 
 using namespace std;
 

@@ -1,8 +1,8 @@
 
 // Definition of the socket class
 
-#ifndef RJ_SOCKET_H
-#define RJ_SOCKET_H
+#ifndef CODA_SOCKET_H
+#define CODA_SOCKET_H
 
 #ifdef _WIN32
 #include <winsock.h>
@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-namespace rj
+namespace coda
 {
     namespace net
     {

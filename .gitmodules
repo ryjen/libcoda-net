@@ -1,10 +1,4 @@
-[submodule "tests/vendor/bandit"]
-	path = tests/vendor/bandit
-	url = https://github.com/joakimkarlsson/bandit.git
 [submodule "cmake"]
 	path = cmake
 	url = https://github.com/ryjen/cmake.git
-[submodule "src/vendor/cereal"]
-	path = src/vendor/cereal
-    url = https://github.com/USCiLab/cereal.git
 

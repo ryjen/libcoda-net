@@ -24,7 +24,7 @@ namespace std
     }
 }
 
-namespace rj
+namespace coda
 {
     namespace net
     {

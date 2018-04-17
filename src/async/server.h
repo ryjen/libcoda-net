@@ -1,13 +1,13 @@
-#ifndef RJ_NET_SERVER_ASYNC_H
-#define RJ_NET_SERVER_ASYNC_H
+#ifndef CODA_NET_SERVER_ASYNC_H
+#define CODA_NET_SERVER_ASYNC_H
 
-namespace rj
+namespace coda
 {
     namespace net
     {
         namespace async
         {
-            class server : public rj::net::socket_server
+            class server : public coda::net::socket_server
             {
                public:
                 /*!

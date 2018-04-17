@@ -10,9 +10,9 @@
 
 using namespace std;
 
-#define THIS_USER_AGENT "librj_net"
+#define THIS_USER_AGENT "libcoda_net"
 
-namespace rj
+namespace coda
 {
     namespace net
     {
@@ -223,12 +223,12 @@ namespace rj
             }
 
 
-            client::client(const rj::net::uri &uri) : uri_(uri), timeout_(http::DEFAULT_HTTP_TIMEOUT)
+            client::client(const coda::net::uri &uri) : uri_(uri), timeout_(http::DEFAULT_HTTP_TIMEOUT)
             {
                 add_header(http::HEADER_USER_AGENT, THIS_USER_AGENT);
             }
 
-            client::client(const std::string &uri) : client(rj::net::uri(uri, http::PROTOCOL))
+            client::client(const std::string &uri) : client(coda::net::uri(uri, http::PROTOCOL))
             {
             }
 
@@ -284,7 +284,7 @@ namespace rj
                 headers_.erase(key);
             }
 
-            rj::net::uri client::uri() const
+            coda::net::uri client::uri() const
             {
                 return uri_;
             }

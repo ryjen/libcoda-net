@@ -4,7 +4,7 @@
 #include "../protocol.h"
 #include "jester.h"
 
-namespace rj
+namespace coda
 {
     namespace net
     {
@@ -28,7 +28,7 @@ namespace rj
 
                 return std::make_shared<arg_pair>(key, value);
             }
-            interactive::interactive(rj::net::jester *jest)
+            interactive::interactive(coda::net::jester *jest)
                 : state_(std::bind(&interactive::get_method, this)),
                   prompt_(std::bind(&interactive::ask_method, this)),
                   jester_(jest)
