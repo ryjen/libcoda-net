@@ -23,11 +23,24 @@ set(${PROJECT_NAME}_SOURCE_FILES
   encoders.cpp
 )
 
+include(ExternalProject)
+
+externalproject_add(${PROJECT_NAME}-cereal
+        GIT_REPOSITORY https://github.com/USCiLab/cereal.git
+        GIT_TAG v1.2.2
+        INSTALL_COMMAND ""
+        BUILD_COMMAND ""
+        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/cereal)
+
+ExternalProject_Get_property(${PROJECT_NAME}-cereal SOURCE_DIR)
+
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${OPENSSL_INCLUDE_DIRS} SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS} SYSTEM PUBLIC "vendor/cereal/include")
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${OPENSSL_INCLUDE_DIRS} SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS} SYSTEM PUBLIC ${SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${URIPARSER_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-cereal)
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME})
 

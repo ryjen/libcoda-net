@@ -1,0 +1,24 @@
+{
+  "author": {
+    "email": "ryan@coda.life",
+    "web": "https://coda.life",
+    "name": "Ryan Jennings"
+  },
+  "build_system": [
+    "cmake",
+    "make"
+  ],
+  "dependencies": [
+    {
+      "name": "curl",
+      "version": "7.59.0"
+    },
+    {
+      "name": "openssl",
+      "version": "1.0.2o"
+    }
+  ],
+  "name": "coda_net",
+  "version": "0.1.1"
+}
+

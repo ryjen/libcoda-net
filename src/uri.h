@@ -1,5 +1,5 @@
-#ifndef CODA_NET_URI_H_
-#define CODA_NET_URI_H_
+#ifndef CODA_NET_URI_H
+#define CODA_NET_URI_H
 
 #ifdef URIPARSER_FOUND
 #include <uriparser/Uri.h>

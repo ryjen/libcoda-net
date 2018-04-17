@@ -1,5 +1,5 @@
-#ifndef CODA_NET_BUFFERED_SOCKET_H_
-#define CODA_NET_BUFFERED_SOCKET_H_
+#ifndef CODA_NET_BUFFERED_SOCKET_H
+#define CODA_NET_BUFFERED_SOCKET_H
 
 #include <memory>
 #include <string>

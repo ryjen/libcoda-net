@@ -5,7 +5,7 @@ coda_net
 [![Coverage Status](http://img.shields.io/coveralls/ryjen/net/master.svg)](https://coveralls.io/github/ryjen/net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
 
-A c++11 networking library.
+A c++17 networking library.
 
 Model
 =====
