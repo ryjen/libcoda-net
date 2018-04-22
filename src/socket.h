@@ -55,12 +55,12 @@ namespace coda
             /*!
              * default constructor
              */
-            socket();
+            socket() noexcept;
 
             /*!
              * constructor to take a raw socket and its address
              */
-            socket(SOCKET sock, const sockaddr_storage &addr);
+            socket(SOCKET sock, const sockaddr_storage &addr) noexcept;
 
             /*!
              * Constructor to open a socket given the host and port
@@ -75,7 +75,7 @@ namespace coda
             /*!
              * move constructor
              */
-            socket(socket &&other);
+            socket(socket &&other) noexcept;
 
             /*!
              * destructor will close the socket RAII style
@@ -90,9 +90,9 @@ namespace coda
             /*!
              * Move assignment operator
              */
-            socket &operator=(socket &&);
+            socket &operator=(socket &&) noexcept;
 
-            bool operator==(const socket &other) const;
+            bool operator==(const socket &other) const noexcept;
 
             // Data Transimission
 
@@ -117,7 +117,7 @@ namespace coda
             /*!
              * @returns true if the socket is alive and connected
              */
-            bool is_valid() const;
+            bool is_valid() const noexcept;
 
             /*!
              * Writes a data buffer to the socket
@@ -132,7 +132,7 @@ namespace coda
             /*!
              * @returns the raw socket
              */
-            SOCKET raw_socket() const;
+            SOCKET raw_socket() const noexcept;
 
 
             /*!
@@ -172,9 +172,9 @@ namespace coda
              */
             void set_non_blocking(const bool);
 
-            bool is_non_blocking() const;
+            bool is_non_blocking() const noexcept;
 
-            bool is_secure() const;
+            bool is_secure() const noexcept;
 
             void set_secure(bool value);
 

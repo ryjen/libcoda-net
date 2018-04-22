@@ -43,7 +43,7 @@ namespace coda
                 return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
             }
         }
-        uri::uri() : isValid_(false)
+        uri::uri() noexcept : isValid_(false)
         {
         }
 
@@ -52,12 +52,12 @@ namespace coda
             isValid_ = parse(uri, defaultScheme);
         }
 
-        std::string uri::to_string() const
+        std::string uri::to_string() const noexcept
         {
             return uri_;
         }
 
-        uri::operator std::string() const
+        uri::operator std::string() const noexcept
         {
             return uri_;
         }
@@ -173,35 +173,35 @@ namespace coda
 #endif
         }
 
-        uri::~uri()
+        uri::~uri() noexcept
         {
         }
 
-        bool uri::is_valid() const
+        bool uri::is_valid() const noexcept
         {
             return isValid_;
         }
 
-        std::string uri::scheme() const
+        std::string uri::scheme() const noexcept
         {
             return scheme_;
         }
 
-        std::string uri::username() const
+        std::string uri::username() const noexcept
         {
             return user_;
         }
 
-        std::string uri::password() const
+        std::string uri::password() const noexcept
         {
             return password_;
         }
 
-        std::string uri::host() const
+        std::string uri::host() const noexcept
         {
             return host_;
         }
-        std::string uri::port() const
+        std::string uri::port() const noexcept
         {
             return port_;
         }
@@ -216,15 +216,15 @@ namespace coda
             return hostname;
         }
 
-        std::string uri::path() const
+        std::string uri::path() const noexcept
         {
             return path_;
         }
-        std::string uri::query() const
+        std::string uri::query() const noexcept
         {
             return query_;
         }
-        std::string uri::fragment() const
+        std::string uri::fragment() const noexcept
         {
             return fragment_;
         }

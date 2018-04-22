@@ -12,12 +12,12 @@ namespace coda
 {
     namespace net
     {
-        socket_server::socket_server(const factory_type &factory)
+        socket_server::socket_server(const factory_type &factory) noexcept
             : factory_(factory), backgroundThread_(nullptr), listeners_()
         {
         }
 
-        socket_server::socket_server(socket_server &&other)
+        socket_server::socket_server(socket_server &&other) noexcept
             : socket(std::move(other)),
               factory_(other.factory_),
               backgroundThread_(std::move(other.backgroundThread_)),
@@ -34,7 +34,7 @@ namespace coda
             stop();
         }
 
-        socket_server &socket_server::operator=(socket_server &&other)
+        socket_server &socket_server::operator=(socket_server &&other) noexcept
         {
             socket::operator=(std::move(other));
 
@@ -64,7 +64,7 @@ namespace coda
             return !operator==(other);
         }
 
-        bool socket_server::is_valid() const
+        bool socket_server::is_valid() const noexcept
         {
             return socket::is_valid() && factory_ != NULL;
         }
@@ -95,7 +95,7 @@ namespace coda
             return *this;
         }
 
-        void socket_server::set_socket_factory(const factory_type &factory)
+        void socket_server::set_socket_factory(const factory_type &factory) noexcept
         {
             factory_ = factory;
         }

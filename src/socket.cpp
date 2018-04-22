@@ -22,18 +22,18 @@ namespace coda
         }
 #endif
 
-        socket::socket() : sock_(INVALID), non_blocking_(false), ssl_(nullptr)
+        socket::socket() noexcept : sock_(INVALID), non_blocking_(false), ssl_(nullptr)
         {
             memset(&addr_, 0, sizeof(addr_));
         }
 
 
-        socket::socket(SOCKET sock, const sockaddr_storage &addr)
+        socket::socket(SOCKET sock, const sockaddr_storage &addr) noexcept
             : sock_(sock), addr_(addr), non_blocking_(false), ssl_(nullptr)
         {
         }
 
-        socket::socket(socket &&other)
+        socket::socket(socket &&other) noexcept
             : sock_(other.sock_),
               addr_(std::move(other.addr_)),
               non_blocking_(other.non_blocking_),
@@ -53,7 +53,7 @@ namespace coda
             connect(host, port);
         }
 
-        socket &socket::operator=(socket &&other)
+        socket &socket::operator=(socket &&other) noexcept
         {
             sock_ = other.sock_;
             addr_ = std::move(other.addr_);
@@ -70,7 +70,7 @@ namespace coda
             close();
         }
 
-        bool socket::operator==(const socket &other) const
+        bool socket::operator==(const socket &other) const noexcept
         {
             return sock_ == other.sock_;
         }
@@ -111,12 +111,12 @@ namespace coda
             return ::send(sock_, s, len, flags);
         }
 
-        bool socket::is_valid() const
+        bool socket::is_valid() const noexcept
         {
             return sock_ != INVALID;
         }
 
-        SOCKET socket::raw_socket() const
+        SOCKET socket::raw_socket() const noexcept
         {
             return sock_;
         }
@@ -367,12 +367,12 @@ namespace coda
             non_blocking_ = b;
         }
 
-        bool socket::is_non_blocking() const
+        bool socket::is_non_blocking() const noexcept
         {
             return non_blocking_;
         }
 
-        bool socket::is_secure() const
+        bool socket::is_secure() const noexcept
         {
             return ssl_ != nullptr;
         }

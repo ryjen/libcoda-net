@@ -28,7 +28,7 @@ namespace coda
              * default constructor
              * @factory the factory to create sockets with
              */
-            socket_server(const factory_type &factory = default_socket_factory);
+            socket_server(const factory_type &factory = default_socket_factory) noexcept;
 
             /*!
              * non-copyable constructor
@@ -38,7 +38,7 @@ namespace coda
             /*!
              * move constructor
              */
-            socket_server(socket_server &&other);
+            socket_server(socket_server &&other) noexcept;
 
             /*!
              * destuctor will stop the server
@@ -53,9 +53,9 @@ namespace coda
             /*!
              * move assignment operator
              */
-            socket_server &operator=(socket_server &&other);
+            socket_server &operator=(socket_server &&other) noexcept;
 
-            bool is_valid() const;
+            bool is_valid() const noexcept;
 
             /*!
              * starts the server
@@ -95,7 +95,7 @@ namespace coda
             /*!
              * sets the factory used to create sockets on connections
              */
-            void set_socket_factory(const factory_type &factory);
+            void set_socket_factory(const factory_type &factory) noexcept;
 
            protected:
             /*!
