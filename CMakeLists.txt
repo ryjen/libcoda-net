@@ -76,5 +76,5 @@ enable_testing()
 
 include(ValgrindTest)
 	
-add_valgrind_profile_test(PROFILING ${ENABLE_PROFILING} MEMCHECK ${ENABLE_MEMCHECK} TARGET ${TEST_PROJECT_NAME} VALGRIND_ARGS "--suppressions=${PROJECT_SOURCE_DIR}/suppression.map")
+add_valgrind_profile_test(PROFILING ${ENABLE_PROFILING} MEMCHECK ${ENABLE_MEMCHECK} TARGET ${TEST_PROJECT_NAME} )
 
