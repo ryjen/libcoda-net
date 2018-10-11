@@ -25,4 +25,4 @@ install(FILES ${${PROJECT_NAME_HTTP}_HEADER_FILES} DESTINATION "${CMAKE_INSTALL_
 
 install(TARGETS ${PROJECT_NAME_HTTP} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
-add_subdirectory(jest)
+add_subdirectory(crest)
