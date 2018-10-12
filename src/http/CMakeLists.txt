@@ -17,7 +17,7 @@ target_include_directories(${PROJECT_NAME_HTTP} SYSTEM PUBLIC ${CURL_INCLUDE_DIR
 
 target_link_libraries(${PROJECT_NAME_HTTP} ${PROJECT_NAME} ${CURL_LIBRARIES} ${URIPARSER_LIBRARIES})
 
-create_package(TARGET ${PROJECT_NAME_HTTP} DESCRIPTION "A c++ http client library.")
+create_packages(TARGET ${PROJECT_NAME_HTTP} DESCRIPTION "A c++ http client library.")
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME_HTTP})
 

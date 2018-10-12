@@ -27,8 +27,6 @@ set(PROJECT_NAME_ASYNC "${PROJECT_NAME}_async")
 
 set(PROJECT_NAME_SYNC "${PROJECT_NAME}_sync")
 
-set(TEST_PROJECT_NAME "${PROJECT_NAME}_test")
-
 include (CheckIncludeFiles)
 check_include_files("sys/epoll.h" EPOLL_FOUND)
 
@@ -56,25 +54,14 @@ if (WITH_URIPARSER)
 	endif ()
 endif()
 
-# add target for code coverage
-if(ENABLE_COVERAGE)
-	include(CodeCoverage)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_COVERAGE}")
-	setup_target_for_coverage(TARGET ${PROJECT_NAME}_coverage OUTPUT ${PROJECT_BINARY_DIR}/coverage)
-endif()
-
 # create package config
-include(CreatePackage)
-create_package(DESCRIPTION "a c++ networking library")
-
-# add directories
-add_subdirectory(src)
-add_subdirectory(tests)
+include(CreatePackages)
+create_packages(DESCRIPTION "a c++ networking library")
 
 # Setup testing
 enable_testing()
 
-include(ValgrindTest)
-	
-add_valgrind_profile_test(PROFILING ${ENABLE_PROFILING} MEMCHECK ${ENABLE_MEMCHECK} TARGET ${TEST_PROJECT_NAME} )
+# add directories
+add_subdirectory(src)
+add_subdirectory(tests)
 

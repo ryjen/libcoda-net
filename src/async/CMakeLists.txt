@@ -9,7 +9,7 @@ add_library(${PROJECT_NAME_ASYNC} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME_ASYNC} INTERFACE ${PROJECT_NAME})
 
-create_package(TARGET ${PROJECT_NAME_ASYNC} DESCRIPTION "A c++ async server library.")
+create_packages(TARGET ${PROJECT_NAME_ASYNC} DESCRIPTION "A c++ async server library.")
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME_ASYNC})
 
