@@ -13,7 +13,7 @@ add_library(${PROJECT_NAME_SYNC} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME_SYNC} INTERFACE ${PROJECT_NAME})
 
-create_package(TARGET ${PROJECT_NAME_SYNC} DESCRIPTION "A c++ syncronous server library.")
+create_packages(TARGET ${PROJECT_NAME_SYNC} DESCRIPTION "A c++ syncronous server library.")
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME_SYNC})
 

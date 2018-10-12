@@ -12,7 +12,7 @@ set(${PROJECT_NAME_TELNET}_HEADERS
   socket.h
 )
 
-create_package(TARGET ${PROJECT_NAME_TELNET} DESCRIPTION "A c++ telnet library.")
+create_packages(TARGET ${PROJECT_NAME_TELNET} DESCRIPTION "A c++ telnet library.")
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME_TELNET})
 
