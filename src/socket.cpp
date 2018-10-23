@@ -229,18 +229,18 @@ namespace coda
             }
 
             for (p = result; p != NULL; p = p->ai_next) {
-                sock_ = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+                auto sock = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
-                if (sock_ == INVALID) {
+                if (sock == INVALID) {
                     continue;
                 }
 
-                if (::connect(sock_, p->ai_addr, p->ai_addrlen) != INVALID) {
+                if (::connect(sock, p->ai_addr, p->ai_addrlen) != INVALID) {
+                    sock_ = sock;
                     break;
                 }
 
-                closesocket(sock_);
-                sock_ = INVALID;
+                closesocket(sock);
             }
 
             if (p == NULL || sock_ == INVALID) {
@@ -276,13 +276,7 @@ namespace coda
             int r = getaddrinfo(NULL, servnam, &hints, &result);
 
             if (r != 0) {
-                for (int i = 0; i < 5 && r != 0; i++) {
-                    r = getaddrinfo(NULL, servnam, &hints, &result);
-                }
-
-                if (r != 0) {
-                    throw socket_exception(gai_strerror(r));
-                }
+                throw socket_exception(gai_strerror(r));
             }
 
             if (result == NULL) {
@@ -290,25 +284,25 @@ namespace coda
             }
 
             for (p = result; p != NULL; p = p->ai_next) {
-                sock_ = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+                auto sock = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
-                if (sock_ == INVALID) {
+                if (sock == INVALID) {
                     continue;
                 }
 
-                if (setsockopt(sock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
+                if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
                     continue;
                 }
 
-                if (::bind(sock_, p->ai_addr, p->ai_addrlen) == 0) {
+                if (::bind(sock, p->ai_addr, p->ai_addrlen) == 0) {
+                    sock_ = sock;
                     break;
                 }
 
-                closesocket(sock_);
-                sock_ = INVALID;
+                closesocket(sock);
             }
 
-            if (p == NULL) {
+            if (p == NULL || sock_ == INVALID) {
                 freeaddrinfo(result);
                 return false;
             }

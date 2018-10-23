@@ -3,6 +3,7 @@
 
 #include "select_impl.h"
 #include <sys/select.h>
+#include <cstring>
 #include "../exception.h"
 
 namespace coda
