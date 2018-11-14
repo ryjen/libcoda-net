@@ -2,6 +2,7 @@
 #define CODA_NET_HTTP_CLIENT_H
 
 #include "protocol.h"
+#include "../uri.h"
 #include <functional>
 #include <map>
 #include <string>

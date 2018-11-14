@@ -1,6 +1,8 @@
 #ifndef CODA_NET_SERVER_ASYNC_H
 #define CODA_NET_SERVER_ASYNC_H
 
+#include "../socket_server.h"
+
 namespace coda {
   namespace net {
     namespace async {

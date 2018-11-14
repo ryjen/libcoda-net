@@ -4,7 +4,6 @@
 namespace coda {
   namespace net {
     namespace http {
-      static const socket::data_buffer NEWLINE;
 
       constexpr static const int OK = 200;
 

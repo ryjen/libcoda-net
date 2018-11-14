@@ -1,6 +1,9 @@
 #ifndef CODA_NET_SERVER_ASYNC_CLIENT_H
 #define CODA_NET_SERVER_ASYNC_CLIENT_H
 
+#include <thread>
+#include "../buffered_socket.h"
+
 namespace coda {
   namespace net {
     namespace async {
