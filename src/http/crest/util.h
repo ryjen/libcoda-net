@@ -10,46 +10,43 @@
 #define PATH_SEP "/"
 #endif
 
-namespace coda
-{
-    namespace net
-    {
-        class jester;
+namespace coda {
+  namespace net {
+    class jester;
 
-        namespace jest
-        {
-            class interactive
-            {
-               public:
-                interactive(jester *jest);
+    namespace jest {
+      class interactive {
+        public:
+        interactive(jester *jest);
 
-                void start();
+        void start();
 
-               private:
-                void ask_method() const;
+        private:
+        void ask_method() const;
 
-                bool get_method();
+        bool get_method();
 
-                void ask_headers() const;
+        void ask_headers() const;
 
-                bool get_headers();
+        bool get_headers();
 
-                void ask_data() const;
+        void ask_data() const;
 
-                bool get_data();
+        bool get_data();
 
-                void prompt() const;
+        void prompt() const;
 
-                std::function<bool()> state_;
-                std::function<void()> prompt_;
-                jester *jester_;
-            };
+        std::function<bool()> state_;
+        std::function<void()> prompt_;
+        jester *jester_;
+      };
 
-            typedef std::pair<std::string, std::string> arg_pair;
+      typedef std::pair<std::string, std::string> arg_pair;
 
-            std::shared_ptr<arg_pair> split_arg(const std::string &arg, const std::string &delimiter);
-        }
-    }
-}
+      std::shared_ptr<arg_pair> split_arg(const std::string &arg,
+                                          const std::string &delimiter);
+    } // namespace jest
+  }   // namespace net
+} // namespace coda
 
 #endif
