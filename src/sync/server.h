@@ -4,105 +4,100 @@
 #include "../socket_server.h"
 #include "server_impl.h"
 
-namespace coda
-{
-    namespace net
-    {
-        namespace sync
-        {
-            namespace detail
-            {
-                class cleanup_listener;
-            }
+namespace coda {
+  namespace net {
+    namespace sync {
+      namespace detail {
+        class cleanup_listener;
+      }
 
-            /*!
-             * A syncronous server has a poll frequency and no threads
-             */
-            class server : public socket_server
-            {
-               public:
-                typedef struct timeval timer;
+      /*!
+       * A syncronous server has a poll frequency and no threads
+       */
+      class server : public socket_server {
+        public:
+        typedef struct timeval timer;
 
-                /*!
-                 * default constructor
-                 * @factory the factory to create sockets with
-                 */
-                server(const factory_type &factory = default_socket_factory);
+        /*!
+         * default constructor
+         * @factory the factory to create sockets with
+         */
+        server(const factory_type &factory = default_socket_factory);
 
-                /*!
-                 * non-copyable constructor
-                 */
-                server(const server &other) = delete;
+        /*!
+         * non-copyable constructor
+         */
+        server(const server &other) = delete;
 
-                /*!
-                 * move constructor
-                 */
-                server(server &&other);
+        /*!
+         * move constructor
+         */
+        server(server &&other);
 
-                /*!
-                 * Non-copyable assignment operator
-                 */
-                server &operator=(const server &other) = delete;
+        /*!
+         * Non-copyable assignment operator
+         */
+        server &operator=(const server &other) = delete;
 
-                /*!
-                 * move assignment operator
-                 */
-                server &operator=(server &&other);
+        /*!
+         * move assignment operator
+         */
+        server &operator=(server &&other);
 
-                /*!
-                 * updates the servers connections (performs read/writes)
-                 * - will do nothing if the server is not alive
-                 * - is called by the server based on the poll frequency
-                 */
-                void poll(timer *last_time);
+        /*!
+         * updates the servers connections (performs read/writes)
+         * - will do nothing if the server is not alive
+         * - is called by the server based on the poll frequency
+         */
+        void poll(timer *last_time);
 
-                bool listen(const int port, const int backlogSize);
+        bool listen(const int port, const int backlogSize);
 
-                /*!
-                 * Sets the frequency of connection updates (used when looping)
-                 * Only uses in non-async
-                 * @param value the number of cycles per secon
-                 */
-                void set_frequency(unsigned cyclesPerSecond);
+        /*!
+         * Sets the frequency of connection updates (used when looping)
+         * Only uses in non-async
+         * @param value the number of cycles per secon
+         */
+        void set_frequency(unsigned cyclesPerSecond);
 
-                void stop();
+        void stop();
 
-               protected:
-                void add_socket(const socket_type &sock);
+        protected:
+        void add_socket(const socket_type &sock);
 
-                void remove_socket(const SOCKET &sock);
+        void remove_socket(const SOCKET &sock);
 
-                void clear_sockets();
+        void clear_sockets();
 
-                virtual socket_type on_accept(SOCKET socket, sockaddr_storage addr);
+        virtual socket_type on_accept(SOCKET socket, sockaddr_storage addr);
 
-                timer *wait_time(timer *last_time) const;
+        timer *wait_time(timer *last_time) const;
 
-               private:
-                static const unsigned DEFAULT_FREQUENCY = 4;
+        private:
+        static const unsigned DEFAULT_FREQUENCY = 4;
 
-                std::recursive_mutex sockets_mutex_;
-                socket_type find_socket(SOCKET value) const;
+        std::recursive_mutex sockets_mutex_;
+        socket_type find_socket(SOCKET value) const;
 
-                std::shared_ptr<server_impl> impl_;
+        std::shared_ptr<server_impl> impl_;
 
-                void run();
+        void run();
 
-                virtual void on_start();
+        virtual void on_start();
 
-                virtual void on_poll();
+        virtual void on_poll();
 
-                void notify_poll();
+        void notify_poll();
 
-                std::map<SOCKET, socket_type> sockets_;
+        std::map<SOCKET, socket_type> sockets_;
 
-                unsigned frequency_;
+        unsigned frequency_;
 
-                friend class impl;
-                friend class detail::cleanup_listener;
-            };
-        }
-    }
-}
+        friend class impl;
+        friend class detail::cleanup_listener;
+      };
+    } // namespace sync
+  }   // namespace net
+} // namespace coda
 
 #endif

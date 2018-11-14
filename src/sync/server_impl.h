@@ -3,24 +3,20 @@
 
 #include <sys/time.h>
 
-namespace coda
-{
-    namespace net
-    {
-        namespace sync
-        {
-            class server;
+namespace coda {
+  namespace net {
+    namespace sync {
+      class server;
 
-            class server_impl
-            {
-               public:
-                typedef struct timeval timer;
+      class server_impl {
+        public:
+        typedef struct timeval timer;
 
-                virtual bool listen(server &server) = 0;
-                virtual void poll(server &server, timer *stall_time) = 0;
-            };
-        }
-    }
-}
+        virtual bool listen(server &server) = 0;
+        virtual void poll(server &server, timer *stall_time) = 0;
+      };
+    } // namespace sync
+  }   // namespace net
+} // namespace coda
 
 #endif
