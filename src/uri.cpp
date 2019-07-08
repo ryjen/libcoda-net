@@ -129,7 +129,7 @@ namespace coda
             } else {
                 scheme_.reserve(distance(uri_s.begin(), pos_i));
                 transform(uri_s.begin(), pos_i, back_inserter(scheme_),
-                          ptr_fun<int, int>(tolower));  // protocol is icase
+                          [](unsigned char c) { return tolower(c); });  // protocol is icase
                 advance(pos_i, prot_end.length());
             }
 
@@ -160,7 +160,7 @@ namespace coda
                 host_end = path_i;
             }
             host_.reserve(distance(pos_i, host_end));
-            transform(pos_i, host_end, back_inserter(host_), ptr_fun<int, int>(tolower));
+            transform(pos_i, host_end, back_inserter(host_), [](unsigned char c) { return tolower(c); });
             string::const_iterator query_i = find(path_i, uri_s.end(), '?');
             path_.assign(*path_i == '/' ? (path_i + 1) : path_i, query_i);
             if (query_i != uri_s.end()) ++query_i;
