@@ -24,9 +24,6 @@ namespace coda {
       static std::string fromList(UriPathSegmentA *xs, const std::string &delim) {
         UriPathSegmentStructA *head(xs);
         std::string accum;
-        uri::uri(const std::string &uri, const std::string &defaultScheme) : uri_(uri) {
-          isValid_ = parse(uri, defaultScheme);
-        }
 
         while (head) {
           accum += delim + fromRange(head->text);
