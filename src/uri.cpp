@@ -21,10 +21,12 @@ namespace coda {
         }
       }
 
-      static std::string fromList(UriPathSegmentA *xs,
-                                  const std::string &delim) {
+      static std::string fromList(UriPathSegmentA *xs, const std::string &delim) {
         UriPathSegmentStructA *head(xs);
         std::string accum;
+        uri::uri(const std::string &uri, const std::string &defaultScheme) : uri_(uri) {
+          isValid_ = parse(uri, defaultScheme);
+        }
 
         while (head) {
           accum += delim + fromRange(head->text);
@@ -34,14 +36,11 @@ namespace coda {
         return accum;
       }
 #endif
-      char from_hex(char ch) {
-        return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
-      }
-    } // namespace helper
+      char from_hex(char ch) { return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10; }
+    }  // namespace helper
     uri::uri() noexcept : isValid_(false) {}
 
-    uri::uri(const std::string &uri, const std::string &defaultScheme)
-        : uri_(uri) {
+    uri::uri(const std::string &uri, const std::string &defaultScheme) : uri_(uri) {
       isValid_ = parse(uri, defaultScheme);
     }
 
@@ -61,16 +60,14 @@ namespace coda {
       }
       return temp;
     }
-    bool uri::parse(const std::string &uri_s,
-                    const std::string &defaultScheme) {
+    bool uri::parse(const std::string &uri_s, const std::string &defaultScheme) {
       static const string prot_end("://");
 
       if (uri_s.empty()) {
         return false;
       }
 
-      string::const_iterator pos_i =
-          search(uri_s.begin(), uri_s.end(), prot_end.begin(), prot_end.end());
+      string::const_iterator pos_i = search(uri_s.begin(), uri_s.end(), prot_end.begin(), prot_end.end());
 #ifdef URIPARSER_FOUND
       UriUriA uri;
       UriParserStateA state;
@@ -116,7 +113,7 @@ namespace coda {
       } else {
         scheme_.reserve(distance(uri_s.begin(), pos_i));
         transform(uri_s.begin(), pos_i, back_inserter(scheme_),
-                  ptr_fun<int, int>(tolower)); // protocol is icase
+                  [](unsigned char c) { return tolower(c); });  // protocol is icase
         advance(pos_i, prot_end.length());
       }
 
@@ -147,12 +144,10 @@ namespace coda {
         host_end = path_i;
       }
       host_.reserve(distance(pos_i, host_end));
-      transform(pos_i, host_end, back_inserter(host_),
-                ptr_fun<int, int>(tolower));
+      transform(pos_i, host_end, back_inserter(host_), [](unsigned char c) { return tolower(c); });
       string::const_iterator query_i = find(path_i, uri_s.end(), '?');
       path_.assign(*path_i == '/' ? (path_i + 1) : path_i, query_i);
-      if (query_i != uri_s.end())
-        ++query_i;
+      if (query_i != uri_s.end()) ++query_i;
       string::const_iterator frag_i = find(query_i, uri_s.end(), '#');
       query_.assign(query_i, frag_i);
       if (frag_i != uri_s.end()) {
@@ -194,8 +189,7 @@ namespace coda {
       escaped.fill('0');
       escaped << hex;
 
-      for (string::const_iterator i = value.begin(), n = value.end(); i != n;
-           ++i) {
+      for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
         string::value_type c = (*i);
 
         // Keep alphanumeric and other accepted characters intact
@@ -237,5 +231,5 @@ namespace coda {
 
       return escaped.str();
     }
-  } // namespace net
-} // namespace coda
+  }  // namespace net
+}  // namespace coda
