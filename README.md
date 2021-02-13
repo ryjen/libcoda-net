@@ -1,6 +1,7 @@
 coda_net
 ======
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/05b15cb5df19490b9b779067cf3d648e)](https://www.codacy.com/app/ryjen/arg3net?utm_source=github.com&utm_medium=referral&utm_content=ryjen/net&utm_campaign=badger)
 [![Build Status](http://img.shields.io/travis/ryjen/net/master.svg)](https://travis-ci.org/ryjen/net)
 [![Coverage Status](http://img.shields.io/coveralls/ryjen/net/master.svg)](https://coveralls.io/github/ryjen/net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
