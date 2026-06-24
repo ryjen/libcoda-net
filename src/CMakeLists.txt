@@ -27,7 +27,8 @@ include(ExternalProject)
 
 externalproject_add(${PROJECT_NAME}-cereal
         GIT_REPOSITORY https://github.com/USCiLab/cereal.git
-        GIT_TAG v1.2.2
+        GIT_TAG v1.3.2
+        CMAKE_ARGS -DCMAKE_POLICY_VERSION_MINIMUM=3.5
         INSTALL_COMMAND ""
         BUILD_COMMAND ""
         PREFIX ${CMAKE_CURRENT_BINARY_DIR}/cereal)
@@ -52,4 +53,3 @@ add_subdirectory(async)
 add_subdirectory(http)
 add_subdirectory(sync)
 add_subdirectory(telnet)
-

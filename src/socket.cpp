@@ -202,7 +202,7 @@ namespace coda
         socket &socket::operator>>(data_buffer &s)
         {
             if (recv(s) < 0) {
-                throw new socket_exception("Could not read from socket");
+                throw socket_exception("Could not read from socket");
             }
 
             return *this;

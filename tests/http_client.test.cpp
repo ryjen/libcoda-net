@@ -1,7 +1,9 @@
 #include <string>
 
 #include <bandit/bandit.h>
+#include <functional>
 #include <thread>
+#include <vector>
 #include "socket_server.h"
 #include "uri.h"
 #include "async/client.h"
@@ -69,7 +71,9 @@ namespace test
 
             string method = line.substr(0, line.find(' '));
 
-            sock->write(method + ": " + response_);
+            string body = method + ": " + response_;
+            sock->write("HTTP/1.1 200 OK\r\nContent-Length: " + to_string(body.size()) +
+                        "\r\nConnection: close\r\n\r\n" + body);
         }
 
         void on_will_write(const buffered_socket_listener::socket_type &sock)
@@ -84,6 +88,21 @@ namespace test
             sock->close();
         }
     };
+
+    void for_each_http_implementation(const std::function<void()> &test)
+    {
+        std::vector<http::client::implementation> implementations;
+
+#ifdef CURL_FOUND
+        implementations.push_back(http::curl::request);
+#endif
+        implementations.push_back(http::socket::request);
+
+        for (const auto &implementation : implementations) {
+            http::client::set_request_type(implementation);
+            test();
+        }
+    }
 }
 
 go_bandit([]() {
@@ -107,35 +126,43 @@ go_bandit([]() {
         after_each([&testServer]() { testServer.stop(); });
 
         it("can get", [&]() {
-            http::client client("localhost:9876/test");
+            test::for_each_http_implementation([]() {
+                http::client client("localhost:9876/test");
 
-            client.get(
-                [](const http::response &response) { Assert::That(response.content(), Equals("GET: Hello, World!")); });
+                client.get([](const http::response &response) {
+                    Assert::That(response.content(), Equals("GET: Hello, World!"));
+                });
+            });
         });
 #ifdef OPENSSL_FOUND
         it("is secure", []() {
-            http::client client("https://www.httpvshttps.com");
+            test::for_each_http_implementation([]() {
+                http::client client("https://www.httpvshttps.com");
 
-            Assert::That(client.is_secure(), IsTrue());
+                Assert::That(client.is_secure(), IsTrue());
 
-            client.get();
+                client.get();
 
-            Assert::That(client.response().content().empty(), Equals(false));
+                Assert::That(client.response().content().empty(), Equals(false));
+            });
         });
 #endif
         it("can post", []() {
-            http::client client("localhost:9876/test");
+            test::for_each_http_implementation([]() {
+                http::client client("localhost:9876/test");
 
-            client.set_content("Hello, World!");
+                client.set_content("Hello, World!");
 
-            client.post();
+                client.post();
 
-            Assert::That(client.response().content(), Equals("POST: Hello, World!"));
+                Assert::That(client.response().content(), Equals("POST: Hello, World!"));
+            });
 
         });
 
         it("can read http response", []() {
-            http::client client("http://www.httpvshttps.com");
+            test::for_each_http_implementation([]() {
+                http::client client("http://www.httpvshttps.com");
 
                 client.get();
 
@@ -144,6 +171,7 @@ go_bandit([]() {
                 Assert::That(response.content().empty(), Equals(false));
 
                 Assert::That(response.content().find("<html"), !Equals(string::npos));
+            });
 
         });
     });

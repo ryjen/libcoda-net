@@ -8,6 +8,7 @@ if (NOT DEFINED BANDIT_DIR)
     externalproject_add(${BANDIT_TARGET}
             GIT_REPOSITORY https://github.com/banditcpp/bandit.git
             GIT_TAG v2.0.0
+            CMAKE_ARGS -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             INSTALL_COMMAND ""
             BUILD_COMMAND ""
             PREFIX ${CMAKE_CURRENT_BINARY_DIR}/bandit)

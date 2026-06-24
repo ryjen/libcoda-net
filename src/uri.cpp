@@ -1,6 +1,7 @@
 
 #include "uri.h"
 #include <algorithm>
+#include <cctype>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -162,7 +163,9 @@ namespace coda
             host_.reserve(distance(pos_i, host_end));
             transform(pos_i, host_end, back_inserter(host_), [](unsigned char c) { return tolower(c); });
             string::const_iterator query_i = find(path_i, uri_s.end(), '?');
-            path_.assign(*path_i == '/' ? (path_i + 1) : path_i, query_i);
+            if (path_i != uri_s.end()) {
+                path_.assign(*path_i == '/' ? (path_i + 1) : path_i, query_i);
+            }
             if (query_i != uri_s.end()) ++query_i;
             string::const_iterator frag_i = find(query_i, uri_s.end(), '#');
             query_.assign(query_i, frag_i);
@@ -265,10 +268,13 @@ namespace coda
                 string::value_type c = (*i);
 
                 if (c == '%') {
-                    if (i[1] && i[2]) {
+                    if (std::distance(i, n) >= 3 && isxdigit(static_cast<unsigned char>(i[1])) &&
+                        isxdigit(static_cast<unsigned char>(i[2]))) {
                         h = helper::from_hex(i[1]) << 4 | helper::from_hex(i[2]);
                         escaped << h;
                         i += 2;
+                    } else {
+                        escaped << c;
                     }
                 } else if (c == '+') {
                     escaped << ' ';
