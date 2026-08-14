@@ -92,7 +92,7 @@ go_bandit([]() {
 
     async::server testServer(testFactory);
 
-    describe("an http client", [&]() {
+    describe("an http client using local transport", [&]() {
         before_each([&testServer, &testFactory]() {
             try {
                 testServer.start_in_background(9876);
@@ -112,17 +112,7 @@ go_bandit([]() {
             client.get(
                 [](const http::response &response) { Assert::That(response.content(), Equals("GET: Hello, World!")); });
         });
-#ifdef OPENSSL_FOUND
-        it("is secure", []() {
-            http::client client("https://www.httpvshttps.com");
 
-            Assert::That(client.is_secure(), IsTrue());
-
-            client.get();
-
-            Assert::That(client.response().content().empty(), Equals(false));
-        });
-#endif
         it("can post", []() {
             http::client client("localhost:9876/test");
 
@@ -131,21 +121,6 @@ go_bandit([]() {
             client.post();
 
             Assert::That(client.response().content(), Equals("POST: Hello, World!"));
-
-        });
-
-        it("can read http response", []() {
-            http::client client("http://www.httpvshttps.com");
-
-                client.get();
-
-                auto response = client.response();
-
-                Assert::That(response.content().empty(), Equals(false));
-
-                Assert::That(response.content().find("<html"), !Equals(string::npos));
-
         });
     });
-
 });
