@@ -10,20 +10,21 @@ namespace coda {
   namespace net {
 #ifdef OPENSSL_FOUND
     openssl_layer::openssl_layer() : handle_(NULL), context_(NULL) { init(); }
-    openssl_layer::openssl_layer(const openssl_layer &other)
-        : handle_(other.handle_), context_(other.context_) {}
-    openssl_layer::openssl_layer(openssl_layer &&other)
+
+    openssl_layer::openssl_layer(openssl_layer &&other) noexcept
         : handle_(other.handle_), context_(other.context_) {
       other.handle_ = NULL;
       other.context_ = NULL;
     }
+
     openssl_layer::~openssl_layer() { shutdown(); }
-    openssl_layer &openssl_layer::operator=(const openssl_layer &other) {
-      handle_ = other.handle_;
-      context_ = other.context_;
-      return *this;
-    }
-    openssl_layer &openssl_layer::operator=(openssl_layer &&other) {
+
+    openssl_layer &openssl_layer::operator=(openssl_layer &&other) noexcept {
+      if (this == &other) {
+        return *this;
+      }
+
+      shutdown();
       handle_ = other.handle_;
       context_ = other.context_;
       other.handle_ = NULL;
