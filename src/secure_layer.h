@@ -11,6 +11,7 @@ namespace coda {
   namespace net {
     class secure_layer {
       public:
+      virtual ~secure_layer() = default;
       virtual void init() = 0;
       virtual void shutdown() = 0;
       virtual void attach(SOCKET sock) = 0;
@@ -26,17 +27,17 @@ namespace coda {
 
       public:
       openssl_layer();
-      openssl_layer(const openssl_layer &);
-      openssl_layer(openssl_layer &&other);
-      virtual ~openssl_layer();
-      openssl_layer &operator=(const openssl_layer &);
-      openssl_layer &operator=(openssl_layer &&);
+      openssl_layer(const openssl_layer &) = delete;
+      openssl_layer(openssl_layer &&other) noexcept;
+      ~openssl_layer() override;
+      openssl_layer &operator=(const openssl_layer &) = delete;
+      openssl_layer &operator=(openssl_layer &&other) noexcept;
 
-      void init();
-      void shutdown();
-      void attach(SOCKET sock);
-      int send(const void *data, size_t size);
-      int read(void *buf, size_t size);
+      void init() override;
+      void shutdown() override;
+      void attach(SOCKET sock) override;
+      int send(const void *data, size_t size) override;
+      int read(void *buf, size_t size) override;
     };
 #endif
   } // namespace net

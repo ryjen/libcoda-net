@@ -42,12 +42,17 @@ namespace coda {
     }
 
     socket &socket::operator=(socket &&other) noexcept {
+      if (this == &other) {
+        return *this;
+      }
+
+      close();
       sock_ = other.sock_;
       addr_ = std::move(other.addr_);
       non_blocking_ = other.non_blocking_;
-      ssl_ = other.ssl_;
+      ssl_ = std::move(other.ssl_);
       other.sock_ = INVALID;
-      other.ssl_ = nullptr;
+      other.non_blocking_ = false;
 
       return *this;
     }
@@ -170,7 +175,7 @@ namespace coda {
 
     socket &socket::operator>>(data_buffer &s) {
       if (recv(s) < 0) {
-        throw new socket_exception("Could not read from socket");
+        throw socket_exception("Could not read from socket");
       }
 
       return *this;
@@ -257,6 +262,7 @@ namespace coda {
         }
 
         if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
+          closesocket(sock);
           continue;
         }
 
@@ -295,7 +301,7 @@ namespace coda {
 
       SOCKET sock = ::accept(sock_, (struct sockaddr *)&addr, &addr_length);
 
-      if (sock <= 0) {
+      if (sock == INVALID) {
         return INVALID;
       }
 
