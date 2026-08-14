@@ -62,11 +62,28 @@ if (DEFINED BANDIT_TARGET)
     endif()
 endif()
 
-# add target for code coverage
 if(ENABLE_COVERAGE)
-	include(CodeCoverage)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_COVERAGE}")
-	setup_target_for_coverage(TARGET ${PROJECT_NAME}_coverage OUTPUT ${PROJECT_BINARY_DIR}/coverage)
+    include(CodaCoverage)
+
+    set(NET_COVERAGE_TARGETS
+        ${PROJECT_NAME}
+        ${PROJECT_NAME_ASYNC}
+        ${PROJECT_NAME_HTTP}
+        ${PROJECT_NAME_SYNC}
+        ${PROJECT_NAME_TELNET}
+        crest
+        ${TEST_PROJECT_NAME}
+        ${CURL_TEST_PROJECT_NAME}
+        ${LIVE_TEST_PROJECT_NAME}
+    )
+
+    foreach(COVERAGE_TARGET IN LISTS NET_COVERAGE_TARGETS)
+        if(COVERAGE_TARGET AND TARGET ${COVERAGE_TARGET})
+            coda_enable_target_coverage(TARGET ${COVERAGE_TARGET})
+        endif()
+    endforeach()
+
+    setup_target_for_coverage(TARGET ${PROJECT_NAME}_coverage OUTPUT ${PROJECT_BINARY_DIR}/coverage)
 endif()
 
 include(ValgrindTest)
