@@ -45,9 +45,10 @@ endif()
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME}
-        SYSTEM PUBLIC ${OPENSSL_INCLUDE_DIR}
-        SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS}
-        SYSTEM PUBLIC ${CEREAL_INCLUDE_DIRS})
+        SYSTEM PUBLIC
+            ${OPENSSL_INCLUDE_DIR}
+            ${URIPARSER_INCLUDE_DIRS}
+            ${CEREAL_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}
         ${CMAKE_THREAD_LIBS_INIT}
