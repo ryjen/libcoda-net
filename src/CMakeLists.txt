@@ -13,13 +13,13 @@ set(${PROJECT_NAME}_HEADERS
 
 set(${PROJECT_NAME}_SOURCE_FILES
   ${${PROJECT_NAME}_HEADERS}
-  buffered_socket.cpp 
+  buffered_socket.cpp
   socket.cpp
   secure_layer.cpp
   socket_factory.cpp
   socket_server.cpp
-  uri.cpp 
-  telnet/socket.cpp 
+  uri.cpp
+  telnet/socket.cpp
   encoders.cpp
 )
 
@@ -43,6 +43,16 @@ elseif(CODA_FETCH_DEPS)
 endif()
 
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE_FILES})
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+
+# These conditionals affect installed/public core headers, so consumers must
+# compile with the same feature view when the dependencies are available.
+if (OPENSSL_FOUND)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC OPENSSL_FOUND)
+endif()
+if (URIPARSER_FOUND)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC URIPARSER_FOUND)
+endif()
 
 target_include_directories(${PROJECT_NAME}
         SYSTEM PUBLIC
@@ -70,4 +80,3 @@ add_subdirectory(async)
 add_subdirectory(http)
 add_subdirectory(sync)
 add_subdirectory(telnet)
-

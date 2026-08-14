@@ -1,5 +1,6 @@
-cmake_minimum_required (VERSION 3.1)
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.21)
+
+project(coda_net VERSION 0.3.0 LANGUAGES CXX)
 
 # build/test options
 option(CODA_BUILD_TESTS "Build libcoda-net tests." ON)
@@ -12,15 +13,12 @@ option(WITH_CURL "Compile http client using libcurl." ON)
 option(WITH_SSL "Compile sockets with OpenSSL support." ON)
 option(WITH_URIPARSER "Use liburiparser for uri parsing." ON)
 
-# define project name
-project (coda_net VERSION 0.3.0)
-
 # set path to custom modules
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-find_package (Threads)
-find_package (PkgConfig)
-find_package (cereal CONFIG QUIET)
+find_package(Threads)
+find_package(PkgConfig)
+find_package(cereal CONFIG QUIET)
 
 if (NOT cereal_FOUND AND NOT CODA_FETCH_DEPS)
 	message(FATAL_ERROR
@@ -32,31 +30,24 @@ set(PROJECT_NAME_HTTP "${PROJECT_NAME}_http")
 set(PROJECT_NAME_ASYNC "${PROJECT_NAME}_async")
 set(PROJECT_NAME_SYNC "${PROJECT_NAME}_sync")
 
-include (CheckIncludeFiles)
-check_include_files("sys/epoll.h" EPOLL_FOUND)
-
-if (EPOLL_FOUND)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEPOLL_FOUND")
-endif()
+include(CheckIncludeFileCXX)
+check_include_file_cxx("sys/epoll.h" EPOLL_FOUND)
 
 if (WITH_CURL)
-	find_package (CURL REQUIRED)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_FOUND")
+	find_package(CURL REQUIRED)
 endif()
 
 if (WITH_SSL)
-	find_package (OpenSSL)
-	if (OPENSSL_FOUND)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOPENSSL_FOUND")
-	endif()
-endif ()
+	find_package(OpenSSL)
+endif()
 
 if (WITH_URIPARSER)
-	pkg_check_modules (URIPARSER liburiparser)
+	pkg_check_modules(URIPARSER liburiparser)
 	if (URIPARSER_FOUND)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DURIPARSER_FOUND")
+		# Legacy raw-library lookup still needs the discovered library path. Moving
+		# this to an imported dependency target is tracked in the next #2 slice.
 		link_directories(${URIPARSER_LIBRARY_DIRS})
-	endif ()
+	endif()
 endif()
 
 # create package config
@@ -70,4 +61,3 @@ if(CODA_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(tests)
 endif()
-
