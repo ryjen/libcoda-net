@@ -4,6 +4,7 @@ project(coda_net VERSION 0.3.0 LANGUAGES CXX)
 
 # build/test options
 option(CODA_BUILD_TESTS "Build libcoda-net tests." ON)
+option(CODA_BUILD_LIVE_NETWORK_TESTS "Build tests that require external internet/TLS services." OFF)
 option(CODA_FETCH_DEPS "Allow libcoda-net to fetch missing third-party dependencies." OFF)
 option(ENABLE_COVERAGE "Enable code coverage testing." OFF)
 option(ENABLE_MEMCHECK "Enable testing for memory leaks." OFF)
@@ -12,6 +13,10 @@ option(ENABLE_PROFILING "Enable profiling code paths." OFF)
 option(WITH_CURL "Compile http client using libcurl." ON)
 option(WITH_SSL "Compile sockets with OpenSSL support." ON)
 option(WITH_URIPARSER "Use liburiparser for uri parsing." ON)
+
+if(CODA_BUILD_LIVE_NETWORK_TESTS AND NOT CODA_BUILD_TESTS)
+	message(FATAL_ERROR "CODA_BUILD_LIVE_NETWORK_TESTS requires CODA_BUILD_TESTS=ON")
+endif()
 
 # set path to custom modules
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
