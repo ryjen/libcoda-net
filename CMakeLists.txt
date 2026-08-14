@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 3.1)
 set(CMAKE_CXX_STANDARD 17)
 
-# add options for testing
+# build/test options
+option(CODA_BUILD_TESTS "Build libcoda-net tests." ON)
+option(CODA_FETCH_DEPS "Allow libcoda-net to fetch missing third-party dependencies." OFF)
 option(ENABLE_COVERAGE "Enable code coverage testing." OFF)
 option(ENABLE_MEMCHECK "Enable testing for memory leaks." OFF)
 option(ENABLE_PROFILING "Enable profiling code paths." OFF)
@@ -18,13 +20,16 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package (Threads)
 find_package (PkgConfig)
+find_package (cereal CONFIG QUIET)
+
+if (NOT cereal_FOUND AND NOT CODA_FETCH_DEPS)
+	message(FATAL_ERROR
+		"cereal is required. Install a cereal CMake package or configure with CODA_FETCH_DEPS=ON to allow the pinned fallback download.")
+endif()
 
 set(PROJECT_NAME_TELNET "${PROJECT_NAME}_telnet")
-
 set(PROJECT_NAME_HTTP "${PROJECT_NAME}_http")
-
 set(PROJECT_NAME_ASYNC "${PROJECT_NAME}_async")
-
 set(PROJECT_NAME_SYNC "${PROJECT_NAME}_sync")
 
 include (CheckIncludeFiles)
@@ -58,10 +63,11 @@ endif()
 include(CreatePackages)
 create_packages(DESCRIPTION "a c++ networking library")
 
-# Setup testing
-enable_testing()
-
 # add directories
 add_subdirectory(src)
-add_subdirectory(tests)
+
+if(CODA_BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests)
+endif()
 
