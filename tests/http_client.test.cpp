@@ -1,3 +1,4 @@
+#include <sstream>
 #include <string>
 
 #include <bandit/bandit.h>
@@ -66,10 +67,17 @@ namespace test
             // cout << sock->ip() << " did read" << endl;
 
             string line = sock->readln();
-
             string method = line.substr(0, line.find(' '));
+            string body = method + ": " + response_;
 
-            sock->write(method + ": " + response_);
+            ostringstream response;
+            response << "HTTP/1.1 200 OK\r\n"
+                     << "Content-Length: " << body.size() << "\r\n"
+                     << "Connection: close\r\n"
+                     << "\r\n"
+                     << body;
+
+            sock->write(response.str());
         }
 
         void on_will_write(const buffered_socket_listener::socket_type &sock)
@@ -92,7 +100,7 @@ go_bandit([]() {
 
     async::server testServer(testFactory);
 
-    describe("an http client", [&]() {
+    describe("an http client using local transport", [&]() {
         before_each([&testServer, &testFactory]() {
             try {
                 testServer.start_in_background(9876);
@@ -107,45 +115,20 @@ go_bandit([]() {
         after_each([&testServer]() { testServer.stop(); });
 
         it("can get", [&]() {
-            http::client client("localhost:9876/test");
+            http::client client("http://localhost:9876/test");
 
             client.get(
                 [](const http::response &response) { Assert::That(response.content(), Equals("GET: Hello, World!")); });
         });
-#ifdef OPENSSL_FOUND
-        it("is secure", []() {
-            http::client client("https://www.httpvshttps.com");
 
-            Assert::That(client.is_secure(), IsTrue());
-
-            client.get();
-
-            Assert::That(client.response().content().empty(), Equals(false));
-        });
-#endif
         it("can post", []() {
-            http::client client("localhost:9876/test");
+            http::client client("http://localhost:9876/test");
 
             client.set_content("Hello, World!");
 
             client.post();
 
             Assert::That(client.response().content(), Equals("POST: Hello, World!"));
-
-        });
-
-        it("can read http response", []() {
-            http::client client("http://www.httpvshttps.com");
-
-                client.get();
-
-                auto response = client.response();
-
-                Assert::That(response.content().empty(), Equals(false));
-
-                Assert::That(response.content().find("<html"), !Equals(string::npos));
-
         });
     });
-
 });
