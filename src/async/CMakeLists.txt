@@ -6,6 +6,7 @@ set(${PROJECT_NAME_ASYNC}_HEADER_FILES
 )
 
 add_library(${PROJECT_NAME_ASYNC} ${SOURCE_FILES})
+target_compile_features(${PROJECT_NAME_ASYNC} PUBLIC cxx_std_17)
 
 target_link_libraries(${PROJECT_NAME_ASYNC} INTERFACE ${PROJECT_NAME})
 
