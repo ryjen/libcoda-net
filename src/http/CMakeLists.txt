@@ -12,8 +12,15 @@ set(${PROJECT_NAME_HTTP}_SOURCE_FILES
 )
 
 add_library(${PROJECT_NAME_HTTP} ${${PROJECT_NAME_HTTP}_SOURCE_FILES})
+target_compile_features(${PROJECT_NAME_HTTP} PUBLIC cxx_std_17)
 
-target_include_directories(${PROJECT_NAME_HTTP} SYSTEM PUBLIC ${CURL_INCLUDE_DIRS} SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS} )
+# CURL_FOUND conditions the installed HTTP client header, so propagate the
+# feature view to consumers when curl support is enabled/discovered.
+if (CURL_FOUND)
+    target_compile_definitions(${PROJECT_NAME_HTTP} PUBLIC CURL_FOUND)
+endif()
+
+target_include_directories(${PROJECT_NAME_HTTP} SYSTEM PUBLIC ${CURL_INCLUDE_DIRS} SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME_HTTP} ${PROJECT_NAME} ${CURL_LIBRARIES} ${URIPARSER_LIBRARIES})
 
