@@ -23,24 +23,41 @@ set(${PROJECT_NAME}_SOURCE_FILES
   encoders.cpp
 )
 
-include(ExternalProject)
+set(CEREAL_INCLUDE_DIRS)
+set(CEREAL_DEPENDENCY_TARGET)
 
-externalproject_add(${PROJECT_NAME}-cereal
-        GIT_REPOSITORY https://github.com/USCiLab/cereal.git
-        GIT_TAG v1.2.2
-        INSTALL_COMMAND ""
-        BUILD_COMMAND ""
-        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/cereal)
+if (cereal_FOUND)
+    set(CEREAL_DEPENDENCY_TARGET cereal::cereal)
+elseif(CODA_FETCH_DEPS)
+    include(ExternalProject)
 
-ExternalProject_Get_property(${PROJECT_NAME}-cereal SOURCE_DIR)
+    externalproject_add(${PROJECT_NAME}-cereal
+            GIT_REPOSITORY https://github.com/USCiLab/cereal.git
+            GIT_TAG v1.2.2
+            INSTALL_COMMAND ""
+            BUILD_COMMAND ""
+            PREFIX ${CMAKE_CURRENT_BINARY_DIR}/cereal)
+
+    ExternalProject_Get_property(${PROJECT_NAME}-cereal SOURCE_DIR)
+    set(CEREAL_INCLUDE_DIRS ${SOURCE_DIR}/include)
+endif()
 
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${OPENSSL_INCLUDE_DIR} SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS} SYSTEM PUBLIC ${SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME}
+        SYSTEM PUBLIC ${OPENSSL_INCLUDE_DIR}
+        SYSTEM PUBLIC ${URIPARSER_INCLUDE_DIRS}
+        SYSTEM PUBLIC ${CEREAL_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${URIPARSER_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${OPENSSL_LIBRARIES}
+        ${URIPARSER_LIBRARIES}
+        ${CEREAL_DEPENDENCY_TARGET})
 
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-cereal)
+if (CODA_FETCH_DEPS AND NOT cereal_FOUND)
+    add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-cereal)
+endif()
 
 string(REPLACE "_" "/" INSTALL_DIRECTORY ${PROJECT_NAME})
 
