@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Seamwork transition — ARCHIVE.** This repository is no longer an active standalone product. Transport, TLS, protocol-boundary, and security work are retained as historical evidence. New networking work should begin as a focused Seamwork study driven by a concrete consumer. See [Seamwork](https://github.com/ryjen/seamwork) for current C++23 interface and architecture refinement work.
+
 coda_net
 ======
 
