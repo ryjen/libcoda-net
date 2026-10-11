@@ -1,11 +1,10 @@
 > [!NOTE]
 > **Seamwork transition — ARCHIVE.** This repository is no longer an active standalone product. Transport, TLS, protocol-boundary, and security work are retained as historical evidence. New networking work should begin as a focused Seamwork study driven by a concrete consumer. See [Seamwork](https://github.com/ryjen/seamwork) for current C++23 interface and architecture refinement work.
+> [Migration decisions and pinned provenance](MIGRATION.md). The historical API and build instructions below are not a supported Seamwork release.
 
 coda_net
 ======
 
-[![Build Status](http://img.shields.io/travis/ryjen/net/master.svg)](https://travis-ci.org/ryjen/net)
-[![Coverage Status](http://img.shields.io/coveralls/ryjen/net/master.svg)](https://coveralls.io/github/ryjen/net?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://ryjen.mit-license.org)
 
 A c++17 networking library.
